@@ -29,10 +29,10 @@ Course: Advanced Ada
 
     - Erroneous Execution
 
-        - [ ] `Gem #132 : Erroneous Execution - Part 1 by Bob Duff <https://www.adacore.com/gems/gem-132-erroneous-execution-part-1>`_
-        - [ ] `Gem #133 : Erroneous Execution - Part 2 by Bob Duff <https://www.adacore.com/gems/gem-133-erroneous-execution-part-2>`_
-        - [ ] `Gem #134 : Erroneous Execution - Part 3 by Bob Duff <https://www.adacore.com/gems/gem-134-erroneous-execution-part-3>`_
-        - [ ] `Gem #135 : Erroneous Execution - Part 4 by Bob Duff <https://www.adacore.com/gems/gem-134-erroneous-execution-part-4>`_
+        - [x] `Gem #132 : Erroneous Execution - Part 1 by Bob Duff <https://www.adacore.com/gems/gem-132-erroneous-execution-part-1>`_
+        - [x] `Gem #133 : Erroneous Execution - Part 2 by Bob Duff <https://www.adacore.com/gems/gem-133-erroneous-execution-part-2>`_
+        - [x] `Gem #134 : Erroneous Execution - Part 3 by Bob Duff <https://www.adacore.com/gems/gem-134-erroneous-execution-part-3>`_
+        - [x] `Gem #135 : Erroneous Execution - Part 4 by Bob Duff <https://www.adacore.com/gems/gem-134-erroneous-execution-part-4>`_
 
 - Memory Management
 
