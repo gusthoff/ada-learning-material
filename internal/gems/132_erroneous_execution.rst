@@ -120,7 +120,7 @@ suppressed, will do what the hardware does. The RM says anything at all
 can happen.
 
 If you suppress :ada:`Overflow_Checks`, you are telling the compiler to
-assume to assume that overflow will not happen. If overflow can happen,
+assume that overflow will not happen. If overflow can happen,
 you are telling the compiler to assume a falsehood. In any mathematical
 system, if you assume "false", anything at all can be proven true, causing
 the whole house of cards to tumble. Optimizers can and do prove all sorts
