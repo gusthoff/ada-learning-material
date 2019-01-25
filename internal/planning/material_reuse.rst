@@ -10,8 +10,8 @@ Course: Advanced Ada
 
     - Data Representation / Conversion
 
-        - [ ] `Gem #27: Changing Data Representation (Part 1) by Robert Dewar <https://www.adacore.com/gems/gem-27>`_
-        - [ ] `Gem #28: Changing Data Representation (Part 2) by Robert Dewar <https://www.adacore.com/gems/gem-28>`_
+        - [x] `Gem #27: Changing Data Representation (Part 1) by Robert Dewar <https://www.adacore.com/gems/gem-27>`_
+        - [x] `Gem #28: Changing Data Representation (Part 2) by Robert Dewar <https://www.adacore.com/gems/gem-28>`_
 
     - Tagged Types / Object-Oriented Programming
 
