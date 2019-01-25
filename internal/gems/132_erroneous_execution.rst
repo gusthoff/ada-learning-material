@@ -324,7 +324,7 @@ zero, then it's erroneous, so anything can happen, including not printing
 *Zero*.
 
 Even if the :ada:`Put_Line` is not removed by the compiler, it can appear
-to be, because the :ada:`"Zero""` might be stored in a buffer that never
+to be, because the :ada:`"Zero"` might be stored in a buffer that never
 gets flushed because some later erroneousness caused the program to crash.
 
 Every statement about Ada must be understood to have ", unless execution
