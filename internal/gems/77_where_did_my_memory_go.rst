@@ -70,8 +70,9 @@ Here is a short example demonstrating the use of debug pools:
        for Integer_Access'Storage_Pool use Pool;
     end My_Package;
 
-    with My_Package;
+    with My_Package; use My_Package;
     with Ada.Unchecked_Deallocation;
+
     procedure Main is
        procedure Unchecked_Free is
           new Ada.Unchecked_Deallocation (Integer, Integer_Access);
