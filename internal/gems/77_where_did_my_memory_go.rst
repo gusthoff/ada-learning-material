@@ -54,7 +54,7 @@ implementation that can, at any time during program execution, display the
 currently allocated memory (along with a backtrace of the code at the
 point of allocation). It will also detect invalid memory references (for
 instance, attempting to dereference a pointer to already deallocated
-memory). The implementation is efficient andl imposes only a very small
+memory). The implementation is efficient and imposes only a very small
 overhead on your application.
 
 Here is a short example demonstrating the use of debug pools:
