@@ -227,17 +227,17 @@ point in time without the need to recompile :program:`GPS`. (Note that
 
 Another feature of :ada:`GNATCOLL.Memory` is the capability of resetting
 all counters to zero. For example, let's assume we want to investigate
-memory leaks while opening and closing editors in GPS. If we look at the
-places that allocate memory, the biggest allocations that are displayed in
-the console do not concern the editor itself, but rather memory allocated
-when :program:`GPS` started (if you are curious, this is generally memory
-that is related to the cross-reference database). Therefore, we would do the
-following: start :program:`GPS`, reset :ada:`GNATCOLL.Memory` counters to
-0, open and close an editor, and dump memory usage. At that point, if
-:ada:`Dump` prints any information on the console, we know that this is
-memory that has been allocated since the call to :ada:`Reset`, and that
-wasn't freed when the editor was closed, and therefore is most likely a
-memory leak.
+memory leaks while opening and closing editors in :program:`GPS`. If we
+look at the places that allocate memory, the biggest allocations that are
+displayed in the console do not concern the editor itself, but rather
+memory allocated when :program:`GPS` started (if you are curious, this is
+generally memory that is related to the cross-reference database).
+Therefore, we would do the following: start :program:`GPS`, reset
+:ada:`GNATCOLL.Memory` counters to 0, open and close an editor, and dump
+memory usage. At that point, if :ada:`Dump` prints any information on the
+console, we know that this is memory that has been allocated since the
+call to :ada:`Reset`, and that wasn't freed when the editor was closed,
+and therefore is most likely a memory leak.
 
 The appropriate use of :ada:`Reset` and :ada:`Dump` therefore allows the
 monitoring of memory usage in specific parts of the code.
