@@ -55,9 +55,9 @@ Course: Advanced Ada
 
     - Memory Pools
 
-        - [ ] `Gem #77: Where did my memory go? (Part 1) <https://www.adacore.com/gems/gem-77>`_
-        - [ ] `Gem #78: Where did my memory go? (Part 2) <https://www.adacore.com/gems/gem-78>`_
-        - [ ] `Gem #79: Where did my memory go? (Part 3) <https://www.adacore.com/gems/gem-79>`_
+        - [x] `Gem #77: Where did my memory go? (Part 1) <https://www.adacore.com/gems/gem-77>`_
+        - [x] `Gem #78: Where did my memory go? (Part 2) <https://www.adacore.com/gems/gem-78>`_
+        - [x] `Gem #79: Where did my memory go? (Part 3) <https://www.adacore.com/gems/gem-79>`_
 
     - References
 
