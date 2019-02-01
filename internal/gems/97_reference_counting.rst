@@ -23,6 +23,7 @@ Original Gems:
     - `Gem #99: Reference Counting in Ada - Part 2: Task Safety <https://www.adacore.com/gems/gem-99-reference-counting-in-ada-part-2-task-safety>`_
     - `Gem #100: Reference Counting in Ada - Part 3: Weak References <https://www.adacore.com/gems/gem-100-reference-counting-in-ada-part-3-weak-references>`_
     - `Gem #107: Preventing Deallocation for Reference-counted Types by Ada Magica <https://www.adacore.com/gems/gem-107-preventing-deallocation-for-reference-counted-types>`_
+    - `Gem #123: Implicit Dereferencing in Ada 2012 by Christoph Grein <https://www.adacore.com/gems/gem-123-implicit-dereferencing-in-ada-2012>`_
 
 
 Gem #97: Reference Counting in Ada |mdash| Part 1
@@ -560,3 +561,141 @@ pointer type:
 Incidentally, as a final note, the type :ada:`Accessor` should probably be
 declared as limited private, to avoid the possibility of clients
 constructing aggregates (which, by the way, would be quite useless).
+
+Gem #123: Implicit Dereferencing in Ada 2012
+--------------------------------------------
+
+by Christoph Grein
+
+In Gem #107, we presented an accessor for safely referencing objects
+stored in a container. The example concerned a reference-counted pointer,
+but such accessors can be defined on any kind of container.
+
+An advantage of using accessors rather than simple access types is that
+the former cannot be used to deallocate the designated object. However,
+safety always comes with a cost, in this case in the form of awkward
+syntax. In this Gem, we show how some features of Ada 2012 can be used to
+simplify the syntax.
+
+Consider a prototypical container as an example:
+
+.. code-block:: ada
+
+    generic
+       type Element is private;
+       type Key     is private;
+       with function Key_of (E : Element) return Key;
+    package Containers is
+
+       type Container is private;
+
+       type Accessor (Data : not null access Element) is limited private;
+
+       procedure Put (C : in out Container; E : in Element);
+
+       function  Get (C : Container; K : Key) return Accessor;
+
+    private
+
+       .. . implementation not shown
+    end Containers;
+
+The container holds elements that can be retrieved via some kind of key.
+How elements are stored and retrieved is not of interest here. What is
+important is that :ada:`Get` grants direct access to the stored element
+(in other words, :ada:`Get` does not return a copy). This is crucial if
+you have a big object and only want to update a component:
+
+.. code-block:: ada
+
+       Get (Cont, My_Key).Data.Component := Some_Value;
+
+Note that if the discriminant were to be defined as
+:ada:`not null access constant Element`, then the accessor would allow
+only read access. Also, the null exclusion guarantees that an accessor
+will always reference an object.
+
+This syntax is quite verbose, but Ada 2012 provides a new feature that
+helps simplify it, namely the :ada:`Implicit_Dereference` aspect.
+
+Side Note: Ada 2012 has added a general mechanism called an aspect
+specification that allows defining various characteristics of
+declarations, called aspects, as part of the declaration itself. For
+example, representation attributes can now be specified by using an aspect
+specification rather than a separate attribute definition.
+
+Here is how the :ada:`Implicit_Deference` aspect would be specified for
+our :ada:`Accessor` type:
+
+.. code-block:: ada
+
+       type Accessor (Data: not null access Element) is limited private
+
+           with Implicit_Dereference => Data;
+
+A type defined with this aspect is called a reference type, and an object
+of such a type is a reference object. The use of this aspect allows us to
+reduce the statement to:
+
+.. code-block:: ada
+
+       Get (Cont, My_Key).Component := Some_Value;
+
+Note that the call :ada:`Get (Cont, My_Key)` is overloaded: its result can
+be interpreted as either an accessor value or the accessed object itself,
+and the compiler resolves this based on the context of the call. (This is
+the reason the :ada:`Implicit_Dereference` aspect cannot be used on the
+reference-counted pointer in Gem #107, where a type conversion is needed,
+because the argument of a type conversion must be resolved independently
+of the context.)
+
+You might argue that this is not a significant simplification. However,
+this is not the end of the story. We're not interested so much in how to
+get an accessor value (the result of function :ada:`Get`) as we are in
+getting to the elements themselves. It happens that we can elide the call
+to :ada:`Get` by means of another aspect, called :ada:`Variable_Indexing`,
+that's applied to the :ada:`Container` type:
+
+.. code-block:: ada
+
+       type Container is tagged private
+           with Variable_Indexing => Get;
+
+The result type of the :ada:`Variable_Indexing` function must be a
+reference type. It's worth noting that the name given in an aspect
+specification may denote something declared later. In this case it's a
+forward reference to :ada:`Get`, which is declared after the type.
+
+Also, the type to which the :ada:`Variable_Indexing` attribute is applied
+must be tagged. Being a tagged type, this allows the
+:ada:`Object.Operation` notation, leading to:
+
+.. code-block:: ada
+
+       Cont.Get (My_Key).Component := Some_Value;
+
+Given the :ada:`Variable_Indexing` aspect that specifies :ada:`Get`, this
+can now be further reduced to simply:
+
+.. code-block:: ada
+
+       Cont (My_Key).Component := Some_Value;
+
+Effectively what we get is direct access to container elements, as though
+the container were a kind of array indexed by the key. In fact, it's
+possible to use the indexed name alone in a context requiring a variable
+of the element type, such as an assignment statement:
+
+.. code-block:: ada
+
+       Cont (My_Key) := Some_Element_Value;
+
+So, by combining the new aspects :ada:`Implicit_Dereference` and
+:ada:`Variable_Indexing` we get a concise and much more readable syntax
+for manipulating container elements.
+
+Incidentally, there's also a companion aspect to :ada:`Variable_Indexing`
+called :ada:`Constant_Indexing`, that can be used to grant read-only
+access to element values. In that case, the associated function is not
+required to return a reference type, because all functions return a
+constant result.

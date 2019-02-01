@@ -65,7 +65,7 @@ Course: Advanced Ada
         - [x] `Gem #99: Reference Counting in Ada - Part 2: Task Safety <https://www.adacore.com/gems/gem-99-reference-counting-in-ada-part-2-task-safety>`_
         - [x] `Gem #100: Reference Counting in Ada - Part 3: Weak References <https://www.adacore.com/gems/gem-100-reference-counting-in-ada-part-3-weak-references>`_
         - [x] `Gem #107: Preventing Deallocation for Reference-counted Types by Ada Magica <https://www.adacore.com/gems/gem-107-preventing-deallocation-for-reference-counted-types>`_
-        - [ ] `Gem #123: Implicit Dereferencing in Ada 2012 by Christoph Grein <https://www.adacore.com/gems/gem-123-implicit-dereferencing-in-ada-2012>`_
+        - [x] `Gem #123: Implicit Dereferencing in Ada 2012 by Christoph Grein <https://www.adacore.com/gems/gem-123-implicit-dereferencing-in-ada-2012>`_
 
 - Numerics
 
