@@ -22,6 +22,8 @@ Original Gems:
     - `Gem #97: Reference Counting in Ada - Part 1 <https://www.adacore.com/gems/gem-97-reference-counting-in-ada-part-1>`_
     - `Gem #99: Reference Counting in Ada - Part 2: Task Safety <https://www.adacore.com/gems/gem-99-reference-counting-in-ada-part-2-task-safety>`_
     - `Gem #100: Reference Counting in Ada - Part 3: Weak References <https://www.adacore.com/gems/gem-100-reference-counting-in-ada-part-3-weak-references>`_
+    - `Gem #107: Preventing Deallocation for Reference-counted Types by Ada Magica <https://www.adacore.com/gems/gem-107-preventing-deallocation-for-reference-counted-types>`_
+
 
 Gem #97: Reference Counting in Ada |mdash| Part 1
 -------------------------------------------------
@@ -396,3 +398,165 @@ in the first part of this Gem series.
 We will not go into the details of the implementation for a weak
 reference. Interested parties can look at the code in
 :ada:`GNATCOLL.Refcount.Weakref`, which is relatively small.
+
+Gem #107: Preventing Deallocation for Reference-counted Types
+-------------------------------------------------------------
+
+by Ada Magica |mdash| C.K.W. Grein
+
+In Gem #97, a reference-counting pointer was presented, where a :ada:`Get`
+function returns an access to the data. This could be dangerous, since the
+caller might want to free the data (which should remain under control of
+the reference type). In this Gem, we present a method to prevent the
+misuse of the result of :ada:`Get`.
+
+Let's repeat the relevant declarations:
+
+.. code-block:: ada
+
+      type Refcounted is abstract tagged private;
+      type Refcounted_Access is access Refcounted'Class;
+
+      type Ref is tagged private;  -- our smart pointer
+
+      procedure Set (Self: in out Ref; Data: Refcounted'Class);
+      function  Get (Self: Ref) return Refcounted_Access;
+
+    private
+
+      type Ref is new Ada.Finalization.Controlled with record
+        Data: Refcounted_Access;
+      end record;
+
+The function :ada:`Get` lets us retrieve and modify the accessed object.
+The problem with this function is that it compromises the safety of the
+pointer type :ada:`Ref`, in that a caller might copy the result access
+object and deallocate the accessed object:
+
+.. code-block:: ada
+
+      Copy: Refcounted_Access := Get (P);
+      Free (Copy);
+
+where :ada:`Free` is an appropriate instantiation of
+:ada:`Unchecked_Deallocation`.
+
+To cure the situation, we no longer return a direct access to the data.
+Instead we define an accessor, a limited type with such an access as a
+discriminant, and let :ada:`Get` return an object of such a type:
+
+.. code-block:: ada
+
+      type Accessor (Data: access Refcounted'Class) is limited null record;
+      function Get (Self: Ref) return Accessor;
+
+Making the type limited prevents copying, and access discriminants are
+unchangeable. The discriminant also cannot be copied to a variable of type
+:ada:`Refcounted_Access`. The result is that the discriminant can be used
+only for reading and writing the object, but not for deallocation. Thus we
+have achieved our goal of making accesses safe.
+
+A user might now declare some type derived from :ada:`Refcounted` and
+change the value of the accessed object like so:
+
+.. code-block:: ada
+
+      declare
+        type My_Refcount is new Refcounted with record
+          I: Integer;
+        end record;
+
+        P: Ref;
+
+      begin
+        Set (P, My_Refcount'(Refcounted with I => -10));
+        My_Refcount (Get (P).Data.all).I := 42;
+      end;
+
+This view conversion to :ada:`My_Refcount` will incur a tag check that
+will succeed in this example. In general, you have to know the type with
+which to view-convert in order to access the relevant components. An
+alternative is to declare a generic package like the following:
+
+.. code-block:: ada
+
+      generic
+        type T is private;
+      package Generic_Pointers is
+        type Accessor (Data: access T) is limited private;
+        type Smart_Pointer is private;
+        procedure Set (Self: in out Smart_Pointer; Data: in T);
+        function  Get (Self: Smart_Pointer) return Accessor;
+      private
+        ... implementation not shown
+      end Generic_Pointers;
+
+Instantiate with type :ada:`Integer` and the last line becomes instead:
+
+.. code-block:: ada
+
+      Get (P).Data.all := 42;
+
+So how do we implement the function :ada:`Get`? This is quite
+straightforward in Ada 2005, using a function returning a limited
+aggregate. (Note that in Ada 95, limited objects were returned by
+reference, whereas in Ada 2005 limited function results are built in
+place.)
+
+.. code-block:: ada
+
+      function Get (Self: Ref) return Accessor is
+      begin
+         return Accessor'(Data => Self.Data);
+      end Get;
+
+Alas, we are not yet completely safe. To see this, we have to consider in
+detail the lifetime of the :ada:`Accessor` objects. In the example above,
+the lifetime of :ada:`Get (P)` ends with the statement and the accessor is
+finalized. That is, it ceases to exist (in Ada vernacular, the master of
+the object is the statement). So, tasking issues aside, nothing can happen
+to the accessed object (the integer in our example) as long as the
+accessor exists.
+
+Now consider a variant of the above. Imagine we have a pointer :ada:`P`
+whose reference count is 1, and let's extend the accessor's lifetime:
+
+.. code-block:: ada
+
+      declare
+         A: Accessor renames Get (P);
+      begin
+         Set (P, ...);  -- allocate a new object
+         My_Refcount (A.Data.all).I := 42;  -- ?
+      end;  -- A's lifetime ends here
+
+In this example, the master of the accessor is the block (and there are
+other ways to make the lifetime as long as one wishes). Now in the block,
+the pointer :ada:`P` is given a new object to access. Since we said that
+:ada:`P` was the only pointer to the old object, it's finalized with
+disastrous effect: :ada:`A.Data` is now a dangling pointer granting access
+to a nonexistent object until the end of the declare block.
+
+(Note that this issue also existed in the original
+:ada:`GNATCOLL.Refcount` implementation.)
+
+To cure the situation, we have to prevent the deallocation. That suggests
+increasing the reference count with the construction of an accessor and
+decreasing the count when the accessor is finalized again. The easiest way
+to accomplish this is to piggyback upon the properties of the smart
+pointer type:
+
+.. code-block:: ada
+
+      type Accessor (Data: access Refcounted'Class) is limited record
+        Hold: Ref;
+      end record;
+
+      function Get (Self: Ref) return Accessor is
+      begin
+        return Accessor'(Data => Self.Data, Hold => Self);
+      end Get;
+
+Incidentally, as a final note, the type :ada:`Accessor` should probably be
+declared as limited private, to avoid the possibility of clients
+constructing aggregates (which, by the way, would be quite useless).
