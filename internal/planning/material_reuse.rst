@@ -71,7 +71,7 @@ Course: Advanced Ada
 
     - Numeric representation
 
-        - [ ] `Gem #7: The Beauty of Numeric Literals in Ada by Franco Gasperoni <https://www.adacore.com/gems/ada-gem-7>`_
+        - [x] `Gem #7: The Beauty of Numeric Literals in Ada by Franco Gasperoni <https://www.adacore.com/gems/ada-gem-7>`_
 
     - Numeric types
 
