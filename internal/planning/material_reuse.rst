@@ -75,7 +75,7 @@ Course: Advanced Ada
 
     - Numeric types
 
-        - [ ] `Gem #26: The Mod Attribute by Bob Duff <https://www.adacore.com/gems/gem-26>`_
+        - [x] `Gem #26: The Mod Attribute by Bob Duff <https://www.adacore.com/gems/gem-26>`_
         - [ ] `Gem #80: Speedy Shift and Rotate in SPARK by Rod Chapman <https://www.adacore.com/gems/gem-80>`_
 
 - Containers
