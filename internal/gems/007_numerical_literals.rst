@@ -160,8 +160,8 @@ can write:
                              Exabinary   +
                              Zettabinary;
 
-       Result : constant := (Yottabinary - 1) / (Kilobinary - 1);
-       Nil : constant := Result - Big_Sum;
+       Result  : constant := (Yottabinary - 1) / (Kilobinary - 1);
+       Nil     : constant := Result - Big_Sum;
 
 and be guaranteed that :ada:`Nil` is equal to zero.
 
