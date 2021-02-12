@@ -32,6 +32,7 @@ import colors as C
 import shutil
 import re
 from widget.chop import manual_chop, cheapo_gnatchop, real_gnatchop
+# from app.widget import project
 
 
 class Block(object):
@@ -211,6 +212,8 @@ parser.add_argument('--build-dir', '-B', type=str, default="build",
 parser.add_argument('--verbose', '-v', type=bool, default=False,
                     help='Show more information')
 
+parser.add_argument('--keep_files', '-k', action='store_true',
+                    help='Keep files generated in the test')
 parser.add_argument('--code-block', '-b', type=str, default=0)
 parser.add_argument('--all-diagnostics', '-A', action='store_true')
 parser.add_argument('--code-block-at', type=int, default=0)
@@ -357,7 +360,7 @@ def analyze_file(rst_file):
             project_dir = base_project_dir + "/" + project.replace(".", "/")
 
             if os.path.exists(project_dir):
-                shutil.rmtree(args.build_dir)
+                shutil.rmtree(project_dir)
 
             try:
                 os.makedirs(project_dir)
@@ -454,12 +457,20 @@ def analyze_file(rst_file):
                     main_file = source_files[-1].basename
                 return main_file
 
+            def make_project_block_dir():
+                project_block_dir = str(block.line_start)
+                os.makedirs(project_block_dir)
+
+                return project_block_dir
+
             if (('ada-run' in block.classes
                  or 'ada-run-expect-failure' in block.classes
                  or 'run' in block.buttons)
                 and not 'ada-norun' in block.classes
             ):
                 main_file = get_main_filename(block)
+
+                project_block_dir = make_project_block_dir()
 
                 if block.language == "ada":
                     try:
@@ -472,6 +483,9 @@ def analyze_file(rst_file):
                             print_error(loc, "Failed to compile example")
                             print(e.output)
                             has_error = True
+                        out = str(e.output)
+                    with open(project_block_dir + "/build.log", u"w") as logfile:
+                        logfile.write(out)
                 elif block.language == "c":
                     try:
                         out = run("gcc", "-c", main_file)
@@ -482,11 +496,14 @@ def analyze_file(rst_file):
                             print_error(loc, "Failed to compile example")
                             print(e.output)
                             has_error = True
+                        out = str(e.output)
+                    with open(project_block_dir + "/build.log", u"w") as logfile:
+                        logfile.write(out)
 
                 if not compile_error and not has_error:
                     if block.language == "ada":
                         try:
-                            run("./{}".format(P.splitext(main_file)[0]))
+                            out = run("./{}".format(P.splitext(main_file)[0]))
 
                             if 'ada-run-expect-failure' in block.classes:
                                 print_error(
@@ -494,7 +511,7 @@ def analyze_file(rst_file):
                                 )
                                 has_error = True
 
-                        except S.CalledProcessError:
+                        except S.CalledProcessError as e:
                             if 'ada-run-expect-failure' in block.classes:
                                 if args.verbose:
                                     print("Running of example expectedly failed")
@@ -502,19 +519,52 @@ def analyze_file(rst_file):
                                 print_error(loc, "Running of example failed")
                                 has_error = True
 
+                            out = str(e.output)
+
+                        with open(project_block_dir + "/run.log", u"w") as logfile:
+                            logfile.write(out)
+
+                    elif block.language == "c":
+                        try:
+                            out = run("./{}".format(P.splitext(main_file)[0]))
+
+                            if 'ada-run-expect-failure' in block.classes:
+                                print_error(
+                                    loc, "Running of example should have failed"
+                                )
+                                has_error = True
+
+                        except S.CalledProcessError as e:
+                            if 'ada-run-expect-failure' in block.classes:
+                                if args.verbose:
+                                    print("Running of example expectedly failed")
+                            else:
+                                print_error(loc, "Running of example failed")
+                                has_error = True
+                            out = str(e.output)
+
+                        with open(project_block_dir + "/run.log", u"w") as logfile:
+                            logfile.write(out)
+
             if 'compile' in block.buttons:
+
+                project_block_dir = make_project_block_dir()
 
                 for source_file in source_files:
                     if block.language == "ada":
                         try:
-                            run("gcc", "-c", "-gnatc", "-gnatyg0-s",
-                                source_file.basename)
-                        except S.CalledProcessError:
+                            out = run("gcc", "-c", "-gnatc", "-gnatyg0-s",
+                                      source_file.basename)
+                        except S.CalledProcessError as e:
                             if 'ada-expect-compile-error' in block.classes:
                                 compile_error = True
                             else:
                                 print_error(loc, "Failed to compile example")
                                 has_error = True
+                            out = str(e.output)
+
+                        with open(project_block_dir + "/compile.log", u"w+") as logfile:
+                            logfile.write(out)
 
             if any(b in prove_buttons for b in block.buttons):
 
@@ -595,7 +645,7 @@ def analyze_file(rst_file):
 
         os.chdir(work_dir)
 
-    if os.path.exists(base_project_dir):
+    if os.path.exists(base_project_dir) and not args.keep_files:
         shutil.rmtree(base_project_dir)
 
     return analysis_error
