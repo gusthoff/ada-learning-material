@@ -154,22 +154,24 @@ omitted) results in compilation errors:
        Y := Tmp;  --  ERROR
     end Swap;
 
-Here is the output of AdaCore's GNAT compiler:
+.. only:: builder_html
 
-::
+    Here is the output of AdaCore's GNAT compiler:
 
-        1.     procedure Swap (X, Y : Integer) is
-        2.        Tmp : Integer := X;
-        3.     begin
-        4.        X := Y;  --  ERROR
-                  |
-           >>> assignment to "in" mode parameter not allowed
+    ::
 
-        5.        Y := Tmp;  --  ERROR
-                  |
-           >>> assignment to "in" mode parameter not allowed
+            1.     procedure Swap (X, Y : Integer) is
+            2.        Tmp : Integer := X;
+            3.     begin
+            4.        X := Y;  --  ERROR
+                      |
+               >>> assignment to "in" mode parameter not allowed
 
-        6.     end Swap;
+            5.        Y := Tmp;  --  ERROR
+                      |
+               >>> assignment to "in" mode parameter not allowed
+
+            6.     end Swap;
 
 The correct version of :ada:`Swap` in SPARK takes parameters of mode
 :ada:`in out`:
