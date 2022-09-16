@@ -425,6 +425,23 @@ required.
         end Limited_Types;
 
 
+Private implementation of limited types
+---------------------------------------
+
+.. todo::
+
+    Complete section!
+
+
+
+Limited record elements
+-----------------------
+
+.. todo::
+
+    Complete section!
+
+
 Limited types and aggregates
 ----------------------------
 
@@ -1479,21 +1496,3 @@ by copy is made by the compiler.
     - `6.2 Formal Parameter Modes <http://www.ada-auth.org/standards/12rm/html/RM-6-2.html>`__
     - `6.4.1 Parameter Associations <http://www.ada-auth.org/standards/12rm/html/RM-6-4-1.html>`__
     - `7.5 Limited Types <http://www.ada-auth.org/standards/12rm/html/RM-7-5.html>`__
-
-
-Limited record elements
------------------------
-
-.. todo::
-
-    Complete section!
-
-
-Private implementation of limited types
----------------------------------------
-
-.. todo::
-
-    Complete section!
-
-
