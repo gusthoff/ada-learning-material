@@ -43,13 +43,15 @@ subprograms for it. For example, we could specify an addition operation for it:
 
        type Null_Record is null record;
 
-       function "+" (A, B : Null_Record) return Null_Record;
+       function "+" (A, B : Null_Record)
+                     return Null_Record;
 
     end Null_Recs;
 
     package body Null_Recs is
 
-       function "+" (A, B : Null_Record) return Null_Record is
+       function "+" (A, B : Null_Record)
+                     return Null_Record is
           pragma Unreferenced (A, B);
        begin
           return (null record);
@@ -88,21 +90,27 @@ Consider this example:
 
        type Device is private;
 
-       function Create (Active : Boolean) return Device;
+       function Create (Active : Boolean)
+                        return Device;
 
-       procedure Reset (D : out Device) is null;
+       procedure Reset (D : out Device)
+         is null;
 
-       procedure Process (D : in out Device) is null;
+       procedure Process (D : in out Device)
+         is null;
 
-       procedure Activate (D : in out Device) is null;
+       procedure Activate (D : in out Device)
+         is null;
 
-       procedure Deactivate (D : in out Device) is null;
+       procedure Deactivate (D : in out Device)
+         is null;
 
     private
 
        type Device is null record;
 
-       function Create (Active : Boolean) return Device
+       function Create (Active : Boolean)
+                        return Device
          is (null record);
 
     end Devices;
@@ -164,7 +172,8 @@ the :ada:`Devices` package. This is the adapted code:
 
        type Device is null record;
 
-       function Create (Active : Boolean) return Device;
+       function Create (Active : Boolean)
+                        return Device;
 
        procedure Reset (D : out Device);
 
@@ -180,7 +189,8 @@ the :ada:`Devices` package. This is the adapted code:
 
     package body Devices is
 
-       function Create (Active : Boolean) return Device is
+       function Create (Active : Boolean)
+                        return Device is
           pragma Unreferenced (Active);
        begin
           Put_Line ("Creating device...");
@@ -255,12 +265,14 @@ derive from null records. Let's see a simple example:
 
        type Device_Config is null record;
 
-       function Create (Config : Device_Config) return Device
+       function Create (Config : Device_Config)
+                        return Device
          is (null record);
 
        type Derived_Device is new Device;
 
-       procedure Process (D : Derived_Device) is null;
+       procedure Process (D : Derived_Device)
+         is null;
 
     end Many_Devices;
 
@@ -302,7 +314,8 @@ activation state in the record:
 
        type Device is private;
 
-       function Create (Active : Boolean) return Device;
+       function Create (Active : Boolean)
+                        return Device;
 
        procedure Reset (D : out Device);
 
@@ -324,7 +337,8 @@ activation state in the record:
 
     package body Devices is
 
-       function Create (Active : Boolean) return Device is
+       function Create (Active : Boolean)
+                        return Device is
           pragma Unreferenced (Active);
        begin
           Put_Line ("Creating device...");
@@ -389,9 +403,11 @@ A null record may be tagged, as we can see in this example:
 
     package Null_Recs is
 
-       type Tagged_Null_Record is tagged null record;
+       type Tagged_Null_Record is
+         tagged null record;
 
-       type Abstract_Tagged_Null_Record is abstract tagged null record;
+       type Abstract_Tagged_Null_Record is
+         abstract tagged null record;
 
     end Null_Recs;
 
@@ -408,7 +424,8 @@ them. For example:
 
        type Device is private;
 
-       function Create (Active : Boolean) return Device;
+       function Create (Active : Boolean)
+                        return Device;
 
        type Derived_Device is private;
 
@@ -416,14 +433,16 @@ them. For example:
 
        type Device is tagged null record;
 
-       function Create (Active : Boolean) return Device
+       function Create (Active : Boolean)
+                        return Device
          is (null record);
 
        type Derived_Device is new Device with record
           Active : Boolean;
        end record;
 
-       function Create (Active : Boolean) return Derived_Device
+       function Create (Active : Boolean)
+                        return Derived_Device
          is (Active => Active);
 
     end Devices;
@@ -485,7 +504,8 @@ adding a component:
 
 .. code:: ada no_button project=Courses.Advanced_Ada.Limited_Types.Full_Coverage_Rules
 
-    with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+    with Ada.Strings.Unbounded;
+    use  Ada.Strings.Unbounded;
 
     package Persons is
        type Years is new Natural;
@@ -507,7 +527,9 @@ for record aggregates):
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Limited_Types.Full_Coverage_Rules
 
-    with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+    with Ada.Strings.Unbounded;
+    use  Ada.Strings.Unbounded;
+
     with Persons; use Persons;
 
     procedure Show_Aggregate_Init_Others is
@@ -816,7 +838,8 @@ the :ada:`Show_Points` procedure of the next code example.
 
     package Points.Extensions is
 
-       type Point_3D_Ext is new Point_3D with null record;
+       type Point_3D_Ext is new Point_3D
+         with null record;
 
     end Points.Extensions;
 

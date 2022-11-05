@@ -38,7 +38,8 @@ private type and map an actual data type to it:
        type Null_Record is null record;
 
        package Map_Definite_Type is new
-         Definite_Formal_Type_Example (T => Null_Record);
+         Definite_Formal_Type_Example
+           (T => Null_Record);
 
     end Show_Map_To_Definite_Formal_Type;
 
@@ -52,7 +53,8 @@ we cannot map indefinite types to it:
 
     package Show_Map_To_Definite_Formal_Type is
 
-       type Simple_Record (Extended : Boolean) is record
+       type Simple_Record (Extended : Boolean) is
+       record
           V : Integer;
           case Extended is
              when False =>
@@ -63,8 +65,10 @@ we cannot map indefinite types to it:
        end record;
 
        package Map_Indefinite_Type is new
-         Definite_Formal_Type_Example (T => Simple_Record);
-       --  ERROR: trying to map an indefinite type to a formal definite type!
+         Definite_Formal_Type_Example
+           (T => Simple_Record);
+       --  ERROR: trying to map an indefinite type
+       --         to a formal definite type!
 
     end Show_Map_To_Definite_Formal_Type;
 
@@ -77,14 +81,16 @@ problem by changing type :ada:`T` to a formal indefinite type, for example:
     generic
        type T (<>) is private;
     package Indefinite_Formal_Type_Example is
-       function Dummy (Unused : T) return Boolean is (True);
+       function Dummy (Unused : T)
+                       return Boolean is (True);
     end Indefinite_Formal_Type_Example;
 
     with Indefinite_Formal_Type_Example;
 
     package Show_Map_To_Indefinite_Formal_Type is
 
-       type Simple_Record (Extended : Boolean) is record
+       type Simple_Record (Extended : Boolean) is
+       record
           V : Integer;
           case Extended is
              when False =>
@@ -95,7 +101,8 @@ problem by changing type :ada:`T` to a formal indefinite type, for example:
        end record;
 
        package Map_Indefinite_Type is new
-         Indefinite_Formal_Type_Example (T => Simple_Record);
+         Indefinite_Formal_Type_Example
+           (T => Simple_Record);
 
     end Show_Map_To_Indefinite_Formal_Type;
 
@@ -112,7 +119,8 @@ For example:
        type Null_Record is null record;
 
        package Map_Definite_Type is new
-         Indefinite_Formal_Type_Example (T => Null_Record);
+         Indefinite_Formal_Type_Example
+           (T => Null_Record);
 
     end Show_Map_To_Indefinite_Formal_Type;
 
@@ -149,14 +157,16 @@ we could be more specific about the discriminants that we use for type
     generic
        type T (B : Boolean) is private;
     package Formal_Type_Discriminants_Example is
-       function Dummy (Unused : T) return Boolean is (True);
+       function Dummy (Unused : T)
+                       return Boolean is (True);
     end Formal_Type_Discriminants_Example;
 
     with Formal_Type_Discriminants_Example;
 
     package Show_Map_To_Formal_Type_With_Discrimants is
 
-       type Simple_Record (Extended : Boolean) is record
+       type Simple_Record (Extended : Boolean) is
+       record
           V : Integer;
           case Extended is
              when False =>
@@ -166,16 +176,19 @@ we could be more specific about the discriminants that we use for type
           end case;
        end record;
 
-       type Integer_Array is array (Positive range <>) of Integer;
+       type Integer_Array is
+         array (Positive range <>) of Integer;
 
-       type Simple_Record_2 (Last : Integer) is record
+       type Simple_Record_2 (Last : Integer) is
+       record
           A : Integer_Array (1 .. Last);
        end record;
 
        type Null_Record is null record;
 
        package Map_Boolean_Discriminant is new
-         Formal_Type_Discriminants_Example (T => Simple_Record);
+         Formal_Type_Discriminants_Example
+           (T => Simple_Record);
 
     end Show_Map_To_Formal_Type_With_Discrimants;
 
@@ -190,19 +203,23 @@ specific list of discriminants. For example, we cannot map the following types:
 
     package Show_Map_To_Formal_Type_With_Discrimants is
 
-       type Integer_Array is array (Positive range <>) of Integer;
+       type Integer_Array is
+         array (Positive range <>) of Integer;
 
-       type Simple_Record_2 (Last : Integer) is record
+       type Simple_Record_2 (Last : Integer) is
+       record
           A : Integer_Array (1 .. Last);
        end record;
 
        type Null_Record is null record;
 
        package Map_Type_With_Integer_Discriminant is new
-         Formal_Type_Discriminants_Example (T => Simple_Record_2);
+         Formal_Type_Discriminants_Example
+           (T => Simple_Record_2);
 
        package Map_Definite_Type is new
-         Formal_Type_Discriminants_Example (T => Null_Record);
+         Formal_Type_Discriminants_Example
+           (T => Null_Record);
 
     end Show_Map_To_Formal_Type_With_Discrimants;
 
@@ -239,7 +256,8 @@ subprograms. For example:
 
        type R;
 
-       package R_Pkg is new Using_Formal_Incomplete (R);
+       package R_Pkg is new
+         Using_Formal_Incomplete (R);
 
        type R is record
           I : Integer;
@@ -266,7 +284,8 @@ Let's see an example:
 
     generic
       type Incomplete_Tagged is tagged;
-      with function Test (V : Incomplete_Tagged) return Boolean;
+      with function Test (V : Incomplete_Tagged)
+                          return Boolean;
     package Formal_Incomplete_Tagged_Type_Example is
 
        procedure Perform_Test (I : Incomplete_Tagged);
@@ -315,16 +334,21 @@ from the introductory course.
        generic
           type T is private;
           type Index is range <>;
-          type Array_T is array (Index range <>) of T;
-       procedure Generic_Reverse_Array (X : in out Array_T);
+          type Array_T is
+            array (Index range <>) of T;
+       procedure Generic_Reverse_Array
+         (X : in out Array_T);
 
-       procedure Generic_Reverse_Array (X : in out Array_T) is
+       procedure Generic_Reverse_Array
+         (X : in out Array_T) is
        begin
-          for I in X'First .. (X'Last + X'First) / 2 loop
+          for I in X'First
+                   .. (X'Last + X'First) / 2 loop
              declare
                 Tmp     : T;
                 X_Left  : T renames X (I);
-                X_Right : T renames X (X'Last + X'First - I);
+                X_Right : T renames
+                            X (X'Last + X'First - I);
              begin
                 Tmp     := X_Left;
                 X_Left  := X_Right;
@@ -334,16 +358,22 @@ from the introductory course.
        end Generic_Reverse_Array;
 
        type Color is (Black, Red, Green, Blue, White);
-       type Color_Array is array (Integer range <>) of Color;
+       type Color_Array is
+         array (Integer range <>) of Color;
 
-       procedure Reverse_Color_Array is new Generic_Reverse_Array
-         (T => Color, Index => Integer, Array_T => Color_Array);
+       procedure Reverse_Color_Array is new
+         Generic_Reverse_Array
+           (T       => Color,
+            Index   => Integer,
+            Array_T => Color_Array);
 
-       My_Colors : Color_Array (1 .. 5) := (Black, Red, Green, Blue, White);
+       My_Colors : Color_Array (1 .. 5) :=
+                     (Black, Red, Green, Blue, White);
 
     begin
        for C of My_Colors loop
-          Put_Line ("My_Color: " & Color'Image (C));
+          Put_Line ("My_Color: "
+                    & Color'Image (C));
        end loop;
 
        New_Line;
@@ -352,7 +382,8 @@ from the introductory course.
        Reverse_Color_Array (My_Colors);
 
        for C of My_Colors loop
-          Put_Line ("My_Color: " & Color'Image (C));
+          Put_Line ("My_Color: "
+                    & Color'Image (C));
        end loop;
 
     end Test_Reverse_Colors;
@@ -392,7 +423,8 @@ parameter in the form:
 
 .. code-block:: ada
 
-    with package P is new Simple_Generic_Array_Pkg(<params>)
+    with package P is new
+      Simple_Generic_Array_Pkg(<params>)
 
 This will allow us to reuse definitions from the generic package.
 
@@ -410,17 +442,22 @@ algorithm:
 
        generic
           type T is private;
-          with package P is new Simple_Generic_Array_Pkg (T => T, others => <>);
+          with package P is new
+            Simple_Generic_Array_Pkg (T      => T,
+                                      others => <>);
        procedure Reverse_Array (X : in out P.Array_T);
 
-       procedure Reverse_Array (X : in out P.Array_T) is
+       procedure Reverse_Array (X : in out P.Array_T)
+       is
           use P;
        begin
-          for I in X'First .. (X'Last + X'First) / 2 loop
+          for I in X'First
+                   .. (X'Last + X'First) / 2 loop
              declare
                 Tmp     : T;
                 X_Left  : T renames X (I);
-                X_Right : T renames X (X'Last + X'First - I);
+                X_Right : T renames
+                            X (X'Last + X'First - I);
              begin
                 Tmp     := X_Left;
                 X_Left  := X_Right;
@@ -432,15 +469,19 @@ algorithm:
        type Color is (Black, Red, Green, Blue, White);
 
        package Color_Pkg is new
-         Simple_Generic_Array_Pkg (T => Color, Index => Integer);
+         Simple_Generic_Array_Pkg (T     => Color,
+                                   Index => Integer);
 
        procedure Reverse_Color_Array is new
-         Reverse_Array (T => Color, P => Color_Pkg);
+         Reverse_Array (T => Color,
+                        P => Color_Pkg);
 
-       My_Colors : Color_Pkg.Array_T (1 .. 5) := (Black, Red, Green, Blue, White);
+       My_Colors : Color_Pkg.Array_T (1 .. 5) :=
+                     (Black, Red, Green, Blue, White);
     begin
        for C of My_Colors loop
-          Put_Line ("My_Color: " & Color'Image (C));
+          Put_Line ("My_Color: "
+                    & Color'Image (C));
        end loop;
 
        New_Line;
@@ -449,7 +490,8 @@ algorithm:
        Reverse_Color_Array (My_Colors);
 
        for C of My_Colors loop
-          Put_Line ("My_Color: " & Color'Image (C));
+          Put_Line ("My_Color: "
+                    & Color'Image (C));
        end loop;
 
     end Test_Reverse_Colors_Simple_Pkg;
@@ -480,7 +522,9 @@ instantiation:
 
        generic
           type T is private;
-          with package P is new Simple_Generic_Array_Pkg (T => T, others => <>);
+          with package P is new
+            Simple_Generic_Array_Pkg (T      => T,
+                                      others => <>);
        procedure Reverse_Array (X : in out P.Array_T);
 
     end Show_Partial_Parametrization;
@@ -500,8 +544,10 @@ types in the generic declaration. For example:
        generic
           type T is private;
           type Index is range <>;
-          with package P is new Simple_Generic_Array_Pkg (T     => T,
-                                                          Index => Index);
+          with package P is new
+            Simple_Generic_Array_Pkg
+              (T     => T,
+               Index => Index);
        procedure Reverse_Array (X : in out P.Array_T);
 
     end Show_Complete_Parametrization;
@@ -516,7 +562,8 @@ parameter:
     package Show_Box_Parameter is
 
        generic
-          with package P is new Simple_Generic_Array_Pkg (<>);
+          with package P is new
+            Simple_Generic_Array_Pkg (<>);
        procedure Reverse_Array (X : in out P.Array_T);
 
     end Show_Box_Parameter;
@@ -572,11 +619,13 @@ This is the generic package body:
     package body Generic_Array_Pkg is
        procedure Reverse_Array (X : in out Array_T) is
        begin
-          for I in X'First .. (X'Last + X'First) / 2 loop
+          for I in X'First
+                   .. (X'Last + X'First) / 2 loop
              declare
                 Tmp     : T;
                 X_Left  : T renames X (I);
-                X_Right : T renames X (X'Last + X'First - I);
+                X_Right : T renames
+                            X (X'Last + X'First - I);
              begin
                 Tmp     := X_Left;
                 X_Left  := X_Right;
@@ -627,9 +676,11 @@ This is a version of the test application that makes use of the generic
 
        generic
           S : String;
-          with package Array_Pkg is new Generic_Array_Pkg (<>);
+          with package Array_Pkg is new
+            Generic_Array_Pkg (<>);
           use Array_Pkg;
-          with function Image (E : T) return String is <>;
+          with function Image (E : T)
+                               return String is <>;
           with procedure Pkg_Test (X : in out Array_T);
        procedure Perform_Test (X : in out Array_T);
 
@@ -640,7 +691,8 @@ This is a version of the test application that makes use of the generic
           end loop;
 
           New_Line;
-          Put_Line ("Performing operation on " & S & "...");
+          Put_Line ("Performing operation on "
+                    & S & "...");
           New_Line;
           Pkg_Test (X);
 
@@ -651,15 +703,19 @@ This is a version of the test application that makes use of the generic
 
        type Color is (Black, Red, Green, Blue, White);
 
-       package Color_Pkg is new Generic_Array_Pkg (T => Color, Index => Integer);
+       package Color_Pkg is new
+         Generic_Array_Pkg (T     => Color,
+                            Index => Integer);
 
-       My_Colors : Color_Pkg.Array_T (1 .. 5) := (Black, Red, Green, Blue, White);
+       My_Colors : Color_Pkg.Array_T (1 .. 5) :=
+                     (Black, Red, Green, Blue, White);
 
-       procedure Perform_Test_Reverse_Color_Array is new Perform_Test
-         (S         => "My_Color",
-          Image     => Color'Image,
-          Array_Pkg => Color_Pkg,
-          Pkg_Test  => Color_Pkg.Reverse_Array);
+       procedure Perform_Test_Reverse_Color_Array is new
+         Perform_Test
+           (S         => "My_Color",
+            Image     => Color'Image,
+            Array_Pkg => Color_Pkg,
+            Pkg_Test  => Color_Pkg.Reverse_Array);
     begin
        Perform_Test_Reverse_Color_Array (My_Colors);
     end Test_Reverse_Colors_Pkg;
@@ -678,14 +734,17 @@ Note that this example includes a formal package declaration:
 
 .. code-block:: ada
 
-    with package Array_Pkg is new Generic_Array_Pkg (<>);
+    with package Array_Pkg is new
+      Generic_Array_Pkg (<>);
 
 Previously, we've seen package instantiations that define the elements.
 For example:
 
 .. code-block:: ada
 
-    package Color_Pkg is new Generic_Array_Pkg (T => Color, Index => Integer);
+    package Color_Pkg is new
+      Generic_Array_Pkg (T     => Color,
+                         Index => Integer);
 
 In this case, however, we're simply using :ada:`(<>)`, as discussed in the
 section on
@@ -727,8 +786,10 @@ references the :ada:`Generic_Array_Pkg` package and the two formal elements
 
     generic
        S : String;
-       with package Array_Pkg is new Generic_Array_Pkg (<>);
-       with function Image (E : Array_Pkg.T) return String is <>;
+       with package Array_Pkg is new
+         Generic_Array_Pkg (<>);
+       with function Image (E : Array_Pkg.T)
+                            return String is <>;
     package Generic_Array_Bundle is
     end Generic_Array_Bundle;
 
@@ -745,7 +806,8 @@ Then, we update the definition of :ada:`Perform_Test`:
     procedure Test_Reverse_Colors_Pkg is
 
        generic
-          with package Array_Bundle is new Generic_Array_Bundle (<>);
+          with package Array_Bundle is new
+            Generic_Array_Bundle (<>);
           use Array_Bundle;
           use Array_Pkg;
           with procedure Pkg_Test (X : in out Array_T);
@@ -769,18 +831,23 @@ Then, we update the definition of :ada:`Perform_Test`:
 
        type Color is (Black, Red, Green, Blue, White);
 
-       package Color_Pkg is new Generic_Array_Pkg (T => Color, Index => Integer);
+       package Color_Pkg is new
+         Generic_Array_Pkg (T     => Color,
+                            Index => Integer);
 
-       My_Colors : Color_Pkg.Array_T (1 .. 5) := (Black, Red, Green, Blue, White);
+       My_Colors : Color_Pkg.Array_T (1 .. 5) :=
+                     (Black, Red, Green, Blue, White);
 
-       package Color_Array_Bundle is new Generic_Array_Bundle
-         (S         => "My_Color",
-          Image     => Color'Image,
-          Array_Pkg => Color_Pkg);
+       package Color_Array_Bundle is new
+         Generic_Array_Bundle
+           (S         => "My_Color",
+            Image     => Color'Image,
+            Array_Pkg => Color_Pkg);
 
-       procedure Perform_Test_Reverse_Color_Array is new Perform_Test
-         (Array_Bundle => Color_Array_Bundle,
-          Pkg_Test     => Color_Pkg.Reverse_Array);
+       procedure Perform_Test_Reverse_Color_Array is new
+         Perform_Test
+           (Array_Bundle => Color_Array_Bundle,
+            Pkg_Test     => Color_Pkg.Reverse_Array);
     begin
        Perform_Test_Reverse_Color_Array (My_Colors);
     end Test_Reverse_Colors_Pkg;
@@ -814,7 +881,8 @@ In this simple example, we define the signature package :ada:`Sig_Pkg`:
 
     generic
        type T is private;
-       with function Image (E : T) return String is <>;
+       with function Image (E : T)
+                            return String is <>;
     package Sig_Pkg is
     end Sig_Pkg;
 
@@ -838,7 +906,8 @@ For example, let's use this signature package for the generic procedure
     package body P is
        procedure Show (V : SP.T) is
        begin
-          Put_Line ("Value: " & SP.Image (V));
+          Put_Line ("Value: "
+                    & SP.Image (V));
        end Show;
     end P;
 
@@ -850,8 +919,10 @@ Finally, we can use this package in an application:
     with P;
 
     procedure Main is
-       package   Int_P    is new Sig_Pkg (Integer, Integer'Image);
-       procedure Show_Int is new P.Show (Int_P);
+       package Int_P is new
+         Sig_Pkg (Integer, Integer'Image);
+       procedure Show_Int is new
+         P.Show (Int_P);
 
        V : Integer;
     begin
@@ -865,8 +936,10 @@ We can also use formal incomplete types for signature packages. For example:
 
     generic
       type Incomplete;
-      with function "+" (V1, V2 : Incomplete) return Incomplete;
-      with function "-" (V1, V2 : Incomplete) return Incomplete;
+      with function "+" (V1, V2 : Incomplete)
+                         return Incomplete;
+      with function "-" (V1, V2 : Incomplete)
+                         return Incomplete;
     package Formal_Incomplete_Type_Example
       with Pure is
     end Formal_Incomplete_Type_Example;
@@ -879,7 +952,9 @@ This allows us to map other formal incomplete types, for example:
 
     generic
        type T;
-       with package P is new Formal_Incomplete_Type_Example (T, others => <>);
+       with package P is new
+         Formal_Incomplete_Type_Example
+           (T, others => <>);
     package Map_Incomplete_Type_Example
       with Pure is
     end Map_Incomplete_Type_Example;
@@ -924,13 +999,16 @@ instantiation.
 
     procedure Show_Formal_Object is
 
-       type Array_Float is array (Positive range <>) of Float;
+       type Array_Float is
+         array (Positive range <>) of Float;
 
        generic
           Use_Fast_Version : Boolean;
-       function Gen_Calc (A : Array_Float) return Float;
+       function Gen_Calc (A : Array_Float)
+                          return Float;
 
-       function Gen_Calc (A : Array_Float) return Float is
+       function Gen_Calc (A : Array_Float)
+                          return Float is
        begin
           if Use_Fast_Version then
              Put_Line ("Using fast version");
@@ -942,7 +1020,8 @@ instantiation.
           return 0.0;
        end Gen_Calc;
 
-       function Calc is new Gen_Calc (Use_Fast_Version => True);
+       function Calc is new
+         Gen_Calc (Use_Fast_Version => True);
 
        Vals : Array_Float (1 .. 2) := (0.5, 0.3);
        X    : Float;
@@ -971,8 +1050,11 @@ based on the specified field.
 
 .. code:: ada no_button project=Courses.Advanced_Ada.Generics.In_Out_Formal_Object
 
-    with Ada.Calendar;          use Ada.Calendar;
-    with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+    with Ada.Calendar;
+    use  Ada.Calendar;
+
+    with Ada.Strings.Unbounded;
+    use  Ada.Strings.Unbounded;
 
     package Data_Elements is
 
@@ -982,7 +1064,9 @@ based on the specified field.
           Birthday   : Time;
        end record;
 
-       type Data_Fields is (First_Name_F, Last_Name_F, Birthday_F, Age_F);
+       type Data_Fields is
+         (First_Name_F, Last_Name_F,
+          Birthday_F,   Age_F);
 
        function Image (D : Data_Element;
                        F : Data_Fields) return String;
@@ -993,25 +1077,36 @@ This is the corresponding package body:
 
 .. code:: ada compile_button project=Courses.Advanced_Ada.Generics.In_Out_Formal_Object
 
-    with Ada.Calendar.Formatting; use Ada.Calendar.Formatting;
-    with Ada.Calendar.Time_Zones; use Ada.Calendar.Time_Zones;
+    with Ada.Calendar.Formatting;
+    use  Ada.Calendar.Formatting;
+
+    with Ada.Calendar.Time_Zones;
+    use  Ada.Calendar.Time_Zones;
 
     package body Data_Elements is
        TZ   : Time_Offset := UTC_Time_Offset;
 
-       function To_Year (D : Duration) return Natural is
+       function To_Year (D : Duration)
+                         return Natural is
          (Natural (D) / 86_400 / 365);
 
        function Image (D : Data_Element;
-                       F : Data_Fields) return String is
+                       F : Data_Fields)
+                       return String is
           Now : Time := Clock;
           Age : Natural := To_Year (Now - D.Birthday);
        begin
           case F is
-             when First_Name_F => return To_String (D.First_Name);
-             when Last_Name_F  => return To_String (D.Last_Name);
-             when Birthday_F   => return Image (D.Birthday, True, TZ);
-             when Age_F        => return Natural'Image (Age);
+             when First_Name_F =>
+               return To_String (D.First_Name);
+             when Last_Name_F  =>
+               return To_String (D.Last_Name);
+             when Birthday_F   =>
+               return Image (D.Birthday,
+                             True,
+                             TZ);
+             when Age_F        =>
+               return Natural'Image (Age);
           end case;
        end Image;
 
@@ -1038,9 +1133,10 @@ developer at the procedure instantiation.
        type Data_Container is private;
 
        procedure Insert (C : in out Data_Container;
-                         V : Data_Element);
+                         V :        Data_Element);
 
-       type Data_Fields_Array is array (Positive range <>) of Data_Fields;
+       type Data_Fields_Array is
+         array (Positive range <>) of Data_Fields;
 
        generic
           Container : in out Data_Container;
@@ -1069,8 +1165,8 @@ as a formal object:
 .. code-block:: ada
 
     generic
-       Fields    : Data_Fields_Array;
-       Header    : String := "";
+       Fields : Data_Fields_Array;
+       Header : String := "";
     procedure Display (Container : in out Data_Container);
 
 In this case, we wouldn't be able to bind a local :ada:`Container` object
@@ -1090,7 +1186,7 @@ This is the corresponding body of the :ada:`Data` package:
     package body Data is
 
        procedure Insert (C : in out Data_Container;
-                         V : Data_Element) is
+                         V :        Data_Element) is
        begin
           C.V.Append (V);
        end Insert;
@@ -1119,7 +1215,9 @@ makes use of the data container:
 
 .. code:: ada compile_button project=Courses.Advanced_Ada.Generics.In_Out_Formal_Object
 
-    with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
+    with Ada.Strings.Unbounded;
+    use  Ada.Strings.Unbounded;
+
     with Ada.Calendar.Formatting;
 
     with Data;          use Data;
@@ -1160,22 +1258,31 @@ makes use of the data container:
        --
 
        procedure Init_Container is
-          function To_US (S : String) return Unbounded_String renames
-            To_Unbounded_String;
-       begin
-          Insert (C, (First_Name => To_US ("John"),
-                      Last_Name  => To_US ("Smith"),
-                      Birthday   => Ada.Calendar.Formatting.Time_Of
-                        (Year        => 1951,
-                         Month       => 5,
-                         Day         => 1)));
 
-          Insert (C, (First_Name => To_US ("Alice"),
-                      Last_Name  => To_US ("Williams"),
-                      Birthday   => Ada.Calendar.Formatting.Time_Of
-                        (Year        => 1968,
-                         Month       => 10,
-                         Day         => 12)));
+          function To_US (S : String)
+                          return Unbounded_String
+            renames To_Unbounded_String;
+
+       begin
+          Insert
+            (C,
+             (First_Name => To_US ("John"),
+              Last_Name  => To_US ("Smith"),
+              Birthday   =>
+                Ada.Calendar.Formatting.Time_Of
+                  (Year        => 1951,
+                   Month       => 5,
+                   Day         => 1)));
+
+          Insert
+            (C,
+             (First_Name => To_US ("Alice"),
+              Last_Name  => To_US ("Williams"),
+              Birthday   =>
+                Ada.Calendar.Formatting.Time_Of
+                  (Year        => 1968,
+                   Month       => 10,
+                   Day         => 12)));
        end Init_Container;
 
     begin
@@ -1271,8 +1378,12 @@ implement this, we can define the following generic interface:
        package Set_Get is
           type T is interface and TI;
 
-          procedure Set (E : in out T; D : TD) is abstract;
-          function Get (E : T) return TD is abstract;
+          procedure Set (E : in out T;
+                         D :        TD)
+            is abstract;
+          function Get (E : T)
+                        return TD
+            is abstract;
        end Set_Get;
 
     end Gen_Interface;
@@ -1294,29 +1405,45 @@ tagged type that combines these conversion subprograms into a single type:
        type My_Type_Interface is interface;
 
        package Set_Get_Integer is new
-         Gen_Interface.Set_Get (TD => Integer,
-                                TI => My_Type_Interface);
+         Gen_Interface.Set_Get
+           (TD => Integer,
+            TI => My_Type_Interface);
        use Set_Get_Integer;
 
        package Set_Get_Float   is new
-         Gen_Interface.Set_Get (TD => Float,
-                                TI => My_Type_Interface);
+         Gen_Interface.Set_Get
+           (TD => Float,
+            TI => My_Type_Interface);
        use Set_Get_Float;
 
        type My_Type is
-         new Set_Get_Integer.T and Set_Get_Float.T with private;
+         new Set_Get_Integer.T and
+             Set_Get_Float.T
+         with private;
 
-       overriding procedure Set (E : in out My_Type; D : Integer);
-       overriding function Get (E : My_Type) return Integer;
+       overriding
+       procedure Set (E : in out My_Type;
+                      D :        Integer);
 
-       overriding procedure Set (E : in out My_Type; D : Float);
-       overriding function Get (E : My_Type) return Float;
+       overriding
+       function Get (E : My_Type)
+                     return Integer;
+
+       overriding
+       procedure Set (E : in out My_Type;
+                      D :        Float);
+
+       overriding
+       function Get (E : My_Type)
+                     return Float;
 
     private
        type My_Type is
-         new Set_Get_Integer.T and Set_Get_Float.T with record
-          I : Integer;
-          F : Float;
+         new Set_Get_Integer.T and
+             Set_Get_Float.T
+         with record
+            I : Integer;
+            F : Float;
        end record;
 
     end My_Type_Pkg;
@@ -1340,24 +1467,28 @@ This is just an example on how we could implement these :ada:`Set` and
 
     package body My_Type_Pkg is
 
-       procedure Set (E : in out My_Type; D : Integer) is
+       procedure Set (E : in out My_Type;
+                      D :        Integer) is
        begin
           E.I := D;
           E.F := Float (D);
        end Set;
 
-       function Get (E : My_Type) return Integer is
+       function Get (E : My_Type)
+                     return Integer is
        begin
           return E.I;
        end Get;
 
-       procedure Set (E : in out My_Type; D : Float) is
+       procedure Set (E : in out My_Type;
+                      D :        Float) is
        begin
           E.F := D;
           E.I := Integer (D);
        end Set;
 
-       function Get (E : My_Type) return Float is
+       function Get (E : My_Type)
+                     return Float is
        begin
           return E.F;
        end Get;
@@ -1420,8 +1551,8 @@ interface.
 
        type T is new TI with null record;
        type T_Class_Access is access all T'Class;
-       type T_Array is array (Positive range <>) of
-         T_Class_Access;
+       type T_Array is
+         array (Positive range <>) of T_Class_Access;
 
        --  Missing implementation
        procedure Op (E : in out T) is null;
@@ -1494,18 +1625,27 @@ interface).
     package Float_Interface_Pkg is
 
        type Float_Cnvt_Type is interface;
-       function To_Float (E : Float_Cnvt_Type) return Float is abstract;
+       function To_Float (E : Float_Cnvt_Type)
+                          return Float is abstract;
 
     end Float_Interface_Pkg;
 
     generic
-       type Float_Cnvt_T is new Float_Cnvt_Type with private;
-       type Float_Cnvt_Class_Access is access all Float_Cnvt_T'Class;
-       type Float_Cnvt_Array is array (Positive range <>) of
-         Float_Cnvt_Class_Access;
+       type Float_Cnvt_T is new
+         Float_Cnvt_Type
+           with private;
+
+       type Float_Cnvt_Class_Access is
+         access all Float_Cnvt_T'Class;
+
+       type Float_Cnvt_Array is
+         array (Positive range <>) of
+           Float_Cnvt_Class_Access;
+
     package Float_Interface_Pkg.Ops is
 
-       function Average (A : Float_Cnvt_Array) return Float;
+       function Average (A : Float_Cnvt_Array)
+                         return Float;
 
     end Float_Interface_Pkg.Ops;
 
@@ -1516,7 +1656,8 @@ the generic :ada:`Average` function:
 
     package body Float_Interface_Pkg.Ops is
 
-       function Average (A : Float_Cnvt_Array) return Float is
+       function Average (A : Float_Cnvt_Array)
+                         return Float is
        begin
           return Acc : Float do
              Acc := 0.0;
@@ -1541,16 +1682,24 @@ corresponding :ada:`To_Float` functions.
 
        type T is new Float_Cnvt_Type with private;
        type T_Class_Access is access all T'Class;
-       type T_Array is array (Positive range <>) of T_Class_Access;
+       type T_Array is
+         array (Positive range <>) of T_Class_Access;
 
-       procedure Set (E : in out T; F : Float);
-       function To_Float (E : T) return Float;
+       procedure Set (E : in out T;
+                      F :        Float);
+       function To_Float (E : T)
+                          return Float;
 
        type T2 is new T with private;
-       type T2_Class_Access is access all T2'Class;
+       type T2_Class_Access is
+         access all T2'Class;
 
-       procedure Set_Ext (E : in out T2; F : Float);
-       overriding function To_Float (E : T2) return Float;
+       procedure Set_Ext (E : in out T2;
+                          F :        Float);
+
+       overriding
+       function To_Float (E : T2)
+                          return Float;
 
     private
 
@@ -1570,7 +1719,8 @@ This is the corresponding package body:
 
     package body App_Data is
 
-       procedure Set (E : in out T; F : Float) is
+       procedure Set (E : in out T;
+                      F :        Float) is
        begin
           E.F := F;
        end Set;
@@ -1578,12 +1728,14 @@ This is the corresponding package body:
        function To_Float (E : T) return Float is
          (E.F);
 
-       procedure Set_Ext (E : in out T2; F : Float) is
+       procedure Set_Ext (E : in out T2;
+                          F :        Float) is
        begin
           E.F2 := F;
        end Set_Ext;
 
-       function To_Float (E : T2) return Float is
+       function To_Float (E : T2)
+                          return Float is
          (E.F + E.F2);
 
     end App_Data;
@@ -1618,7 +1770,8 @@ the average of all elements.
 
           if A (I).all in T2'Class then
              declare
-                A_I : T2_Class_Access := T2_Class_Access (A (I));
+                A_I : T2_Class_Access :=
+                        T2_Class_Access (A (I));
              begin
                 A_I.Set_Ext (3.0);
              end;
@@ -1627,7 +1780,8 @@ the average of all elements.
 
        Avg := Ops.Average (A);
 
-       Put_Line ("Avg: " & Float'Image (Avg));
+       Put_Line ("Avg: "
+                 & Float'Image (Avg));
 
     end Show_Average;
 
@@ -1724,7 +1878,8 @@ table:
 
        generic
           type T is private;
-          with function Hash (Self : T) return Hash_Type is <>;
+          with function Hash (Self : T)
+                              return Hash_Type is <>;
        package Hash_Tables is
           --  Missing implementation
        end Hash_Tables;
@@ -1760,17 +1915,21 @@ This is an example of a package instantiating the generic hash table:
           Key_2 : String (1 .. 100);
        end record;
 
-       function Hash (Self : My_Type) return Hash_Type is
+       function Hash (Self : My_Type)
+                      return Hash_Type is
          (Ada.Strings.Hash (Self.Key));
 
-       function Alt_Hash (Self : My_Type) return Hash_Type is
+       function Alt_Hash (Self : My_Type)
+                          return Hash_Type is
          (Ada.Strings.Hash (Self.Key_2));
 
-       package My_Type_Hash_Tables is new Hash_Tables (My_Type);
+       package My_Type_Hash_Tables is new
+         Hash_Tables (My_Type);
 
-       package My_Type_Alt_Hash_Tables is new Hash_Tables
-         (T    => My_Type,
-          Hash => Alt_Hash);
+       package My_Type_Alt_Hash_Tables is
+         new Hash_Tables
+           (T    => My_Type,
+            Hash => Alt_Hash);
 
     end Instantiation_Using_Formal_Function;
 
@@ -1824,13 +1983,15 @@ package:
 
        generic
           type Element;
-          with function Hash (Self : Element) return Hash_Type is <>;
+          with function Hash (Self : Element)
+                              return Hash_Type is <>;
        package Hashable_Signature is
        end Hashable_Signature;
 
        generic
           type T is private;
-          with package T_Hashable is new Hashable_Signature (T, <>);
+          with package T_Hashable is new
+            Hashable_Signature (T, <>);
        package Hash_Tables is
           --  Missing implementation
        end Hash_Tables;
@@ -1859,23 +2020,28 @@ generic hash table:
           Key_2 : String (1 .. 100);
        end record;
 
-       function Hash (Self : My_Type) return Hash_Type is
-         (Ada.Strings.Hash (Self.Key));
+       function Hash (Self : My_Type)
+                      return Hash_Type
+         is (Ada.Strings.Hash (Self.Key));
 
-       function Alt_Hash (Self : My_Type) return Hash_Type is
-         (Ada.Strings.Hash (Self.Key_2));
+       function Alt_Hash (Self : My_Type)
+                          return Hash_Type
+         is (Ada.Strings.Hash (Self.Key_2));
 
-       package My_Type_Hashable is new Hashable_Signature
-         (My_Type, Hash);
+       package My_Type_Hashable is new
+         Hashable_Signature (My_Type, Hash);
 
-       package My_Type_Hash_Tables is new Hash_Tables
-         (My_Type, My_Type_Hashable);
+       package My_Type_Hash_Tables is new
+         Hash_Tables (My_Type,
+                      My_Type_Hashable);
 
-       package My_Type_Alt_Hashable is new Hashable_Signature
-         (My_Type, Alt_Hash);
+       package My_Type_Alt_Hashable is new
+         Hashable_Signature (My_Type,
+                             Alt_Hash);
 
-       package My_Type_Alt_Hash_Tables is new Hash_Tables
-         (My_Type, My_Type_Alt_Hashable);
+       package My_Type_Alt_Hash_Tables is new
+         Hash_Tables (My_Type,
+                      My_Type_Alt_Hashable);
 
     end Instantiation_Using_Signature_Package;
 
@@ -1927,7 +2093,8 @@ interface:
     package Interface_Using_Tagged_Types is
 
        type Hashable is interface;
-       function Hash (Self : Hashable) return Hash_Type is abstract;
+       function Hash (Self : Hashable)
+                      return Hash_Type is abstract;
 
        generic
           type T is new Hashable with private;
@@ -1945,19 +2112,23 @@ using a tagged type:
     with Ada.Containers; use Ada.Containers;
     with Ada.Strings.Hash;
 
-    with Interface_Using_Tagged_Types; use Interface_Using_Tagged_Types;
+    with Interface_Using_Tagged_Types;
+    use  Interface_Using_Tagged_Types;
 
     package Instantiation_Using_Tagged_Types is
 
-       type My_Type is new Hashable with record
+       type My_Type is new Hashable with
+       record
           Key   : String (1 .. 100);
           Key_2 : String (1 .. 100);
        end record;
 
-       function Hash (Self : My_Type) return Hash_Type is
+       function Hash (Self : My_Type)
+                      return Hash_Type is
          (Ada.Strings.Hash (Self.Key));
 
-       package My_Type_Hash_Tables is new Hash_Tables (My_Type);
+       package My_Type_Hash_Tables is new
+         Hash_Tables (My_Type);
 
     end Instantiation_Using_Tagged_Types;
 
@@ -1975,20 +2146,29 @@ alternative hashing function, as we did in the previous approaches:
 
 .. code:: ada compile_button project=Courses.Advanced_Ada.Generics.Interface_Using_Tagged_Types
 
-    with Ada.Containers;                   use Ada.Containers;
+    with Ada.Containers;
+    use  Ada.Containers;
+
     with Ada.Strings.Hash;
 
-    with Interface_Using_Tagged_Types;     use Interface_Using_Tagged_Types;
-    with Instantiation_Using_Tagged_Types; use Instantiation_Using_Tagged_Types;
+    with Interface_Using_Tagged_Types;
+    use  Interface_Using_Tagged_Types;
+
+    with Instantiation_Using_Tagged_Types;
+    use  Instantiation_Using_Tagged_Types;
 
     package Instantiation_Using_Alt_Tagged_Types is
 
-       type My_Alt_Type is new My_Type with null record;
+       type My_Alt_Type is new
+         My_Type with null record;
 
-       overriding function Hash (Self : My_Alt_Type) return Hash_Type is
-         (Ada.Strings.Hash (Self.Key_2));
+       overriding
+       function Hash (Self : My_Alt_Type)
+                      return Hash_Type
+         is (Ada.Strings.Hash (Self.Key_2));
 
-       package My_Type_Alt_Hash_Tables is new Hash_Tables (My_Alt_Type);
+       package My_Type_Alt_Hash_Tables is new
+         Hash_Tables (My_Alt_Type);
 
     end Instantiation_Using_Alt_Tagged_Types;
 
@@ -2017,8 +2197,10 @@ of the :ada:`synchronized` keyword:
        package Set_Get is
           type T is synchronized interface and TI;
 
-          procedure Set (E : in out T; D : TD) is abstract;
-          function Get (E : T) return TD is abstract;
+          procedure Set (E : in out T;
+                         D :        TD) is abstract;
+          function Get (E : T)
+                        return TD is abstract;
        end Set_Get;
 
     end Gen_Sync_Interface;
@@ -2041,23 +2223,29 @@ package:
 
        type My_Type_Interface is synchronized interface;
 
-       package Set_Get_Integer is
-         new Gen_Sync_Interface.Set_Get (TD => Integer,
-                                         TI => My_Type_Interface);
+       package Set_Get_Integer is new
+         Gen_Sync_Interface.Set_Get
+           (TD => Integer,
+            TI => My_Type_Interface);
        use Set_Get_Integer;
 
-       package Set_Get_Float is
-         new Gen_Sync_Interface.Set_Get (TD => Float,
-                                         TI => My_Type_Interface);
+       package Set_Get_Float is new
+         Gen_Sync_Interface.Set_Get
+           (TD => Float,
+            TI => My_Type_Interface);
        use Set_Get_Float;
 
-       protected type My_Type is
-            new Set_Get_Integer.T and Set_Get_Float.T with
+       protected type My_Type is new
+         Set_Get_Integer.T and Set_Get_Float.T
+       with
+          overriding
+          procedure Set (D : Integer);
 
-          overriding procedure Set (D : Integer);
           function Get return Integer;
 
-          overriding procedure Set (D : Float);
+          overriding
+          procedure Set (D : Float);
+
           function Get return Float;
        private
           I : Integer;
@@ -2179,10 +2367,12 @@ Finally, we create a test application:
 
     procedure Show_Float_Ops is
 
-       package Float_Ops is new Gen_Float_Ops (F => Float);
+       package Float_Ops is new
+         Gen_Float_Ops (F => Float);
        use Float_Ops;
 
-       package Long_Float_Ops is new Gen_Float_Ops (F => Long_Float);
+       package Long_Float_Ops is new
+         Gen_Float_Ops (F => Long_Float);
        use Long_Float_Ops;
 
        F  : Float := 0.5;
@@ -2227,7 +2417,8 @@ This is the package specification:
     package Float_Types is
 
        type My_Float is new Float;
-       function "+" (A, B : My_Float) return My_Float;
+       function "+" (A, B : My_Float)
+                     return My_Float;
 
     end Float_Types;
 
@@ -2246,10 +2437,12 @@ This is the corresponding package body:
           end if;
        end Saturate;
 
-       overriding function "+" (A, B : My_Float) return My_Float is
+       overriding function "+" (A, B : My_Float)
+                                return My_Float is
        begin
           return R : My_Float do
-             R := My_Float (Float (A) + Float (B));
+             R := My_Float (Float (A)
+                            + Float (B));
              Saturate (R);
           end return;
        end "+";
@@ -2263,7 +2456,8 @@ floating-point values. This is the package specification:
 
     generic
        type F is digits <>;
-       with function "+" (A, B : F) return F is <>;
+       with function "+" (A, B : F)
+                          return F is <>;
     package Gen_Float_Acc is
        procedure Acc (V : in out F; S : F);
     end Gen_Float_Acc;
@@ -2280,7 +2474,8 @@ This is the package body:
 
     package body Gen_Float_Acc is
 
-       procedure Acc (V : in out F; S : F) is
+       procedure Acc (V : in out F;
+                      S :        F) is
        begin
           V := V + S;
        end Acc;
@@ -2292,14 +2487,15 @@ This is a test application that makes use of the :ada:`Float_Types` and
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Generics.Float_Types
 
-    with Ada.Text_IO;    use Ada.Text_IO;
+    with Ada.Text_IO; use Ada.Text_IO;
 
     with Float_Types; use Float_Types;
     with Gen_Float_Acc;
 
     procedure Show_Float_Overriding is
 
-       package Float_Ops is new Gen_Float_Acc (F => My_Float);
+       package Float_Ops is new
+         Gen_Float_Acc (F => My_Float);
        use Float_Ops;
 
        F1, F2 : My_Float := 0.5;
@@ -2342,7 +2538,8 @@ example below, where we modified the :ada:`Gen_Float_Acc` package:
 
        procedure Acc (V : in out F; S : F) is
        begin
-          --  Using standard addition for universal floating-point
+          --  Using standard addition for
+          --  universal floating-point
           --  type (digits <>) here:
           V := V + S;
        end Acc;
@@ -2356,9 +2553,11 @@ make use of the standard addition:
 
 .. code-block:: ada
 
-    --  This makes use of the type definition of My_Float, but not its
-    --  overriden operators.
-    package Float_Ops is new Gen_Float_Acc (F => My_Float);
+    --  This makes use of the type
+    --  definition of My_Float, but not
+    --  its overriden operators.
+    package Float_Ops is new
+      Gen_Float_Acc (F => My_Float);
 
 Because the type :ada:`F` is declared as :ada:`digits <>`, which
 corresponds to the universal floating-point data type, the compiler
@@ -2420,25 +2619,34 @@ into the original range.
 
        Ovhd_Depth : constant Positive := 64;
        Ovhd_Bits  : constant := 32;
-       Ovhd_Delta : constant := 2.0 ** Ovhd_Bits / 2.0 ** (Ovhd_Depth - 1);
+       Ovhd_Delta : constant :=
+                      2.0 ** Ovhd_Bits
+                      / 2.0 ** (Ovhd_Depth - 1);
 
-       type Ovhd_Fixed is delta Ovhd_Delta range
-         -2.0 ** Ovhd_Bits .. 2.0 ** Ovhd_Bits - Ovhd_Delta
+       type Ovhd_Fixed is
+         delta Ovhd_Delta
+         range -2.0 ** Ovhd_Bits
+               .. 2.0 ** Ovhd_Bits - Ovhd_Delta
          with Size => Ovhd_Depth;
 
        --  Ensure that Ovhd_Fixed has enough headroom
-       pragma Assert (Ovhd_Fixed'First <= 2.0 * Ovhd_Fixed (F'First));
-       pragma Assert (Ovhd_Fixed'Last  >= 2.0 * Ovhd_Fixed (F'Last));
+       pragma Assert (Ovhd_Fixed'First
+                      <= 2.0 * Ovhd_Fixed (F'First));
+       pragma Assert (Ovhd_Fixed'Last
+                      >= 2.0 * Ovhd_Fixed (F'Last));
 
-       --  Ensure that the precision is at least the same
+       --  Ensure that the precision is at least
+       --  the same
        pragma Assert (Ovhd_Fixed'Small <= F'Small);
 
        procedure Saturate (V : in out Ovhd_Fixed)
-          with Inline;
+         with Inline;
 
        procedure Saturate (V : in out Ovhd_Fixed) is
-          First : constant Ovhd_Fixed := Ovhd_Fixed (F'First);
-          Last  : constant Ovhd_Fixed := Ovhd_Fixed (F'Last);
+          First : constant Ovhd_Fixed :=
+                    Ovhd_Fixed (F'First);
+          Last  : constant Ovhd_Fixed :=
+                    Ovhd_Fixed (F'Last);
        begin
           if V > Last then
              V := Last;
@@ -2479,21 +2687,28 @@ We then use the :ada:`Gen_Fixed_Ops` package in a test application:
        Fixed_Depth      : constant Positive := 16;
        Long_Fixed_Depth : constant Positive := 32;
 
-       Fixed_Delta      : constant := 1.0 / 2.0 ** (Fixed_Depth - 1);
-       Long_Fixed_Delta : constant := 1.0 / 2.0 ** (Long_Fixed_Depth - 1);
+       Fixed_Delta      : constant := 1.0 /
+                            2.0 ** (Fixed_Depth - 1);
+       Long_Fixed_Delta : constant := 1.0 /
+                            2.0 **
+                              (Long_Fixed_Depth - 1);
 
-       type Fixed is delta
-         Fixed_Delta range -1.0 .. 1.0 - Fixed_Delta
+       type Fixed is
+         delta Fixed_Delta
+         range -1.0 .. 1.0 - Fixed_Delta
          with Size => Fixed_Depth;
 
-       type Long_Fixed is delta
-         Long_Fixed_Delta range -1.0 .. 1.0 - Long_Fixed_Delta
+       type Long_Fixed is
+         delta Long_Fixed_Delta
+         range -1.0 .. 1.0 - Long_Fixed_Delta
          with Size => Long_Fixed_Depth;
 
-       package Fixed_Ops is new Gen_Fixed_Ops (F => Fixed);
+       package Fixed_Ops is new
+         Gen_Fixed_Ops (F => Fixed);
        use Fixed_Ops;
 
-       package Long_Fixed_Ops is new Gen_Fixed_Ops (F => Long_Fixed);
+       package Long_Fixed_Ops is new
+         Gen_Fixed_Ops (F => Long_Fixed);
        use Long_Fixed_Ops;
 
        F  : Fixed      :=  0.5;
@@ -2535,14 +2750,17 @@ the package specification:
 
     package Fixed_Types is
 
-       Fixed_Depth      : constant Positive := 16;
-       Fixed_Delta      : constant := 1.0 / 2.0 ** (Fixed_Depth - 1);
+       Fixed_Depth : constant Positive := 16;
+       Fixed_Delta : constant := 1.0 /
+                       2.0 ** (Fixed_Depth - 1);
 
-       type Fixed is delta
-         Fixed_Delta range -1.0 .. 1.0 - Fixed_Delta
+       type Fixed is
+         delta Fixed_Delta
+         range -1.0 .. 1.0 - Fixed_Delta
          with Size => Fixed_Depth;
 
-       function "+" (A, B : Fixed) return Fixed;
+       function "+" (A, B : Fixed)
+                     return Fixed;
 
     end Fixed_Types;
 
@@ -2557,10 +2775,12 @@ the implementation of the saturating addition operator.
 
     package body Fixed_Types is
 
-       package Fixed_Ops is new Gen_Fixed_Ops (F => Fixed);
+       package Fixed_Ops is new
+         Gen_Fixed_Ops (F => Fixed);
        use Fixed_Ops;
 
-       function "+" (A, B : Fixed) return Fixed is
+       function "+" (A, B : Fixed)
+                     return Fixed is
        begin
           return R : Fixed do
              R := Sat_Add (A, B);
@@ -2576,9 +2796,11 @@ fixed-point values. This is the package specification:
 
     generic
        type F is delta <>;
-       with function "+" (A : F; B : F) return F is <>;
+       with function "+" (A, B : F)
+                          return F is <>;
     package Gen_Fixed_Acc is
-       procedure Acc (V : in out F; S : F);
+       procedure Acc (V : in out F;
+                      S :        F);
     end Gen_Fixed_Acc;
 
 In this specification, we declare a formal function for the addition
@@ -2589,7 +2811,8 @@ operator using :ada:`with function`. This operator is used by the
 
     package body Gen_Fixed_Acc is
 
-       procedure Acc (V : in out F; S : F) is
+       procedure Acc (V : in out F;
+                      S :        F) is
        begin
           V := V + S;
        end Acc;
@@ -2601,14 +2824,15 @@ This is a test application that makes use of the :ada:`Fixed_Types` and
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Generics.Generic_Fixed
 
-    with Ada.Text_IO;    use Ada.Text_IO;
+    with Ada.Text_IO;   use Ada.Text_IO;
 
-    with Fixed_Types; use Fixed_Types;
+    with Fixed_Types;   use Fixed_Types;
     with Gen_Fixed_Acc;
 
     procedure Show_Fixed_Overriding is
 
-       package Fixed_Ops is new Gen_Fixed_Acc (F => Fixed);
+       package Fixed_Ops is new
+         Gen_Fixed_Acc (F => Fixed);
        use Fixed_Ops;
 
        F1 : Fixed := -0.5;

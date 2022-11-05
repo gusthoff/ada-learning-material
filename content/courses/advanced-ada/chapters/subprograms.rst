@@ -73,7 +73,8 @@ For array types, the concatenation operator (:ada:`&`) is a primitive operator:
 
     package Integer_Arrays is
 
-       type Integer_Array is array (Positive range <>) of Integer;
+       type Integer_Array is
+         array (Positive range <>) of Integer;
 
     end Integer_Arrays;
 
@@ -106,7 +107,8 @@ In contrast to this, the addition operator is not available for arrays:
 
     package Integer_Arrays is
 
-       type Integer_Array is array (Positive range <>) of Integer;
+       type Integer_Array is
+         array (Positive range <>) of Integer;
 
     end Integer_Arrays;
 
@@ -158,17 +160,21 @@ Let's define a custom addition operator that adds individual components of the
 
     package Integer_Arrays is
 
-       type Integer_Array is array (Positive range <>) of Integer;
+       type Integer_Array is
+         array (Positive range <>) of Integer;
 
-       function "+" (Left, Right : Integer_Array) return Integer_Array
-         with Post => (for all I in "+"'Result'Range =>
-                         "+"'Result (I) = Left (I) + Right (I));
+       function "+" (Left, Right : Integer_Array)
+                     return Integer_Array
+         with Post =>
+           (for all I in "+"'Result'Range =>
+              "+"'Result (I) = Left (I) + Right (I));
 
     end Integer_Arrays;
 
     package body Integer_Arrays is
 
-       function "+" (Left, Right : Integer_Array) return Integer_Array is
+       function "+" (Left, Right : Integer_Array)
+                     return Integer_Array is
           R : Integer_Array (Left'Range);
        begin
           for I in Left'Range loop
@@ -227,8 +233,11 @@ address of a person:
        type Person is private;
 
        function "+" (Name    : String;
-                     Address : String) return Person;
-       function "+" (Left, Right : Person) return Person;
+                     Address : String)
+                     return Person;
+
+       function "+" (Left, Right : Person)
+                     return Person;
 
        procedure Display (P : Person);
 
@@ -250,15 +259,18 @@ address of a person:
     package body Addresses is
 
        function "+" (Name    : String;
-                     Address : String) return Person is
+                     Address : String)
+                     return Person is
        begin
-          return (Name    => Head (Name,
-                                   Name_String'Length),
-                  Address => Head (Address,
-                                   Address_String'Length));
+          return
+            (Name    => Head (Name,
+                              Name_String'Length),
+             Address => Head (Address,
+                              Address_String'Length));
        end "+";
 
-       function "+" (Left, Right : Person) return Person is
+       function "+" (Left, Right : Person)
+                     return Person is
        begin
           return (Name    => Left.Name,
                   Address => Right.Address);
@@ -309,8 +321,10 @@ we can confirm by comparing the operation in both orders:
     with Addresses;   use Addresses;
 
     procedure Show_Address_Addition is
-       John : constant Person := "John" + "4 Main Street";
-       Jane : constant Person := "Jane" + "7 High Street";
+       John : constant Person :=
+                "John" + "4 Main Street";
+       Jane : constant Person :=
+                "Jane" + "7 High Street";
     begin
        if Jane + John = John + Jane then
           Put_Line ("It's commutative!");
@@ -531,18 +545,26 @@ Ada is unusual in that it supports top-down overload resolution as well:
           type Sequence is null record;
           type Set is null record;
 
-          function Empty return Sequence is ((others => <>));
-          function Empty return Set  is ((others => <>));
+          function Empty return Sequence is
+            ((others => <>));
 
-          procedure Print_Sequence (S : Sequence) is null;
-          procedure Print_Set (S : Set) is null;
+          function Empty return Set is
+            ((others => <>));
+
+          procedure Print_Sequence (S : Sequence)
+            is null;
+
+          procedure Print_Set (S : Set)
+            is null;
+
        end Types;
 
        use Types;
 
        X : Sequence;
     begin
-       --  Compiler selects function Empty return Sequence
+       --  Compiler selects
+       --  function Empty return Sequence
        Print_Sequence (Empty);
     end Show_Top_Down_Overloading;
 
@@ -563,8 +585,11 @@ If we overload things too heavily, we can cause ambiguities:
           type Sequence is null record;
           type Set is null record;
 
-          function Empty return Sequence is ((others => <>));
-          function Empty return Set  is ((others => <>));
+          function Empty return Sequence is
+            ((others => <>));
+
+          function Empty return Set is
+            ((others => <>));
 
           procedure Print (S : Sequence) is null;
           procedure Print (S : Set) is null;
@@ -675,7 +700,9 @@ determine its type.
        procedure Grind (X : Complex) is null;
        procedure Grind (X : String) is null;
     begin
-       Grind (X => (Re => 1.0, Im => 1.0));  --  Illegal!
+       Grind (X => (Re => 1.0, Im => 1.0));
+       --  Illegal!
+
     end Show_Record_Resolution_Error;
 
 There are two :ada:`Grind` procedures visible, so the type of the
@@ -717,9 +744,16 @@ we can find these declarations:
 
 .. code-block:: ada
 
-    function "+" (Left, Right : Complex) return Complex;
-    function "+" (Left : Complex;   Right : Real'Base) return Complex;
-    function "+" (Left : Real'Base; Right : Complex)   return Complex;
+    function "+" (Left, Right : Complex)
+                  return Complex;
+
+    function "+" (Left  : Complex;
+                  Right : Real'Base)
+                  return Complex;
+
+    function "+" (Left  : Real'Base;
+                  Right : Complex)
+                  return Complex;
 
 This example shows that the :ada:`+` operator |mdash| as well as other
 operators |mdash| are being overloaded in the :ada:`Generic_Complex_Types`
@@ -885,7 +919,10 @@ server can be implemented as an endless loop. For example:
 
        procedure Run_Server is
        begin
-          pragma Warnings (Off, "implied return after this statement");
+          pragma Warnings
+            (Off,
+             "implied return after this statement");
+
           while True loop
              --  Processing happens here...
              null;
@@ -1036,16 +1073,19 @@ Let's look at this example:
 
     package Float_Arrays is
 
-       type Float_Array is array (Positive range <>) of Float;
+       type Float_Array is
+         array (Positive range <>) of Float;
 
-       function Average (Data : Float_Array) return Float
+       function Average (Data : Float_Array)
+                         return Float
          with Inline;
 
     end Float_Arrays;
 
     package body Float_Arrays is
 
-       function Average (Data : Float_Array) return Float is
+       function Average (Data : Float_Array)
+                         return Float is
           Total : Float := 0.0;
        begin
           for Value of Data loop
@@ -1061,11 +1101,13 @@ Let's look at this example:
     with Float_Arrays; use Float_Arrays;
 
     procedure Compute_Average is
-       Values        : constant Float_Array := (10.0, 11.0, 12.0, 13.0);
+       Values        : constant Float_Array :=
+                         (10.0, 11.0, 12.0, 13.0);
        Average_Value : Float;
     begin
        Average_Value := Average (Values);
-       Put_Line ("Average = " & Float'Image (Average_Value));
+       Put_Line ("Average = "
+                 & Float'Image (Average_Value));
     end Compute_Average;
 
 When compiling this example, the compiler will most probably inline
@@ -1176,6 +1218,7 @@ that type. For example, let's model a very simple API:
 
        procedure Set (S : in out Storage_Model;
                       V :        String) is null;
+
        procedure Display (S : Storage_Model) is null;
 
     end Simple_Storage;
@@ -1209,12 +1252,14 @@ to implement the :ada:`Integer_Storage` type to store an integer value:
 
        procedure Set (S : in out Storage_Model;
                       V :        String) is null;
+
        procedure Display (S : Storage_Model) is null;
 
        type Integer_Storage is private;
 
        procedure Set (S : in out Integer_Storage;
                       V :        String);
+
        procedure Display (S : Integer_Storage);
 
     private

@@ -65,15 +65,19 @@ example:
 
     end Data_Processing;
 
-    private procedure Data_Processing.Calculate (D : in out Data);
+    private
+    procedure Data_Processing.Calculate
+      (D : in out Data);
 
-    procedure Data_Processing.Calculate (D : in out Data) is
+    procedure Data_Processing.Calculate
+      (D : in out Data) is
     begin
        --  Dummy implementation...
        null;
     end Data_Processing.Calculate;
 
-    with Data_Processing; use Data_Processing;
+    with Data_Processing;
+    use  Data_Processing;
 
     procedure Test_Data_Processing is
        D : Data;

@@ -139,9 +139,12 @@ floating-point type (:ada:`My_Float`):
     with Ada.Text_IO; use Ada.Text_IO;
 
     procedure Show_Succ_Pred_Real is
-       subtype My_Float is Float range 0.0 .. 0.5;
 
-       type Decimal is delta 0.1 digits 2 range 0.0 .. 0.5;
+       subtype My_Float is
+         Float range 0.0 .. 0.5;
+
+       type Decimal is
+         delta 0.1 digits 2 range 0.0 .. 0.5;
 
        D : Decimal;
        N : My_Float;
@@ -251,7 +254,8 @@ the string returned by the :ada:`Image` attribute. For example:
 
     procedure Show_Width_Attr is
        package B_Str is new
-         Ada.Strings.Bounded.Generic_Bounded_Length (Max => Integer'Width);
+         Ada.Strings.Bounded.Generic_Bounded_Length
+           (Max => Integer'Width);
        use B_Str;
 
        Str_I : Bounded_String;
@@ -260,13 +264,17 @@ the string returned by the :ada:`Image` attribute. For example:
        J : constant Integer := 103;
     begin
        Str_I := To_Bounded_String (I'Image);
-       Put_Line ("Value:         " & To_String (Str_I));
-       Put_Line ("String Length: " & Length (Str_I)'Image);
+       Put_Line ("Value:         "
+                 & To_String (Str_I));
+       Put_Line ("String Length: "
+                 & Length (Str_I)'Image);
        Put_Line ("----");
 
        Str_I := To_Bounded_String (J'Image);
-       Put_Line ("Value:         " & To_String (Str_I));
-       Put_Line ("String Length: " & Length (Str_I)'Image);
+       Put_Line ("Value:         "
+                 & To_String (Str_I));
+       Put_Line ("String Length: "
+                 & Length (Str_I)'Image);
     end Show_Width_Attr;
 
 In this example, we're storing the string returned by :ada:`Image` in the
@@ -380,7 +388,9 @@ a variable:
        Using_Constrained_Subtype : declare
           V : One_To_Ten := C;
        begin
-          Put_Line ("Increasing value for One_To_Ten...");
+          Put_Line
+            ("Increasing value for One_To_Ten...");
+
           V := One_To_Ten'Succ (V);
        exception
           when others =>
@@ -390,15 +400,19 @@ a variable:
        Using_Base : declare
           V : One_To_Ten'Base := C;
        begin
-          Put_Line ("Increasing value for One_To_Ten'Base...");
+          Put_Line
+            ("Increasing value for One_To_Ten'Base...");
+
           V := One_To_Ten'Succ (V);
        exception
           when others =>
              Put_Line ("Exception raised!");
        end Using_Base;
 
-       Put_Line ("One_To_Ten'Last: "      & One_To_Ten'Last'Image);
-       Put_Line ("One_To_Ten'Base'Last: " & One_To_Ten'Base'Last'Image);
+       Put_Line ("One_To_Ten'Last: "
+                 & One_To_Ten'Last'Image);
+       Put_Line ("One_To_Ten'Base'Last: "
+                 & One_To_Ten'Base'Last'Image);
     end Show_Base;
 
 In the first block of the example (:ada:`Using_Constrained_Subtype`), we're
@@ -421,9 +435,11 @@ to avoid constraint errors:
 
        subtype One_To_Ten is Integer range 1 .. 10;
 
-       function Sat_Add (V1, V2 : One_To_Ten'Base) return One_To_Ten;
+       function Sat_Add (V1, V2 : One_To_Ten'Base)
+                         return One_To_Ten;
 
-       function Sat_Sub (V1, V2 : One_To_Ten'Base) return One_To_Ten;
+       function Sat_Sub (V1, V2 : One_To_Ten'Base)
+                         return One_To_Ten;
 
     end My_Integers;
 
@@ -431,7 +447,8 @@ to avoid constraint errors:
 
     package body My_Integers is
 
-       function Saturate (V : One_To_Ten'Base) return One_To_Ten is
+       function Saturate (V : One_To_Ten'Base)
+                          return One_To_Ten is
        begin
           --  Put_Line ("SATURATE " & V'Image);
 
@@ -444,12 +461,14 @@ to avoid constraint errors:
           end if;
        end Saturate;
 
-       function Sat_Add (V1, V2 : One_To_Ten'Base) return One_To_Ten is
+       function Sat_Add (V1, V2 : One_To_Ten'Base)
+                         return One_To_Ten is
        begin
           return Saturate (V1 + V2);
        end Sat_Add;
 
-       function Sat_Sub (V1, V2 : One_To_Ten'Base) return One_To_Ten is
+       function Sat_Sub (V1, V2 : One_To_Ten'Base)
+                         return One_To_Ten is
        begin
           return Saturate (V1 - V2);
        end Sat_Sub;
@@ -463,8 +482,10 @@ to avoid constraint errors:
 
        type Display_Saturate_Op is (Add, Sub);
 
-       procedure Display_Saturate (V1, V2 : One_To_Ten;
-                                   Op     : Display_Saturate_Op) is
+       procedure Display_Saturate
+         (V1, V2 : One_To_Ten;
+          Op     : Display_Saturate_Op)
+       is
           Res : One_To_Ten;
        begin
           case Op is
@@ -589,7 +610,9 @@ Now, we can use both :ada:`Monday` or :ada:`Mon` to refer to Monday of the
     begin
        if D1 = D2 then
           Put_Line ("D1 = D2");
-          Put_Line (Day'Image (D1) & " =  " & Day'Image (D2));
+          Put_Line (Day'Image (D1)
+                    & " =  "
+                    & Day'Image (D2));
        end if;
     end Show_Renaming;
 
@@ -618,18 +641,27 @@ is just another name to refer to the actual enumeration (:ada:`Mon`).
 
            subtype Day is Enumeration_Example.Day;
 
-           function Monday    return Day renames Enumeration_Example.Mon;
-           function Tuesday   return Day renames Enumeration_Example.Tue;
-           function Wednesday return Day renames Enumeration_Example.Wed;
-           function Thursday  return Day renames Enumeration_Example.Thu;
-           function Friday    return Day renames Enumeration_Example.Fri;
-           function Saturday  return Day renames Enumeration_Example.Sat;
-           function Sunday    return Day renames Enumeration_Example.Sun;
+           function Monday    return Day
+             renames Enumeration_Example.Mon;
+           function Tuesday   return Day
+             renames Enumeration_Example.Tue;
+           function Wednesday return Day
+             renames Enumeration_Example.Wed;
+           function Thursday  return Day
+             renames Enumeration_Example.Thu;
+           function Friday    return Day
+             renames Enumeration_Example.Fri;
+           function Saturday  return Day
+             renames Enumeration_Example.Sat;
+           function Sunday    return Day
+             renames Enumeration_Example.Sun;
 
         end Enumeration_Renaming;
 
-        with Ada.Text_IO;          use Ada.Text_IO;
-        with Enumeration_Renaming; use Enumeration_Renaming;
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        with Enumeration_Renaming;
+        use  Enumeration_Renaming;
 
         procedure Show_Renaming is
            D1 : constant Day := Monday;
@@ -682,8 +714,11 @@ referring to is clear from the context. For example:
     with Colors;      use Colors;
 
     procedure Red_Colors is
-       C1 : constant Color         := Red;   --  Using Red from Color
-       C2 : constant Primary_Color := Red;   --  Using Red from Primary_Color
+       C1 : constant Color         := Red;
+       --  Using Red from Color
+
+       C2 : constant Primary_Color := Red;
+       --  Using Red from Primary_Color
     begin
        if C1 = Red then
           Put_Line ("C1 = Red");
@@ -711,7 +746,8 @@ example, we could define the following subtype:
 
     package Colors.Shades is
 
-       subtype Blue_Shades is Colors range Blue .. Darkblue;
+       subtype Blue_Shades is
+         Colors range Blue .. Darkblue;
 
     end Colors.Shades;
 
@@ -754,7 +790,8 @@ use them in ranges. For example:
 
     procedure Color_Loop is
     begin
-       for C in Red .. Blue loop       --  ERROR: range is ambiguous!
+       for C in Red .. Blue loop
+       --       ^ ERROR: range is ambiguous!
           Put_Line (Color'Image (C));
        end loop;
     end Color_Loop;
@@ -803,7 +840,8 @@ declaration, so we could rewrite the example above using a subtype (such as
     with Colors;      use Colors;
 
     procedure Color_Loop is
-       subtype Red_To_Blue is Color range Red .. Blue;
+       subtype Red_To_Blue is
+         Color range Red .. Blue;
     begin
        for C in Red_To_Blue loop
           Put_Line (Color'Image (C));
@@ -843,9 +881,11 @@ of the :ada:`Day` type and displaying the value of the corresponding position:
     procedure Show_Days is
     begin
        for D in Day loop
-          Put_Line (Day'Image (D) & " position      = "
+          Put_Line (Day'Image (D)
+                    & " position      = "
                     & Integer'Image (Day'Pos (D)));
-          Put_Line (Day'Image (D) & " internal code = "
+          Put_Line (Day'Image (D)
+                    & " internal code = "
                     & Integer'Image (Day'Enum_Rep (D)));
        end loop;
     end Show_Days;
@@ -874,9 +914,12 @@ We can rewrite the previous example using a representation clause:
 
        type Day is (Mon, Tue, Wed, Thu, Fri, Sat, Sun);
 
-       for Day use (Mon => 2#00000001#, Tue => 2#00000010#,
-                    Wed => 2#00000100#, Thu => 2#00001000#,
-                    Fri => 2#00010000#, Sat => 2#00100000#,
+       for Day use (Mon => 2#00000001#,
+                    Tue => 2#00000010#,
+                    Wed => 2#00000100#,
+                    Thu => 2#00001000#,
+                    Fri => 2#00010000#,
+                    Sat => 2#00100000#,
                     Sun => 2#01000000#);
 
     end Days;
@@ -887,9 +930,11 @@ We can rewrite the previous example using a representation clause:
     procedure Show_Days is
     begin
        for D in Day loop
-          Put_Line (Day'Image (D) & " position      = "
+          Put_Line (Day'Image (D)
+                    & " position      = "
                     & Integer'Image (Day'Pos (D)));
-          Put_Line (Day'Image (D) & " internal code = "
+          Put_Line (Day'Image (D)
+                    & " internal code = "
                     & Integer'Image (Day'Enum_Rep (D)));
        end loop;
     end Show_Days;
@@ -943,9 +988,11 @@ Let's see some examples of indefinite types:
 
     package Unconstrained_Types is
 
-       type Integer_Array is array (Positive range <>) of Integer;
+       type Integer_Array is
+         array (Positive range <>) of Integer;
 
-       type Simple_Record (Extended : Boolean) is record
+       type Simple_Record (Extended : Boolean) is
+       record
           V : Integer;
           case Extended is
              when False =>
@@ -962,7 +1009,8 @@ As we've just mentioned, we cannot declare variable of indefinite types:
 .. code:: ada compile_button project=Courses.Advanced_Ada.Types.Indefinite_Types
     :class: ada-expect-compile-error
 
-    with Unconstrained_Types; use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
 
     procedure Using_Unconstrained_Type is
 
@@ -989,12 +1037,14 @@ variable declaration. For example:
 
     procedure Using_Unconstrained_Type is
 
-       subtype Integer_Array_5 is Integer_Array (1 .. 5);
+       subtype Integer_Array_5 is
+         Integer_Array (1 .. 5);
 
        A1 : Integer_Array_5;
        A2 : Integer_Array (1 .. 5);
 
-       subtype Simple_Record_Ext is Simple_Record (Extended => True);
+       subtype Simple_Record_Ext is
+         Simple_Record (Extended => True);
 
        R1 : Simple_Record_Ext;
        R2 : Simple_Record (Extended => True);
@@ -1028,22 +1078,28 @@ parameters of a subprogram:
 
     procedure Show_Integer_Array (A : Integer_Array);
 
-    with Ada.Text_IO;         use Ada.Text_IO;
+    with Ada.Text_IO; use Ada.Text_IO;
 
     procedure Show_Integer_Array (A : Integer_Array) is
     begin
        for I in A'Range loop
-          Put_Line (Positive'Image (I) & ": " & Integer'Image (A (I)));
+          Put_Line (Positive'Image (I)
+                    & ": "
+                    & Integer'Image (A (I)));
        end loop;
        Put_Line ("--------");
     end Show_Integer_Array;
 
-    with Unconstrained_Types; use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
+
     with Show_Integer_Array;
 
     procedure Using_Unconstrained_Type is
-       A_5  : constant Integer_Array (1 .. 5)  := (1, 2, 3, 4, 5);
-       A_10 : constant Integer_Array (1 .. 10) := (1, 2, 3, 4, 5, others => 99);
+       A_5  : constant Integer_Array (1 .. 5)  :=
+                (1, 2, 3, 4, 5);
+       A_10 : constant Integer_Array (1 .. 10) :=
+                (1, 2, 3, 4, 5, others => 99);
     begin
        Show_Integer_Array (A_5);
        Show_Integer_Array (A_10);
@@ -1063,30 +1119,41 @@ another unconstrained parameter. For example:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Types.Indefinite_Types
 
-    with Unconstrained_Types; use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
 
-    procedure Show_Integer_Array_With_Header (AA : Integer_Array;
-                                              HH : String);
+    procedure Show_Integer_Array_With_Header
+      (AA : Integer_Array;
+       HH : String);
 
-    with Ada.Text_IO;         use Ada.Text_IO;
+    with Ada.Text_IO; use Ada.Text_IO;
+
     with Show_Integer_Array;
 
-    procedure Show_Integer_Array_With_Header (AA : Integer_Array;
-                                              HH : String) is
+    procedure Show_Integer_Array_With_Header
+      (AA : Integer_Array;
+       HH : String)
+    is
     begin
        Put_Line (HH);
        Show_Integer_Array (AA);
     end Show_Integer_Array_With_Header;
 
-    with Unconstrained_Types;            use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
+
     with Show_Integer_Array_With_Header;
 
     procedure Using_Unconstrained_Type is
-       A_5  : constant Integer_Array (1 .. 5)  := (1, 2, 3, 4, 5);
-       A_10 : constant Integer_Array (1 .. 10) := (1, 2, 3, 4, 5, others => 99);
+       A_5  : constant Integer_Array (1 .. 5)  :=
+                (1, 2, 3, 4, 5);
+       A_10 : constant Integer_Array (1 .. 10) :=
+                (1, 2, 3, 4, 5, others => 99);
     begin
-       Show_Integer_Array_With_Header (A_5, "First example");
-       Show_Integer_Array_With_Header (A_10, "Second example");
+       Show_Integer_Array_With_Header
+         (A_5, "First example");
+       Show_Integer_Array_With_Header
+         (A_10, "Second example");
     end Using_Unconstrained_Type;
 
 In this case, we're calling the :ada:`Show_Integer_Array` procedure with
@@ -1099,7 +1166,8 @@ For example, for the :ada:`A_5` object, we have this chain:
 
     A_5
 
-        ==> Show_Integer_Array_With_Header (AA => A_5, ...);
+        ==> Show_Integer_Array_With_Header
+              (AA => A_5, ...);
 
             ==> Show_Integer_Array (A => AA);
 
@@ -1113,15 +1181,19 @@ example:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Types.Indefinite_Types
 
-    with Unconstrained_Types; use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
 
-    procedure Show_Integer_Array_Plus (A : Integer_Array;
-                                       V : Integer);
+    procedure Show_Integer_Array_Plus
+      (A : Integer_Array;
+       V : Integer);
 
     with Show_Integer_Array;
 
-    procedure Show_Integer_Array_Plus (A : Integer_Array;
-                                       V : Integer) is
+    procedure Show_Integer_Array_Plus
+      (A : Integer_Array;
+       V : Integer)
+    is
        A_Plus : Integer_Array (A'Range);
     begin
        for I in A_Plus'Range loop
@@ -1130,11 +1202,14 @@ example:
        Show_Integer_Array (A_Plus);
     end Show_Integer_Array_Plus;
 
-    with Unconstrained_Types; use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
+
     with Show_Integer_Array_Plus;
 
     procedure Using_Unconstrained_Type is
-       A_5 : constant Integer_Array (1 .. 5) := (1, 2, 3, 4, 5);
+       A_5 : constant Integer_Array (1 .. 5) :=
+               (1, 2, 3, 4, 5);
     begin
        Show_Integer_Array_Plus (A_5, 5);
     end Using_Unconstrained_Type;
@@ -1168,7 +1243,9 @@ the discriminated record type:
 
     package Unconstrained_Types is
 
-       type Simple_Record (Extended : Boolean := False) is record
+       type Simple_Record
+         (Extended : Boolean := False) is
+       record
           V : Integer;
           case Extended is
              when False =>
@@ -1188,11 +1265,15 @@ the discriminated record type:
 
        procedure Reset (R : in out Simple_Record) is
           Zero_Not_Extended : constant Simple_Record
-            := (Extended => False, V => 0);
+            := (Extended => False,
+                V        => 0);
           Zero_Extended : constant Simple_Record
-            := (Extended => True, V => 0, V_Float => 0.0);
+            := (Extended => True,
+                V        => 0,
+                V_Float  => 0.0);
        begin
-          Put_Line ("---- Reset: R'Constrained => " & R'Constrained'Image);
+          Put_Line ("---- Reset: R'Constrained => "
+                    & R'Constrained'Image);
 
           if not R'Constrained then
              R := Zero_Extended;
@@ -1229,9 +1310,10 @@ explicitly set :ada:`Extended` to :ada:`False`:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Types.Constrained_Attribute
 
-    with Ada.Text_IO;         use Ada.Text_IO;
+    with Ada.Text_IO; use Ada.Text_IO;
 
-    with Unconstrained_Types; use Unconstrained_Types;
+    with Unconstrained_Types;
+    use  Unconstrained_Types;
 
     procedure Using_Constrained_Attribute is
        R1 : Simple_Record;
@@ -1277,7 +1359,8 @@ implementation of the :ada:`Reset` procedure with the following lines:
 
     --  [...]
     begin
-       Put_Line ("---- Reset: R'Constrained => " & R'Constrained'Image);
+       Put_Line ("---- Reset: R'Constrained => "
+                 & R'Constrained'Image);
        R := Zero_Extended;
     end Reset;
 
@@ -1555,15 +1638,18 @@ declare objects. For example:
 
 .. code:: ada compile_button project=Courses.Advanced_Ada.Types.Partial_Full_View
 
-    with Partial_Full_Views; use Partial_Full_Views;
+    with Partial_Full_Views;
+    use  Partial_Full_Views;
 
     procedure Main is
-       --  Partial view of R indicates that R exists as a private type,
-       --  so we can declare objects of this type:
+       --  Partial view of R indicates that R
+       --  exists as a private type, so we can
+       --  declare objects of this type:
        C : R;
     begin
-       --  But we cannot directly access any information declared in the full
-       --  view of R:
+       --  But we cannot directly access any
+       --  information declared in the full view
+       --  of R:
        --
        --  C.I := 42;
        --
@@ -1578,8 +1664,8 @@ type, its partial view must also be limited:
 
     package Limited_Private_Example is
 
-       --  Partial view must be limited, since the
-       --  full view is limited.
+       --  Partial view must be limited, since
+       --  the full view is limited.
        type R is limited private;
 
     private
@@ -1664,13 +1750,14 @@ want to declare objects of this type.
 
            function "+" (Left, Right : Private_Integer)
                          return Private_Integer is
-              Res : constant Integer := Integer (Left)
-                                        + Integer (Right);
-              --  Note that we're converting Left and Right to
-              --  Integer, which calls the "+" operator of the
-              --  Integer type. Writing "Left + Right" would
-              --  have called the "+" operator of Private_Integer,
-              --  which leads to recursive calls, as this is the
+              Res : constant Integer :=
+                      Integer (Left) + Integer (Right);
+              --  Note that we're converting Left and
+              --  Right to Integer, which calls the "+"
+              --  operator of the Integer type. Writing
+              --  "Left + Right" would have called the
+              --  "+" operator of Private_Integer, which
+              --  leads to recursive calls, as this is the
               --  operator we're currently in.
            begin
               return Private_Integer (Res);
@@ -1723,9 +1810,11 @@ enumeration and a new integer |mdash|, we use the :ada:`Default_Value` aspect:
 
     package Defaults is
 
-       type E is (E1, E2, E3) with Default_Value => E1;
+       type E is (E1, E2, E3)
+         with Default_Value => E1;
 
-       type T is new Integer with Default_Value => -1;
+       type T is new Integer
+         with Default_Value => -1;
 
     end Defaults;
 
@@ -1736,7 +1825,8 @@ Note that we cannot specify a default value for a subtype:
 
     package Defaults is
 
-       subtype T is Integer with Default_Value => -1;
+       subtype T is Integer
+         with Default_Value => -1;
        --  ERROR!!
 
     end Defaults;
@@ -1747,8 +1837,9 @@ For array types, we use the :ada:`Default_Component_Value` aspect:
 
     package Defaults is
 
-       type Arr is array (Positive range <>) of Integer
-         with Default_Component_Value => -1;
+       type Arr is
+         array (Positive range <>) of Integer
+           with Default_Component_Value => -1;
 
     end Defaults;
 
@@ -1758,21 +1849,26 @@ This is a package containing the declarations we've just seen:
 
     package Defaults is
 
-       type E is (E1, E2, E3) with Default_Value => E1;
+       type E is (E1, E2, E3)
+         with Default_Value => E1;
 
-       type T is new Integer with Default_Value => -1;
+       type T is new Integer
+         with Default_Value => -1;
 
-       --  We cannot specify default values for subtypes:
+       --  We cannot specify default values
+       --  for subtypes:
        --
-       --  subtype T is Integer with Default_Value => -1;
+       --  subtype T is Integer
+       --    with Default_Value => -1;
 
        type R is record
          X : Positive := 1;
          Y : Positive := 10;
        end record;
 
-       type Arr is array (Positive range <>) of Integer
-         with Default_Component_Value => -1;
+       type Arr is
+         array (Positive range <>) of Integer
+           with Default_Component_Value => -1;
 
     end Defaults;
 
@@ -1782,7 +1878,8 @@ In the example below, we declare variables of the types from the
 .. code:: ada run_button project=Courses.Advanced_Ada.Types.Defaults
 
     with Ada.Text_IO; use Ada.Text_IO;
-    with Defaults; use Defaults;
+
+    with Defaults;    use Defaults;
 
     procedure Use_Defaults is
        E1 : E;
@@ -1790,10 +1887,14 @@ In the example below, we declare variables of the types from the
        R1 : R;
        A1 : Arr (1 .. 5);
     begin
-       Put_Line ("Enumeration:  " & E'Image (E1));
-       Put_Line ("Integer type: " & T'Image (T1));
-       Put_Line ("Record type:  " & Positive'Image (R1.X)
-                 & ", " & Positive'Image (R1.Y));
+       Put_Line ("Enumeration:  "
+                 & E'Image (E1));
+       Put_Line ("Integer type: "
+                 & T'Image (T1));
+       Put_Line ("Record type:  "
+                 & Positive'Image (R1.X)
+                 & ", "
+                 & Positive'Image (R1.Y));
 
        Put ("Array type:   ");
        for V of A1 loop
@@ -1874,7 +1975,8 @@ Then, we can import this constant in the :ada:`Deferred_Constants` package:
 
        Light : constant Speed with
          Import, Convention => C;
-       --      ^ deferred constant declaration; imported from C file
+       --      ^ deferred constant declaration;
+       --        imported from C file
 
     end Deferred_Constants;
 
@@ -1895,15 +1997,18 @@ example:
 
        type Speed is new Long_Float;
 
-       subtype Positive_Speed is Speed range 0.0 .. Speed'Last;
+       subtype Positive_Speed is
+         Speed range 0.0 .. Speed'Last;
 
        Light : constant Speed;
        --      ^ deferred constant declaration
 
     private
 
-       Light : constant Positive_Speed := 299_792_458.0;
-       --      ^ full constant declaration using a subtype
+       Light : constant Positive_Speed :=
+                 299_792_458.0;
+       --      ^ full constant declaration
+       --        using a subtype
 
     end Deferred_Constants;
 
@@ -1929,10 +2034,12 @@ expression function:
 
     private
 
-       function Calculate_Light return Speed is (299_792_458.0);
+       function Calculate_Light return Speed is
+         (299_792_458.0);
 
        Light : constant Speed := Calculate_Light;
-       --      ^ full constant declaration calling a private function
+       --      ^ full constant declaration
+       --        calling a private function
 
     end Deferred_Constants;
 
@@ -2024,10 +2131,12 @@ type:
     package Activation_States is
 
        type Activation_State is (Unknown, Off, On)
-         with Integer_Literal => Integer_To_Activation_State;
+         with Integer_Literal =>
+                Integer_To_Activation_State;
 
-       function Integer_To_Activation_State (S : String)
-                                             return Activation_State;
+       function Integer_To_Activation_State
+         (S : String)
+          return Activation_State;
 
     end Activation_States;
 
@@ -2050,8 +2159,9 @@ convert it to an integer value |mdash| using :ada:`Integer'Value`, for example:
     !activation_states.adb
     package body Activation_States is
 
-       function Integer_To_Activation_State (S : String)
-                                             return Activation_State is
+       function Integer_To_Activation_State
+         (S : String)
+          return Activation_State is
        begin
           case Integer'Value (S) is
              when 0      => return Off;
@@ -2070,26 +2180,33 @@ Let's look at a complete example that makes use of all three kinds of literals:
     package Activation_States is
 
        type Activation_State is (Unknown, Off, On)
-         with String_Literal  => To_Activation_State,
-              Integer_Literal => Integer_To_Activation_State,
-              Real_Literal    => Real_To_Activation_State;
+         with String_Literal  =>
+                To_Activation_State,
+              Integer_Literal =>
+                Integer_To_Activation_State,
+              Real_Literal    =>
+                Real_To_Activation_State;
 
-       function To_Activation_State (S : Wide_Wide_String)
-                                     return Activation_State;
+       function To_Activation_State
+         (S : Wide_Wide_String)
+          return Activation_State;
 
-       function Integer_To_Activation_State (S : String)
-                                             return Activation_State;
+       function Integer_To_Activation_State
+         (S : String)
+          return Activation_State;
 
-       function Real_To_Activation_State (S : String)
-                                          return Activation_State;
+       function Real_To_Activation_State
+         (S : String)
+          return Activation_State;
 
     end Activation_States;
 
     !activation_states.adb
     package body Activation_States is
 
-       function To_Activation_State (S : Wide_Wide_String)
-                                     return Activation_State is
+       function To_Activation_State
+         (S : Wide_Wide_String)
+          return Activation_State is
        begin
           if S = "Off" then
              return Off;
@@ -2100,8 +2217,10 @@ Let's look at a complete example that makes use of all three kinds of literals:
           end if;
        end To_Activation_State;
 
-       function Integer_To_Activation_State (S : String)
-                                             return Activation_State is
+       function Integer_To_Activation_State
+         (S : String)
+          return Activation_State
+       is
        begin
           case Integer'Value (S) is
              when 0      => return Off;
@@ -2110,8 +2229,10 @@ Let's look at a complete example that makes use of all three kinds of literals:
           end case;
        end Integer_To_Activation_State;
 
-       function Real_To_Activation_State (S : String)
-                                          return Activation_State is
+       function Real_To_Activation_State
+         (S : String)
+          return Activation_State
+       is
           V : constant Float := Float'Value (S);
        begin
           if V < 0.0 then
@@ -2127,19 +2248,23 @@ Let's look at a complete example that makes use of all three kinds of literals:
 
     !activation_examples.adb
     with Ada.Text_IO;       use Ada.Text_IO;
+
     with Activation_States; use Activation_States;
 
     procedure Activation_Examples is
        S : Activation_State;
     begin
        S := "Off";
-       Put_Line ("String: Off  => " & Activation_State'Image (S));
+       Put_Line ("String: Off  => "
+                 & Activation_State'Image (S));
 
        S := 1;
-       Put_Line ("Integer: 1   => " & Activation_State'Image (S));
+       Put_Line ("Integer: 1   => "
+                 & Activation_State'Image (S));
 
        S := 1.5;
-       Put_Line ("Real:    1.5 => " & Activation_State'Image (S));
+       Put_Line ("Real:    1.5 => "
+                 & Activation_State'Image (S));
     end Activation_Examples;
 
 In this example, we're extending the declaration of the :ada:`Activation_State`
@@ -2199,8 +2324,9 @@ do. Consider the following misspelling of the :ada:`Off` literal:
     with Activation_States; use Activation_States;
 
     procedure Misspelling_Example is
-       S : constant Activation_State := Offf;
-       --                               ^ Error: Off is misspelled.
+       S : constant Activation_State :=
+             Offf;
+       --    ^ Error: Off is misspelled.
     begin
        Put_Line (Activation_State'Image (S));
     end Misspelling_Example;
@@ -2215,8 +2341,9 @@ when using the corresponding string literal:
     with Activation_States; use Activation_States;
 
     procedure Misspelling_Example is
-       S : constant Activation_State := "Offf";
-       --                               ^ Error: Off is misspelled.
+       S : constant Activation_State :=
+             "Offf";
+       --     ^ Error: Off is misspelled.
     begin
        Put_Line (Activation_State'Image (S));
     end Misspelling_Example;
@@ -2231,9 +2358,12 @@ preconditions of the conversion function:
 
 .. code-block:: ada
 
-       function To_Activation_State (S : Wide_Wide_String)
-                                     return Activation_State
-         with Pre => S = "Off" or S = "On" or S = "Unknown";
+       function To_Activation_State
+         (S : Wide_Wide_String)
+          return Activation_State
+            with Pre => S = "Off" or
+                        S = "On"  or
+                        S = "Unknown";
 
 In this case, the precondition explicitly indicates which string literals are
 allowed for the :ada:`To_Activation_State` type.
@@ -2252,18 +2382,22 @@ For example:
        end record
          with String_Literal => To_Silly;
 
-       function To_Silly (S : Wide_Wide_String) return Silly;
+       function To_Silly (S : Wide_Wide_String)
+                          return Silly;
     end Silly_Records;
 
     !silly_records.adb
     package body Silly_Records is
 
-       function To_Silly (S : Wide_Wide_String) return Silly is
+       function To_Silly (S : Wide_Wide_String)
+                          return Silly is
        begin
           if S = "Magic" then
-             return (X => 42, Y => 42.0);
+             return (X => 42,
+                     Y => 42.0);
           else
-             return (X => 0, Y => 0.0);
+             return (X => 0,
+                     Y => 0.0);
           end if;
        end To_Silly;
 
@@ -2271,13 +2405,16 @@ For example:
 
     !silly_magic.adb
     with Ada.Text_IO;   use Ada.Text_IO;
+
     with Silly_Records; use Silly_Records;
 
     procedure Silly_Magic is
        R1 : Silly;
     begin
        R1 := "Magic";
-       Put_Line (R1.X'Image & ", " & R1.Y'Image);
+       Put_Line (R1.X'Image
+                 & ", "
+                 & R1.Y'Image);
     end Silly_Magic;
 
 In this example, when we initialize an object of :ada:`Silly` type with a

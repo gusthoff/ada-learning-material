@@ -130,9 +130,12 @@ In the Ada application, as mentioned before, we need to replace 'C' by
        V := my_func (1);
        V := my_func (2);
        V := my_func (3);
-       Put_Line ("Result is " & int'Image (V));
+       Put_Line ("Result is "
+                 & int'Image (V));
 
-       Put_Line ("Function was called " & int'Image (func_cnt) & " times");
+       Put_Line ("Function was called "
+                 & int'Image (func_cnt)
+                 & " times");
 
     end Show_Cpp_Func;
 
@@ -261,15 +264,18 @@ The Ada application can then use the bindings:
        V : int;
 
        T  : aliased Test := New_Test;
-       TA : access Test := T'Access;
+       TA : access Test  := T'Access;
 
     begin
        V := my_func (TA, 1);
        V := my_func (TA, 2);
        V := my_func (TA, 3);
-       Put_Line ("Result is " & int'Image (V));
+       Put_Line ("Result is "
+                 & int'Image (V));
 
-       Put_Line ("Function was called " & int'Image (get_cnt (TA)) & " times");
+       Put_Line ("Function was called "
+                 & int'Image (get_cnt (TA))
+                 & " times");
 
     end Show_Cpp_Class;
 
@@ -341,9 +347,12 @@ And this is the adapted Ada application:
        V := TA.my_func (1);
        V := TA.my_func (2);
        V := TA.my_func (3);
-       Put_Line ("Result is " & int'Image (V));
+       Put_Line ("Result is "
+                 & int'Image (V));
 
-       Put_Line ("Function was called " & int'Image (TA.get_cnt) & " times");
+       Put_Line ("Function was called "
+                 & int'Image (TA.get_cnt)
+                 & " times");
 
     end Show_Cpp_Class;
 

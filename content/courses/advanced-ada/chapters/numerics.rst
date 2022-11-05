@@ -109,7 +109,9 @@ convert, say, :ada:`Integer'(-1)` to :ada:`Modular`, you will get
        I : Integer := -1;
        X : Modular := 1;
     begin
-       X := Modular (I);  --  raises Constraint_Error
+       X := Modular (I);
+       --  raises Constraint_Error
+
        Put_Line (X'Image);
     end Show_Modular;
 
@@ -191,9 +193,11 @@ Let's see a simple implementation of the CRC-CCITT (0x1D0F) algorithm:
         type Byte is mod 2 ** 8;
         type Crc  is mod 2 ** 16;
 
-        type Byte_Array is array (Positive range <>) of Byte;
+        type Byte_Array is
+          array (Positive range <>) of Byte;
 
-        function Crc_CCITT (A : Byte_Array) return Crc;
+        function Crc_CCITT (A : Byte_Array)
+                            return Crc;
 
         procedure Display (Crc_A : Crc);
 
@@ -208,7 +212,8 @@ Let's see a simple implementation of the CRC-CCITT (0x1D0F) algorithm:
         package Byte_IO is new Modular_IO (Byte);
         package Crc_IO  is new Modular_IO (Crc);
 
-        function Crc_CCITT (A : Byte_Array) return Crc is
+        function Crc_CCITT (A : Byte_Array)
+                            return Crc is
            X : Byte;
            Crc_A : Crc := 16#1d0f#;
         begin
@@ -254,7 +259,8 @@ Let's see a simple implementation of the CRC-CCITT (0x1D0F) algorithm:
     with Crc_Defs;    use Crc_Defs;
 
     procedure Show_Crc is
-       AA    : constant Byte_Array := (16#0#, 16#20#, 16#30#);
+       AA    : constant Byte_Array :=
+                 (16#0#, 16#20#, 16#30#);
        Crc_A : Crc;
     begin
        Crc_A := Crc_CCITT (AA);
@@ -292,8 +298,10 @@ point. For example:
        Integer_Literal : constant := 365;
        Real_Literal    : constant := 365.2564;
     begin
-       Put_Line ("Integer Literal: " & Integer_Literal'Image);
-       Put_Line ("Real Literal:    " & Real_Literal'Image);
+       Put_Line ("Integer Literal: "
+                 & Integer_Literal'Image);
+       Put_Line ("Real Literal:    "
+                 & Real_Literal'Image);
     end Real_Integer_Literals;
 
 Another classification takes the use of a base indicator into account.
@@ -307,7 +315,8 @@ literals and based literals. For example:
 
     procedure Decimal_Based_Literals is
 
-       package F_IO is new Ada.Text_IO.Float_IO (Float);
+       package F_IO is new
+         Ada.Text_IO.Float_IO (Float);
 
        --
        --  DECIMAL LITERALS
@@ -327,13 +336,15 @@ literals and based literals. For example:
 
        Based_Real        : constant :=
          2#1_0110_1101.0100_0001_1010_0011_0111#;
-       Based_Real_Exp    : constant := 7#1.031_153_643#e3;
+       Based_Real_Exp    : constant :=
+         7#1.031_153_643#e3;
     begin
        F_IO.Default_Fore := 3;
        F_IO.Default_Aft  := 4;
        F_IO.Default_Exp  := 0;
 
-       Put_Line ("Dec_Integer:       " & Dec_Integer'Image);
+       Put_Line ("Dec_Integer:       "
+                 & Dec_Integer'Image);
 
        Put ("Dec_Real:           ");
        F_IO.Put (Item => Dec_Real);
@@ -343,8 +354,10 @@ literals and based literals. For example:
        F_IO.Put (Item => Dec_Real_Exp);
        New_Line;
 
-       Put_Line ("Based_Integer:     " & Based_Integer'Image);
-       Put_Line ("Based_Integer_Exp: " & Based_Integer_Exp'Image);
+       Put_Line ("Based_Integer:     "
+                 & Based_Integer'Image);
+       Put_Line ("Based_Integer_Exp: "
+                 & Based_Integer_Exp'Image);
 
        Put ("Based_Real:         ");
        F_IO.Put (Item => Based_Real);
@@ -417,10 +430,14 @@ write the decimal number 136 in any one of the following notations:
        use Ada.Text_IO;
 
     begin
-       Put_Line ("Bin_136 = " & Integer'Image (Bin_136));
-       Put_Line ("Oct_136 = " & Integer'Image (Oct_136));
-       Put_Line ("Dec_136 = " & Integer'Image (Dec_136));
-       Put_Line ("Hex_136 = " & Integer'Image (Hex_136));
+       Put_Line ("Bin_136 = "
+                 & Integer'Image (Bin_136));
+       Put_Line ("Oct_136 = "
+                 & Integer'Image (Oct_136));
+       Put_Line ("Dec_136 = "
+                 & Integer'Image (Dec_136));
+       Put_Line ("Hex_136 = "
+                 & Integer'Image (Hex_136));
     end Ada_Numeric_Literals;
 
 .. admonition:: In other languages
@@ -459,14 +476,20 @@ Here's the complete example:
 
        type Byte is mod 256;
        Output_Devices : Byte := 0;
-       --  for Output_Devices'Address use 16#DEAD_BEEF#;  --  Memory mapped Output
+       --  for Output_Devices'Address
+       --    use 16#DEAD_BEEF#;
+       --  Memory mapped Output
 
        use Ada.Text_IO;
     begin
-       Output_Devices := Output_Devices  or   Lights_On;
-       Put_Line ("Output_Devices (lights on ) = " & Byte'Image (Output_Devices));
-       Output_Devices := Output_Devices  and  Lights_Off;
-       Put_Line ("Output_Devices (lights off) = " & Byte'Image (Output_Devices));
+       Output_Devices := Output_Devices or
+                         Lights_On;
+       Put_Line ("Output_Devices (lights on ) = "
+                 & Byte'Image (Output_Devices));
+       Output_Devices := Output_Devices and
+                         Lights_Off;
+       Put_Line ("Output_Devices (lights off) = "
+                 & Byte'Image (Output_Devices));
     end Ada_Numeric_Literals;
 
 Of course, we can also use
@@ -532,8 +555,10 @@ different from writing:
 
 .. code-block:: ada
 
-    One_Third_Approx : constant := 0.33333333333333333333333333333;
-    Zero_Approx      : constant := 1.0 - 3.0 * One_Third_Approx;
+    One_Third_Approx : constant :=
+      0.33333333333333333333333333333;
+    Zero_Approx      : constant :=
+      1.0 - 3.0 * One_Third_Approx;
 
 where :ada:`Zero_Approx` is really :ada:`1.0e-29` |mdash| and that will show up
 in your numerical computations. The above is quite handy when we want to write
@@ -544,18 +569,24 @@ fractions without any loss of precision. Here's the complete code:
     with Ada.Text_IO;
 
     procedure Ada_Numeric_Literals is
-       One_Third : constant := 3#1.0#e-1;  --  same as 1.0/3.0
-       Zero      : constant := 1.0 - 3.0 * One_Third;
+       One_Third : constant := 3#1.0#e-1;
+       --                      same as 1.0/3.0
+       Zero      : constant :=
+         1.0 - 3.0 * One_Third;
        pragma Assert (Zero = 0.0);
 
-       One_Third_Approx : constant := 0.33333333333333333333333333333;
-       Zero_Approx      : constant := 1.0 - 3.0 * One_Third_Approx;
+       One_Third_Approx : constant :=
+         0.33333333333333333333333333333;
+       Zero_Approx      : constant :=
+         1.0 - 3.0 * One_Third_Approx;
 
        use Ada.Text_IO;
 
     begin
-       Put_Line ("Zero        = " & Float'Image (Zero));
-       Put_Line ("Zero_Approx = " & Float'Image (Zero_Approx));
+       Put_Line ("Zero        = "
+                 & Float'Image (Zero));
+       Put_Line ("Zero_Approx = "
+                 & Float'Image (Zero_Approx));
     end Ada_Numeric_Literals;
 
 Along these same lines, we can write:
@@ -577,7 +608,8 @@ Along these same lines, we can write:
                              Exabyte   +
                              Zettabyte;
 
-       Result : constant := (Yottabyte - 1) / (Kilobyte - 1);
+       Result : constant := (Yottabyte - 1) /
+                            (Kilobyte - 1);
 
        Nil    : constant := Result - Big_Sum;
        pragma Assert (Nil = 0);
@@ -585,7 +617,8 @@ Along these same lines, we can write:
        use Ada.Text_IO;
 
     begin
-       Put_Line ("Nil         = " & Integer'Image (Nil));
+       Put_Line ("Nil         = "
+                 & Integer'Image (Nil));
     end Ada_Numeric_Literals;
 
 and be guaranteed that :ada:`Nil` is equal to zero.
@@ -692,12 +725,12 @@ a floating-point subtype. Let's see an example:
 
     procedure Show_Digits is
     begin
-       Put_Line ("Float'Digits:           " &
-                 Float'Digits'Image);
-       Put_Line ("Long_Float'Digits:      " &
-                 Long_Float'Digits'Image);
-       Put_Line ("Long_Long_Float'Digits: " &
-                 Long_Long_Float'Digits'Image);
+       Put_Line ("Float'Digits:           "
+                 & Float'Digits'Image);
+       Put_Line ("Long_Float'Digits:      "
+                 & Long_Float'Digits'Image);
+       Put_Line ("Long_Long_Float'Digits: "
+                 & Long_Long_Float'Digits'Image);
     end Show_Digits;
 
 On a typical desktop PC, the requested decimal precision of the :ada:`Float`
@@ -714,10 +747,10 @@ the actual decimal precision with :ada:`'Base'Digits`. For example:
     procedure Show_Base_Digits is
        type Float_D3 is new Float digits 3;
     begin
-       Put_Line ("Float_D3'Digits:           " &
-                 Float_D3'Digits'Image);
-       Put_Line ("Float_D3'Base'Digits:      " &
-                 Float_D3'Base'Digits'Image);
+       Put_Line ("Float_D3'Digits:           "
+                 & Float_D3'Digits'Image);
+       Put_Line ("Float_D3'Base'Digits:      "
+                 & Float_D3'Base'Digits'Image);
     end Show_Base_Digits;
 
 On a typical desktop PC, the requested decimal precision of the :ada:`Float_D3`
@@ -811,11 +844,14 @@ exponent. For example:
        Put_Line ("Float'Exponent (1.0e-25): "
                  & Float'Exponent (1.0e-25)'Image);
        Put_Line ("Float'Compose (5.00000e-01, 1):   "
-                 & Float'Compose (5.00000e-01, 1)'Image);
+                 & Float'Compose
+                     (5.00000e-01, 1)'Image);
        Put_Line ("Float'Compose (5.00000e-01, -1):  "
-                 & Float'Compose (5.00000e-01, -1)'Image);
+                 & Float'Compose
+                     (5.00000e-01, -1)'Image);
        Put_Line ("Float'Compose (9.67141E-01, -83): "
-                 & Float'Compose (9.67141E-01, -83)'Image);
+                 & Float'Compose
+                     (9.67141E-01, -83)'Image);
     end Show_Exponent_Fraction_Compose;
 
 For example, considering that :ada:`Float'Machine_Radix` is two, we see that
@@ -864,10 +900,10 @@ or rounded-up value, respectively, of a floating-point value. For example:
 
     procedure Show_Floor_Ceiling is
     begin
-       Put_Line ("Float'Floor (0.25):   " &
-                 Float'Floor (0.25)'Image);
-       Put_Line ("Float'Ceiling (0.25): " &
-                 Float'Ceiling (0.25)'Image);
+       Put_Line ("Float'Floor (0.25):   "
+                 & Float'Floor (0.25)'Image);
+       Put_Line ("Float'Ceiling (0.25): "
+                 & Float'Ceiling (0.25)'Image);
     end Show_Floor_Ceiling;
 
 As we can see in this example, the rounded-down value (floor) of 0.25 is 0.0,
@@ -1075,11 +1111,17 @@ Let's see some examples:
            Put_Line (Float'(1.000015)'Image);
            Put_Line (Float'Machine (1.000015)'Image);
 
-           Put_Line (Float'Image (Float'Machine (1.000015) - Float'(1.0000)));
-           Put_Line (Float'Image (Float'(1.000015) - Float'(1.0000)));
+           Put_Line (Float'Image
+             (Float'Machine (1.000015) -
+              Float'(1.0000)));
+           Put_Line (Float'Image
+             (Float'(1.000015) -
+              Float'(1.0000)));
 
-           Put_Line (Float'Fraction (Float'Machine (1.000015))'Image);
-           Put_Line (Float'Exponent (Float'Machine (1.000015))'Image);
+           Put_Line (Float'Fraction
+             (Float'Machine (1.000015))'Image);
+           Put_Line (Float'Exponent
+             (Float'Machine (1.000015))'Image);
         end Show_Copy_Sign_Leading_Part_Machine;
 
 Model-oriented attributes
@@ -1127,18 +1169,18 @@ Let's see an example:
 
     procedure Show_Model_Mantissa_Emin is
     begin
-       Put_Line ("Float'Model_Mantissa:           " &
-                 Float'Model_Mantissa'Image);
-       Put_Line ("Long_Float'Model_Mantissa:      " &
-                 Long_Float'Model_Mantissa'Image);
-       Put_Line ("Long_Long_Float'Model_Mantissa: " &
-                 Long_Long_Float'Model_Mantissa'Image);
-       Put_Line ("Float'Model_Emin:               " &
-                 Float'Model_Emin'Image);
-       Put_Line ("Long_Float'Model_Emin:          " &
-                 Long_Float'Model_Emin'Image);
-       Put_Line ("Long_Long_Float'Model_Emin:     " &
-                 Long_Long_Float'Model_Emin'Image);
+       Put_Line ("Float'Model_Mantissa:           "
+                 & Float'Model_Mantissa'Image);
+       Put_Line ("Long_Float'Model_Mantissa:      "
+                 & Long_Float'Model_Mantissa'Image);
+       Put_Line ("Long_Long_Float'Model_Mantissa: "
+                 & Long_Long_Float'Model_Mantissa'Image);
+       Put_Line ("Float'Model_Emin:               "
+                 & Float'Model_Emin'Image);
+       Put_Line ("Long_Float'Model_Emin:          "
+                 & Long_Float'Model_Emin'Image);
+       Put_Line ("Long_Long_Float'Model_Emin:     "
+                 & Long_Long_Float'Model_Emin'Image);
     end Show_Model_Mantissa_Emin;
 
 
@@ -1168,18 +1210,18 @@ Let's see some examples:
 
     procedure Show_Model_Epsilon_Small is
     begin
-       Put_Line ("Float'Model_Epsilon:           " &
-                 Float'Model_Epsilon'Image);
-       Put_Line ("Long_Float'Model_Epsilon:      " &
-                 Long_Float'Model_Epsilon'Image);
-       Put_Line ("Long_Long_Float'Model_Epsilon: " &
-                 Long_Long_Float'Model_Epsilon'Image);
-       Put_Line ("Float'Model_Small:           " &
-                 Float'Model_Small'Image);
-       Put_Line ("Long_Float'Model_Small:      " &
-                 Long_Float'Model_Small'Image);
-       Put_Line ("Long_Long_Float'Model_Small: " &
-                 Long_Long_Float'Model_Small'Image);
+       Put_Line ("Float'Model_Epsilon:           "
+                 & Float'Model_Epsilon'Image);
+       Put_Line ("Long_Float'Model_Epsilon:      "
+                 & Long_Float'Model_Epsilon'Image);
+       Put_Line ("Long_Long_Float'Model_Epsilon: "
+                 & Long_Long_Float'Model_Epsilon'Image);
+       Put_Line ("Float'Model_Small:           "
+                 & Float'Model_Small'Image);
+       Put_Line ("Long_Float'Model_Small:      "
+                 & Long_Float'Model_Small'Image);
+       Put_Line ("Long_Long_Float'Model_Small: "
+                 & Long_Long_Float'Model_Small'Image);
     end Show_Model_Epsilon_Small;
 
 .. todo::
@@ -1214,30 +1256,30 @@ Let's see a code example with these attributes and compare them to the
 
     procedure Show_Safe_First_Last is
     begin
-       Put_Line ("Float'First:                " &
-                 Float'First'Image);
-       Put_Line ("Float'Last:                 " &
-                 Float'Last'Image);
-       Put_Line ("Float'Safe_First:           " &
-                 Float'Safe_First'Image);
-       Put_Line ("Float'Safe_Last:            " &
-                 Float'Safe_Last'Image);
-       Put_Line ("Long_Float'First:           " &
-                 Long_Float'First'Image);
-       Put_Line ("Long_Float'Last:            " &
-                 Long_Float'Last'Image);
-       Put_Line ("Long_Float'Safe_First:      " &
-                 Long_Float'Safe_First'Image);
-       Put_Line ("Long_Float'Safe_Last:       " &
-                 Long_Float'Safe_Last'Image);
-       Put_Line ("Long_Long_Float'First:      " &
-                 Long_Long_Float'First'Image);
-       Put_Line ("Long_Long_Float'Last:       " &
-                 Long_Long_Float'Last'Image);
-       Put_Line ("Long_Long_Float'Safe_First: " &
-                 Long_Long_Float'Safe_First'Image);
-       Put_Line ("Long_Long_Float'Safe_Last:  " &
-                 Long_Long_Float'Safe_Last'Image);
+       Put_Line ("Float'First:                "
+                 & Float'First'Image);
+       Put_Line ("Float'Last:                 "
+                 & Float'Last'Image);
+       Put_Line ("Float'Safe_First:           "
+                 & Float'Safe_First'Image);
+       Put_Line ("Float'Safe_Last:            "
+                 & Float'Safe_Last'Image);
+       Put_Line ("Long_Float'First:           "
+                 & Long_Float'First'Image);
+       Put_Line ("Long_Float'Last:            "
+                 & Long_Float'Last'Image);
+       Put_Line ("Long_Float'Safe_First:      "
+                 & Long_Float'Safe_First'Image);
+       Put_Line ("Long_Float'Safe_Last:       "
+                 & Long_Float'Safe_Last'Image);
+       Put_Line ("Long_Long_Float'First:      "
+                 & Long_Long_Float'First'Image);
+       Put_Line ("Long_Long_Float'Last:       "
+                 & Long_Long_Float'Last'Image);
+       Put_Line ("Long_Long_Float'Safe_First: "
+                 & Long_Long_Float'Safe_First'Image);
+       Put_Line ("Long_Long_Float'Safe_Last:  "
+                 & Long_Long_Float'Safe_Last'Image);
     end Show_Safe_First_Last;
 
 When comparing :ada:`Float'First` to :ada:`Float'Safe_First`, we see that the
@@ -1276,10 +1318,10 @@ representation of a type. For example:
        D : constant := 2.0 ** (-31);
        type TQ31 is delta D range -1.0 .. 1.0 - D;
     begin
-       Put_Line ("T3_D3'Machine_Radix: " &
-                 T3_D3'Machine_Radix'Image);
-       Put_Line ("TQ31'Machine_Radix:  " &
-                 TQ31'Machine_Radix'Image);
+       Put_Line ("T3_D3'Machine_Radix: "
+                 & T3_D3'Machine_Radix'Image);
+       Put_Line ("TQ31'Machine_Radix:  "
+                 & TQ31'Machine_Radix'Image);
     end Show_Fixed_Machine_Radix;
 
 Usually, this value is two, as the radix is based on a binary system.
@@ -1312,14 +1354,14 @@ indicating whether a feature is available or not in the target architecture:
        D : constant := 2.0 ** (-31);
        type TQ31 is delta D range -1.0 .. 1.0 - D;
     begin
-       Put_Line ("T3_D3'Machine_Rounds:    " &
-                 T3_D3'Machine_Rounds'Image);
-       Put_Line ("TQ31'Machine_Rounds:     " &
-                 TQ31'Machine_Rounds'Image);
-       Put_Line ("T3_D3'Machine_Overflows: " &
-                 T3_D3'Machine_Overflows'Image);
-       Put_Line ("TQ31'Machine_Overflows:  " &
-                 TQ31'Machine_Overflows'Image);
+       Put_Line ("T3_D3'Machine_Rounds:    "
+                 & T3_D3'Machine_Rounds'Image);
+       Put_Line ("TQ31'Machine_Rounds:     "
+                 & TQ31'Machine_Rounds'Image);
+       Put_Line ("T3_D3'Machine_Overflows: "
+                 & T3_D3'Machine_Overflows'Image);
+       Put_Line ("TQ31'Machine_Overflows:  "
+                 & TQ31'Machine_Overflows'Image);
     end Show_Boolean_Attributes;
 
 
@@ -1389,36 +1431,36 @@ Let's see an example:
 
     procedure Show_Fixed_Small_Delta is
     begin
-       Put_Line ("T3_D3'Small: " &
-                 T3_D3'Small'Image);
-       Put_Line ("T3_D3'Delta: " &
-                 T3_D3'Delta'Image);
-       Put_Line ("T3_D3'Size: " &
-                 T3_D3'Size'Image);
+       Put_Line ("T3_D3'Small: "
+                 & T3_D3'Small'Image);
+       Put_Line ("T3_D3'Delta: "
+                 & T3_D3'Delta'Image);
+       Put_Line ("T3_D3'Size: "
+                 & T3_D3'Size'Image);
        Put_Line ("--------------------");
 
-       Put_Line ("TD3'Small: " &
-                 TD3'Small'Image);
-       Put_Line ("TD3'Delta: " &
-                 TD3'Delta'Image);
-       Put_Line ("TD3'Size: " &
-                 TD3'Size'Image);
+       Put_Line ("TD3'Small: "
+                 & TD3'Small'Image);
+       Put_Line ("TD3'Delta: "
+                 & TD3'Delta'Image);
+       Put_Line ("TD3'Size: "
+                 & TD3'Size'Image);
        Put_Line ("--------------------");
 
-       Put_Line ("TQ31'Small: " &
-                 TQ31'Small'Image);
-       Put_Line ("TQ31'Delta: " &
-                 TQ31'Delta'Image);
-       Put_Line ("TQ32'Size: " &
-                 TQ31'Size'Image);
+       Put_Line ("TQ31'Small: "
+                 & TQ31'Small'Image);
+       Put_Line ("TQ31'Delta: "
+                 & TQ31'Delta'Image);
+       Put_Line ("TQ32'Size: "
+                 & TQ31'Size'Image);
        Put_Line ("--------------------");
 
-       Put_Line ("TQ15'Small: " &
-                 TQ15'Small'Image);
-       Put_Line ("TQ15'Delta: " &
-                 TQ15'Delta'Image);
-       Put_Line ("TQ15'Size: " &
-                 TQ15'Size'Image);
+       Put_Line ("TQ15'Small: "
+                 & TQ15'Small'Image);
+       Put_Line ("TQ15'Delta: "
+                 & TQ15'Delta'Image);
+       Put_Line ("TQ15'Size: "
+                 & TQ15'Size'Image);
     end Show_Fixed_Small_Delta;
 
 As we can see in the output of the code example, the :ada:`'Delta` attribute
@@ -1495,15 +1537,15 @@ Let's see an example:
        Dec : constant T3_D3 := -0.123;
        Fix : constant TQ31  := -TQ31'Delta;
     begin
-       Put_Line ("T3_D3'Fore: " &
-                 T3_D3'Fore'Image);
-       Put_Line ("T3_D3'Aft:  " &
-                 T3_D3'Aft'Image);
+       Put_Line ("T3_D3'Fore: "
+                 & T3_D3'Fore'Image);
+       Put_Line ("T3_D3'Aft:  "
+                 & T3_D3'Aft'Image);
 
-       Put_Line ("TQ31'Fore: " &
-                 TQ31'Fore'Image);
-       Put_Line ("TQ31'Aft:  " &
-                 TQ31'Aft'Image);
+       Put_Line ("TQ31'Fore: "
+                 & TQ31'Fore'Image);
+       Put_Line ("TQ31'Aft:  "
+                 & TQ31'Aft'Image);
        Put_Line ("----");
        Put_Line ("Dec: " & Dec'Image);
        Put_Line ("Fix: " & Fix'Image);
@@ -1542,10 +1584,10 @@ Let's see an example:
        type T3_D6 is delta 10.0 ** (-3) digits 6;
        subtype T3_D2 is T3_D6 digits 2;
     begin
-       Put_Line ("T3_D6'Digits: " &
-                 T3_D6'Digits'Image);
-       Put_Line ("T3_D2'Digits: " &
-                 T3_D2'Digits'Image);
+       Put_Line ("T3_D6'Digits: "
+                 & T3_D6'Digits'Image);
+       Put_Line ("T3_D2'Digits: "
+                 & T3_D2'Digits'Image);
     end Show_Decimal_Digits;
 
 In this example, :ada:`T3_D6'Digits` is six, which matches the value that we
@@ -1585,12 +1627,12 @@ Let's look at this complete example:
        type T3_D6  is delta 10.0 ** (-3) digits 6;
        type T9_D12 is delta 10.0 ** (-9) digits 12;
     begin
-       Put_Line ("TM3_D6'Scale: " &
-                 TM3_D6'Scale'Image);
-       Put_Line ("T3_D6'Scale: " &
-                 T3_D6'Scale'Image);
-       Put_Line ("T9_D12'Scale: " &
-                 T9_D12'Scale'Image);
+       Put_Line ("TM3_D6'Scale: "
+                 & TM3_D6'Scale'Image);
+       Put_Line ("T3_D6'Scale: "
+                 & T3_D6'Scale'Image);
+       Put_Line ("T9_D12'Scale: "
+                 & T9_D12'Scale'Image);
     end Show_Decimal_Scale;
 
 In this example, we get the following values for the scales:
@@ -1626,10 +1668,10 @@ Let's look at this example:
     procedure Show_Decimal_Round is
        type T3_D3 is delta 10.0 ** (-3) digits 3;
     begin
-       Put_Line ("T3_D3'Round (0.2774): " &
-                 T3_D3'Round (0.2774)'Image);
-       Put_Line ("T3_D3'Round (0.2777): " &
-                 T3_D3'Round (0.2777)'Image);
+       Put_Line ("T3_D3'Round (0.2774): "
+                 & T3_D3'Round (0.2774)'Image);
+       Put_Line ("T3_D3'Round (0.2777): "
+                 & T3_D3'Round (0.2777)'Image);
     end Show_Decimal_Round;
 
 Here, the :ada:`T3_D3` has a precision of three digits. Therefore, to fit this

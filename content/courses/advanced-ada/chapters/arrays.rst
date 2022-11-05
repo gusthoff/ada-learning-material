@@ -16,9 +16,10 @@ example:
 
     package Measurement_Defs is
 
-       type Measurements is array (Positive range <>) of Float;
-       --                          ^ Bounds are of type Positive,
-       --                            but not known at this point.
+       type Measurements is
+         array (Positive range <>) of Float;
+       --       ^ Bounds are of type Positive,
+       --         but not known at this point.
 
     end Measurement_Defs;
 
@@ -175,13 +176,20 @@ Let's use the :ada:`Length` attribute for the arrays we declared in the
 
     procedure Show_Multidimensional_Arrays is
     begin
-       Put_Line ("A1'Length:     " & A1'Length'Image);
-       Put_Line ("A1'Length (1): " & A1'Length (1)'Image);
-       Put_Line ("A2'Length (1): " & A2'Length (1)'Image);
-       Put_Line ("A2'Length (2): " & A2'Length (2)'Image);
-       Put_Line ("A3'Length (1): " & A3'Length (1)'Image);
-       Put_Line ("A3'Length (2): " & A3'Length (2)'Image);
-       Put_Line ("A3'Length (3): " & A3'Length (3)'Image);
+       Put_Line ("A1'Length:     "
+                 & A1'Length'Image);
+       Put_Line ("A1'Length (1): "
+                 & A1'Length (1)'Image);
+       Put_Line ("A2'Length (1): "
+                 & A2'Length (1)'Image);
+       Put_Line ("A2'Length (2): "
+                 & A2'Length (2)'Image);
+       Put_Line ("A3'Length (1): "
+                 & A3'Length (1)'Image);
+       Put_Line ("A3'Length (2): "
+                 & A3'Length (2)'Image);
+       Put_Line ("A3'Length (3): "
+                 & A3'Length (3)'Image);
     end Show_Multidimensional_Arrays;
 
 As this simple example shows, we can easily retrieve the length of each
@@ -206,13 +214,15 @@ This is the complete code for this application:
 
     package Measurement_Defs is
 
-       type Days is (Mon, Tue, Wed, Thu, Fri, Sat, Sun);
+       type Days is (Mon, Tue, Wed, Thu,
+                     Fri, Sat, Sun);
 
        type Hours is range 0 .. 11;
 
        subtype Measurement is Float;
 
-       type Measurements is array (Days, Hours) of Measurement;
+       type Measurements is
+         array (Days, Hours) of Measurement;
 
        procedure Show_Indices (M : Measurements);
 
@@ -350,12 +360,18 @@ declaring objects of unconstrained multidimensional array types:
        A2 : F2 (1 .. 4, 10 .. 20);
        A3 : F3 (2 .. 3, 1 .. 5, 1 .. 2);
     begin
-       Put_Line ("A1'Length (1): " & A1'Length (1)'Image);
-       Put_Line ("A2'Length (1): " & A2'Length (1)'Image);
-       Put_Line ("A2'Length (2): " & A2'Length (2)'Image);
-       Put_Line ("A3'Length (1): " & A3'Length (1)'Image);
-       Put_Line ("A3'Length (2): " & A3'Length (2)'Image);
-       Put_Line ("A3'Length (3): " & A3'Length (3)'Image);
+       Put_Line ("A1'Length (1): "
+                 & A1'Length (1)'Image);
+       Put_Line ("A2'Length (1): "
+                 & A2'Length (1)'Image);
+       Put_Line ("A2'Length (2): "
+                 & A2'Length (2)'Image);
+       Put_Line ("A3'Length (1): "
+                 & A3'Length (1)'Image);
+       Put_Line ("A3'Length (2): "
+                 & A3'Length (2)'Image);
+       Put_Line ("A3'Length (3): "
+                 & A3'Length (3)'Image);
     end Show_Multidimensional_Arrays;
 
 Arrays of arrays
@@ -371,10 +387,13 @@ type :ada:`T1`, and then specifying another one-dimensional array type
 
     package Array_Of_Arrays_Decl is
 
-       type T1 is array (Positive range <>) of Float;
+       type T1 is
+         array (Positive range <>) of Float;
 
-       type T2 is array (Positive range <>) of T1 (1 .. 10);
-       --                                          ^ bounds must be set!
+       type T2 is
+         array (Positive range <>) of T1 (1 .. 10);
+       --                                 ^ bounds must
+       --                                   be set!
 
     end Array_Of_Arrays_Decl;
 
@@ -395,9 +414,11 @@ arrays. This is the adapted code:
 
        subtype Measurement is Float;
 
-       type Hourly_Measurements is array (Hours) of Measurement;
+       type Hourly_Measurements is
+         array (Hours) of Measurement;
 
-       type Measurements is array (Days) of Hourly_Measurements;
+       type Measurements is
+         array (Days) of Hourly_Measurements;
 
        procedure Show_Indices (M : Measurements);
 
