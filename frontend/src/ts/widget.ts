@@ -63,8 +63,8 @@ class Widget {
     }
 
     // Initialize editor
-    const edDiv = this.getElem('editor') as HTMLDivElement;
-    this.editor = new Editor(edDiv);
+    const edDiv = this.getElem('editors') as HTMLDivElement;
+    this.editor = new Editor(this.id, edDiv);
 
     // Parse files
     const files = getElemsByClass(this.container, 'file');
@@ -138,22 +138,13 @@ class Widget {
       this.getElem('settings-bar', 'tab-setting') as HTMLInputElement;
     tabSetting.checked = true;
     tabSetting.addEventListener('change', () => {
-      // TODO: figure out how to do this
-      // if (tabSetting.checked) {
-      //   for (const t of this.viewMap.values()) {
-      //     t.header.style.display = 'block';
-      //     if (t.content.classList.contains('active')) {
-      //       t.content.style.display = 'block';
-      //     } else {
-      //       t.content.style.display = 'none';
-      //     }
-      //   }
-      // } else {
-      //   for (const t of this.viewMap.values()) {
-      //     t.header.style.display = 'none';
-      //     t.content.style.display = 'block';
-      //   }
-      // }
+      this.editor.setTabbedSession(tabSetting.checked);
+
+      const tab = this.getElem('tab');
+      const headers = getElemsByTag(tab, 'button');
+      for (const h of headers) {
+        h.hidden = ! tabSetting.checked;
+      }
     });
 
     const themeSetting =

@@ -4,6 +4,9 @@ import 'brace/mode/c_cpp';
 import 'brace/theme/tomorrow';
 import 'brace/theme/tomorrow_night';
 
+import {getElemsByClass, getElemWithId}
+  from './dom-utils';
+
 /* eslint-disable no-unused-vars */
 export enum EditorTheme {
   Light = 'ace/theme/tomorrow',
@@ -26,16 +29,26 @@ type SessionMap = Map<string, SessionData>;
 /** Class representing an Editor **/
 export class Editor {
   private readonly editor: ace.Editor;
+  private readonly nontabbedEditors : Array<ace.Editor>;
+  private readonly elem: HTMLDivElement;
+  private readonly id: string;
+
   private sessions: SessionMap = new Map();
   private maxLength = 0;
 
   /**
   * Creates an instance of Editor.
   *
+  * @param {string} id - ID of the current widget
   * @param {HTMLDivElement} elem - The element that will contain the editor
   */
-  constructor(elem: HTMLDivElement) {
-    this.editor = ace.edit(elem);
+  constructor(id: string, elem: HTMLDivElement) {
+    this.id = id;
+    this.elem = elem;
+
+    const editorTab = getElemsByClass(this.elem, 'editor-container')[0];
+
+    this.editor = ace.edit(editorTab);
     this.editor.$blockScrolling = Infinity;
 
     // ... and content options
@@ -56,6 +69,8 @@ export class Editor {
     this.editor.selection.moveCursorTo(0, 0);
 
     this.editor.renderer.setScrollMargin(5, 5, 0, 0);
+
+    this.nontabbedEditors = [];
   }
 
   /**
@@ -63,6 +78,28 @@ export class Editor {
    */
   public destructor(): void {
     this.editor.destroy();
+  }
+
+  /**
+   * Add a session to the editor
+   *
+   * @param {boolean} isTabbed - Use tabbed session
+   */
+  public setTabbedSession(isTabbed: boolean): void {
+    const editorContainer = getElemsByClass(this.elem, 'editor-container')[0];
+    const nontabbedEditorContainer =
+      getElemsByClass(this.elem, 'non-tabbed-editor-container')[0];
+
+    editorContainer.hidden = ! isTabbed;
+    nontabbedEditorContainer.hidden = isTabbed;
+
+    if (isTabbed) {
+      this.editor.resize();
+    } else {
+      for (const e of this.nontabbedEditors) {
+        e.resize();
+      }
+    }
   }
 
   /**
@@ -96,6 +133,33 @@ export class Editor {
     data.session.setUndoManager(new ace.UndoManager());
 
     this.sessions.set(basename, data);
+
+    const editorPane = getElemWithId(this.id, 'non-tabbed-editor', basename);
+
+    const newEditor = ace.edit(editorPane);
+    newEditor.$blockScrolling = Infinity;
+
+    // ... and content options
+    newEditor.setShowPrintMargin(false);
+    newEditor.gotoLine(1);
+
+    newEditor.setOptions({
+      highlightActiveLine: false,
+      fontSize: 13,
+      tabSize: 3,
+      useSoftTabs: true,
+      theme: EditorTheme.Light,
+      minLines: this.editor.session.doc.getLength(),
+      maxLines: 50,
+    });
+
+    // place the cursor at 1,1
+    newEditor.selection.moveCursorTo(0, 0);
+
+    newEditor.renderer.setScrollMargin(5, 5, 0, 0);
+    newEditor.setSession(data.session);
+
+    this.nontabbedEditors.push(newEditor);
   }
 
   /**
@@ -142,6 +206,10 @@ export class Editor {
    */
   public setTheme(theme: EditorTheme): void {
     this.editor.setTheme(theme);
+
+    for (const e of this.nontabbedEditors) {
+      e.setTheme(theme);
+    }
   }
 
   /**

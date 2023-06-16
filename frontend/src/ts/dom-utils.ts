@@ -48,3 +48,25 @@ export function getElemsByTag(root: HTMLElement | Document, tag: string):
   const coll = root.getElementsByTagName(tag) as HTMLCollectionOf<HTMLElement>;
   return Array.from(coll);
 }
+
+/**
+  * Gets an element by its id inside the current widget layout
+  *
+  * The ids inside the widget are in the form:
+  * <widget number>.<item>.<sub item>
+  *
+  * This function will prepend the widget number to the args passed in.
+  * An example would be:
+  *
+  * this.getElem('foo', 'bar) would return an element with the ID
+  * <widget number>.foo.bar
+  *
+  * @protected
+  * @param {string} id - The ID
+  * @param {...Array<string>} args - The list of args to append
+  * @return {HTMLElement} - The element with the ID
+  */
+export function getElemWithId(id: string, ...args: Array<string>): HTMLElement {
+  const fullId = [id].concat(args).join('.');
+  return getElemById(fullId);
+}
