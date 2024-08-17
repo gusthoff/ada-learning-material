@@ -55,6 +55,9 @@ class Widget:
         self.__no_button: bool = False
         self.__chop_strategy: ChopStrategy = None
         self.__main = None
+        self.__gnat_version = None
+        self.__gnatprove_version = None
+        self.__gprbuild_version = None
         self.allowed_switches: Dict[str, List[str]] = {
             "Builder": ["-g"],
             "Compiler": [
@@ -306,6 +309,12 @@ class Widget:
                 self.__parseSwitches(arg)
             elif arg.startswith('main='):
                 self.__main = arg.split('=')[1]
+            elif arg.startswith('gnat='):
+                self.__gnat_version = arg.split('=')[1]
+            elif arg.startswith('gnatprove='):
+                self.__gnatprove_version = arg.split('=')[1]
+            elif arg.startswith('gprbuild='):
+                self.__gprbuild_version = arg.split('=')[1]
             elif arg == 'cli_input':
                 # TODO: implement this feature
                 pass
