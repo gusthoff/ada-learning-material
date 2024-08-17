@@ -346,6 +346,9 @@ class Widget:
                 elif opt == 'ada-expect-prove-error':
                     # this is for testing, nothing to do here
                     continue
+                elif opt in ['ada-compile', 'c-compile']:
+                    # this is for testing, nothing to do here
+                    continue
                 elif opt in ['ada-run', 'c-run']:
                     # this is for testing, nothing to do here
                     continue
@@ -354,6 +357,11 @@ class Widget:
                     continue
                 elif opt in ['ada-run-expect-failure',
                              'c-run-expect-failure']:
+                    # this is for testing, nothing to do here
+                    continue
+                elif opt in ['ada-prove', 'ada-prove-flow',
+                             'ada-prove-flow-report-all',
+                             'ada-prove-report-all']:
                     # this is for testing, nothing to do here
                     continue
                 else:
