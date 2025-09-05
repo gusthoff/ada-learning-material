@@ -3233,6 +3233,8 @@ it's always equal to the *delta*.
 
 
 
+.. _Adv_Ada_Decimal_Fixed_Point_Types:
+
 Decimal fixed-point types
 -------------------------
 
