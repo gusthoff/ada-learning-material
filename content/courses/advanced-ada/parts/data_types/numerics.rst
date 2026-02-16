@@ -3419,6 +3419,7 @@ machine for objects of decimal type. For example:
        V_Int_Overlay : T_Int_Decimal
          with Address => V'Address,
               Import, Volatile;
+
        V_Real        : Float;
     begin
        V_Real  := Float (V_Int_Overlay) *
