@@ -3649,6 +3649,7 @@ Let's see an example for decimal fixed-point types:
                  & D6'Image);
        Put_Line ("D18      = "
                  & D18'Image);
+       Put_Line ("-----------------------------");
 
        D18 := TD18 (Decimal'Last);
        D6  := Decimal (D18);
@@ -3660,6 +3661,7 @@ Let's see an example for decimal fixed-point types:
                  & D6'Image);
        Put_Line ("D18      = "
                  & D18'Image);
+       Put_Line ("-----------------------------");
 
        D6       := 800.0;
        D18_1000 := TD18_1000 (D6);
