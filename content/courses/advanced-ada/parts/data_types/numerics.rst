@@ -3374,7 +3374,7 @@ retrieve the actual integer representation, we can use
 Machine representation of decimal types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Let's start with decimal fixed-ppint types. Consider the following types from
+Let's start with decimal fixed-point types. Consider the following types from
 the :ada:`Custom_Decimal_Types` package:
 
 .. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Fixed_Point_Types.Machine_Representation_Decimal_Types
