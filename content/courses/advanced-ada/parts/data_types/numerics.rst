@@ -3183,7 +3183,7 @@ rule that it must be smaller or equal to the *delta*. For example:
     end Show_Fixed_Small_Delta;
 
 In this example, the *delta* that we specifed for :ada:`Ordinary_Fixed_Point`
-is 0.2, while the compiler-selected *small* is 2.0\ :sup:`-3`.
+is 0.2, while the compiler-selected *small* is 0.125 (2.0\ :sup:`-3`).
 
 .. admonition:: For further reading...
 
