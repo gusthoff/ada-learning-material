@@ -3403,7 +3403,7 @@ the :ada:`Custom_Decimal_Types` package:
 We can use an overlay to uncover the actual integer values stored on the
 machine for objects of decimal type. For example:
 
-.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Fixed_Point_Types.Machine_Representation_Decimal_Types
+.. code:: ada no_button project=Courses.Advanced_Ada.Data_Types.Numerics.Fixed_Point_Types.Machine_Representation_Decimal_Types
 
     generic
        type T_Decimal     is delta <> digits <>;
