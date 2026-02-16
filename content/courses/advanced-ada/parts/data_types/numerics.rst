@@ -4689,6 +4689,9 @@ fixed-point types.
     the code above, the :ada:`Short_Decimal (B)` would raise a :ada:`Constraint_Error`
     exception due the small difference in the range that we mentioned previously.
 
+Multiplication and division operations with decimal types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 In addition, the multiplication and division operations also make use of
 universal fixed types. Consider the following package with decimal fixed-point
 types:
