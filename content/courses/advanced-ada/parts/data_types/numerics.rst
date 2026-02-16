@@ -3521,7 +3521,7 @@ which, as we've seen before, is equal to the *delta* for decimal fixed-point
 types. (Later on, we see that this *detail* makes a difference for ordinary
 fixed-point types.)
 
-For example, if we multiple the integer representation of the real value by the
+For example, if we multiply the integer representation of the real value by the
 *small*, we get the real value:
 
 +-------------+-------------------------------+
