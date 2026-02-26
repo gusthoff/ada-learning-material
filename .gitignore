@@ -2,7 +2,7 @@
 *.pyc
 env
 .idea
-.vagrant
+.vagrant*
 .vscode
 .yarn
 *.bkp
