@@ -5535,10 +5535,14 @@ operation is 500.0.
     exception due the small difference in the range that we mentioned previously.
 
 
+.. ::
 
-Integer multiplication and division
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Integer multiplication and division
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+    .. todo::
+
+        Add subsection
 
 
 Decimal vs. floating-point types
