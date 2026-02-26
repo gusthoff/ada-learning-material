@@ -5,6 +5,22 @@ CHANGELOG
 
 .. include:: ../../global.txt
 
+Release 2026-02
+---------------
+
+- Improvements to section:
+
+  - :ref:`Fixed-point types <Adv_Ada_Fixed_Point_Types>`
+
+
+Release 2026-01
+---------------
+
+- New section:
+
+  - :ref:`Decimal fixed-point types <Adv_Ada_Decimal_Fixed_Point_Types>`
+
+
 Release 2025-10
 ---------------
 
