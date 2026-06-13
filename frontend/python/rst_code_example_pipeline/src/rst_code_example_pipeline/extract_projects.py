@@ -433,6 +433,7 @@ if __name__ == "__main__":
         extracted_projects = os.path.abspath(extracted_projects)
 
     if build_dir is None:
+        assert extracted_projects is not None  # guaranteed by the exit(1) above
         build_dir = os.path.dirname(extracted_projects)
         if build_dir == '': ## Special case: no directory in path
             build_dir = os.getcwd()
