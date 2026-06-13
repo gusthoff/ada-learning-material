@@ -51,6 +51,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements_frozen.txt
+        pip install -e python/rst_code_example_pipeline
     - name: Run SPHINX engine tests
       run: make SPHINXOPTS="-W" test_engine
     - name: Build HTML content
