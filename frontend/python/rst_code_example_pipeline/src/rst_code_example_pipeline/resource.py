@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 class Resource:
     """A Resource, or file
@@ -6,7 +6,7 @@ class Resource:
     Resource represents a file object and has a filename (basename) and
     contents.
     """
-    def __init__(self, basename: str, content: List[str] = None):
+    def __init__(self, basename: str, content: Optional[List[str]] = None):
         """Constructs a Resource
 
         Args:

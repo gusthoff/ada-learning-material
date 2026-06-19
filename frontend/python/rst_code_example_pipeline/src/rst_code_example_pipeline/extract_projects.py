@@ -13,11 +13,11 @@ import shutil
 import re
 import json
 
-from widget.chop import manual_chop, real_gnatchop
+from .chop import manual_chop, real_gnatchop
 
-import blocks
-import fmt_utils
-import toolchain_setup
+from . import blocks
+from . import fmt_utils
+from . import toolchain_setup
 
 
 current_config = blocks.ConfigBlock(
@@ -433,6 +433,7 @@ if __name__ == "__main__":
         extracted_projects = os.path.abspath(extracted_projects)
 
     if build_dir is None:
+        assert extracted_projects is not None  # guaranteed by the exit(1) above
         build_dir = os.path.dirname(extracted_projects)
         if build_dir == '': ## Special case: no directory in path
             build_dir = os.getcwd()

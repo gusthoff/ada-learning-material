@@ -6,9 +6,9 @@ SPHINXCONF         = sphinx
 BUILDDIR           = dist
 SRC_TEST_DIR       = $(BUILDDIR)/test_output
 TEST_LAMBDA       ?= 0
-TEST_LOCAL_DRIVER  = PYTHONPATH="$PYTHONPATH:sphinx:py_modules" python3 tests/compile_blocks.py --keep_files -B $(SRC_TEST_DIR)
+TEST_LOCAL_DRIVER  = PYTHONPATH="$PYTHONPATH:sphinx" python3 tests/compile_blocks.py --keep_files -B $(SRC_TEST_DIR)
 TEST_OPTIONS      ?=
-TEST_LAMBDA_DRIVER = PYTHONPATH="$PYTHONPATH:sphinx:py_modules" python3 tests/execute_rst_code_blocks.py --halt-on-failure
+TEST_LAMBDA_DRIVER = PYTHONPATH="$PYTHONPATH:sphinx" python3 tests/execute_rst_code_blocks.py --halt-on-failure
 
 ifeq ($(strip $(TEST_LAMBDA)),1)
 TEST_DRIVER 	:= $(TEST_LAMBDA_DRIVER)
@@ -212,7 +212,7 @@ test_engine: webpack-production                                                #
 	@echo ""
 
 test_parser:                                                                   ## Test the parser.
-	@coverage run --source=widget -m unittest discover --start-directory sphinx
+	@coverage run --source=widget,rst_code_example_pipeline.chop,rst_code_example_pipeline.resource -m unittest discover --start-directory sphinx
 	@coverage report --fail-under=90 -m
 
 ##@ Build website
