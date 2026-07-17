@@ -9025,19 +9025,29 @@ many more fractional bits:
     end Show_Full_Range_Base_Type;
 
 The :ada:`TQ47` type needs 48 bits, again one sign bit plus the 47
-fractional bits of its *small*. Note that :ada:`'Size` reports this
-minimum number of bits |mdash| :ada:`Angle'Size` is 21, not a full
-machine word |mdash| which is why it can differ from the size of the base
-type, as we'll see next.
+fractional bits of its *small*. :ada:`'Size` reports this minimum
+number of bits |mdash| :ada:`Angle'Size` is 21, not a full machine word
+|mdash| which is why it can differ from the size of the base type, as
+we'll see next.
+
+.. admonition:: In the Ada Reference Manual
+
+    :ada:`'Size` reporting the minimum number of bits needed for the
+    subtype is the Ada standard's *recommended level of support*, not a
+    strict requirement |mdash| a conforming compiler is free to pick a
+    larger size. GNAT follows the recommendation, which is why the sizes
+    above match what we computed by hand.
+
+    - :arm22:`13.3 Operational and Representation Attributes <13-3>`
 
 
 Size of base type
 ~~~~~~~~~~~~~~~~~
 
-We've just seen that :ada:`'Size` gives the minimum number of bits for the
-type. The base type, on the other hand, uses a size that the target
-machine supports directly. Let's compare the two sizes for our three
-types:
+We've just seen that :ada:`'Size` gives the minimum number of bits
+recommended for the type. The base type, on the other hand, uses a size
+that the target machine supports directly. Let's compare the two sizes
+for our three types:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Angle
 
