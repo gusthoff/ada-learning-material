@@ -8333,15 +8333,57 @@ floating-point type and use that type's :ada:`'Image`. Let's compare them:
 
 In this example, :ada:`TQ15'Image` displays the value in plain decimal
 notation |mdash| for instance, :ada:`0.25` as ``0.25000`` |mdash| with
-enough fractional digits to reflect the type's *small*. Converting to
-:ada:`Float` first and using :ada:`Float'Image`, on the other hand,
-produces the floating-point representation in exponential notation, such
-as ``2.50000E-01``.
+:ada:`TQ15'Aft` fractional digits (a count derived from the type's *delta*,
+not its *small*). Converting to :ada:`Float` first and using
+:ada:`Float'Image`, on the other hand, produces the floating-point
+representation in exponential notation, such as ``2.50000E-01``.
 
-Let's focus on the :ada:`Show (0.1)` call. Note that the value :ada:`0.1` isn't
-a multiple of the *small* of :ada:`TQ15`. In fact, the value 0.1 is rounded to
-the nearest representable value when we assign it. For this reason,
-:ada:`TQ15'Image` shows ``0.09998`` rather than ``0.10000``.
+.. admonition:: For further reading...
+
+    :ada:`'Aft` is the attribute that tells :ada:`'Image` how many digits to
+    print after the decimal point. It's derived from the type's *delta*, not
+    its *small*, so two fixed-point types with the same *small* can still
+    print a different number of digits if their *delta* differs. We already
+    saw exactly that in the
+    :ref:`derived fixed-point types <Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Subtypes>`
+    example:
+
+    .. code-block:: ada
+
+        D15 : constant := 2.0 ** (-15);
+        D7  : constant := 2.0 ** (-7);
+
+        type TQ15 is
+          delta D15
+          range -1.0 .. 1.0 - D15;
+
+        type TQ15_New is new
+          TQ15
+          delta D7;
+
+    :ada:`TQ15_New` has the same *small* as :ada:`TQ15`
+    (2\ :sup:`-15`), but a larger *delta* (2\ :sup:`-7`) |mdash| and that's
+    why :ada:`TQ15_New'Image` prints ``0.250`` (three digits) instead of
+    :ada:`TQ15'Image`'s ``0.25000`` (five digits), even though both types
+    represent exactly the same set of values. For :ada:`TQ15` here, *delta*
+    and *small* happen to be the same value, so this distinction doesn't
+    change anything in this particular example.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.10 Operations of Fixed Point Types <3-5-10>`
+
+Let's focus on the :ada:`Show (0.1)` call. The value :ada:`0.1` isn't a
+multiple of the *small* of :ada:`TQ15`, so it can't be represented exactly:
+converting it to :ada:`TQ15` |mdash| to become the actual parameter
+:ada:`V` of the :ada:`Show` procedure |mdash| produces one of the two
+neighboring representable multiples of *small*. We cannot know for sure which
+one will be selected, as Ada doesn't give us any guarantees here. For this
+reason, :ada:`TQ15'Image` shows ``0.09998`` rather than ``0.10000``. The
+precision loss already happens at that conversion to :ada:`TQ15`, so the
+subsequent :ada:`Float (V)'Image` call cannot recover the exact value ``0.1``
+either |mdash| it just displays the same value that was already converted,
+but in this case, in floating-point notation.
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Type_Ranges:
