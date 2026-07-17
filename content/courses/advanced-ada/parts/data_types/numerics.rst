@@ -7831,7 +7831,7 @@ By contrast, for :ada:`Angle_2`, we use :ada:`with Small => Angle_Delta` to
 force *small* = *delta*, so every multiple of 1/3600 is representable
 exactly. As mentioned before, Ada lets us use the :ada:`Small` aspect to set
 an ordinary fixed-point type's *small* to any value, not just a power of
-two. However, an implementation isn't required to support every such value.
+two. However, a compiler isn't required to support every such value.
 :ada:`Angle_2`'s *small* (1/3600) is neither a power of two nor a power of
 ten.
 
