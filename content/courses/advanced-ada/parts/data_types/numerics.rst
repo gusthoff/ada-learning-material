@@ -7706,9 +7706,9 @@ Subtypes of ordinary fixed-point types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A subtype of an ordinary fixed-point type has the same *delta* and *small* as
-its parent type; the only constraint allowed in a subtype declaration is a
-range constraint. Unlike derived types, subtype objects are directly
-interchangeable with the parent type |mdash| no explicit conversion is needed.
+its parent type; the only non-obsolescent constraint allowed in a subtype
+declaration is a range constraint. A subtype declaration may also include
+a delta constraint, but, as mentioned above, that's an obsolescent feature.
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Ordinary_Fixed_Point_Subtypes
 
