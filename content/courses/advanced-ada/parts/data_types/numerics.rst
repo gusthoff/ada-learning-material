@@ -9444,6 +9444,22 @@ narrower floating-point type such as the 32-bit :ada:`Float` (with a 24-bit
 mantissa) |mdash| the value is rounded to the nearest representable
 floating-point value.
 
+.. admonition:: In the GNAT toolchain
+
+    If the exact value falls exactly halfway between two representable
+    values, GNAT rounds to the nearest *even* one instead of
+    consistently rounding up or down |mdash| for example, the
+    fixed-point value 16,777,217 (2\ :sup:`24` + 1) converts to
+    ``16,777,216.0`` rather than ``16,777,218.0``, since both neighbors
+    are equally close but ``16,777,216.0`` (2\ :sup:`24`) is the even
+    one. Round-to-nearest for this direction isn't a language guarantee,
+    though: the Ada standard only requires the result to fall within
+    the target floating-point type's accuracy.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`G.2.1 Model of Floating Point Arithmetic <G-2-1>`
+
 When converting in the other direction, from a floating-point value to a
 fixed-point type, the value is likewise rounded to the nearest representable
 fixed-point value:
