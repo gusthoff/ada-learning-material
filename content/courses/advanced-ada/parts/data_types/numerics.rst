@@ -9193,6 +9193,36 @@ directly |mdash| on this typical desktop target, the smallest of 8, 16, 32,
 or 64 bits that can hold the type |mdash| while the size of the actual type
 depends only on its declaration.
 
+The table below gathers *small*, *delta*, range, and :ada:`'Size` for all
+four types we've just discussed, together with their base types for a typical
+desktop PC target:
+
++------------------------+-----------------+-----------------+----------------------+------+
+| Type                   | *small*         | *delta*         | Range                | Size |
++========================+=================+=================+======================+======+
+| :ada:`Angle`           | 2\ :sup:`-12`   | 1/3600          | [0.0, 360.0)         | 21   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`Angle'Base`      | 2\ :sup:`-12`   | 1/3600          | [-524288.0, 524288.0)| 32   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ15`            | 2\ :sup:`-15`   | 2\ :sup:`-15`   | [-1.0, 1.0)          | 16   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ15'Base`       | 2\ :sup:`-15`   | 2\ :sup:`-15`   | [-1.0, 1.0)          | 16   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ47`            | 2\ :sup:`-47`   | 2\ :sup:`-47`   | [-1.0, 1.0)          | 48   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ47'Base`       | 2\ :sup:`-47`   | 2\ :sup:`-47`   | [-65536.0, 65536.0)  | 64   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`T_Narrow`        | 2\ :sup:`-10`   | 2\ :sup:`-10`   | [0.0, 4.0)           | 12   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`T_Narrow'Base`   | 2\ :sup:`-10`   | 2\ :sup:`-10`   | [-32.0, 32.0)        | 16   |
++------------------------+-----------------+-----------------+----------------------+------+
+
+Note how :ada:`TQ15` and :ada:`TQ15'Base` share the same *Range* and
+:ada:`'Size` |mdash| :ada:`TQ15` already uses the full 16-bit machine word, so
+there's nothing left for the base type to widen. The other three types all
+declare a narrower range than their base type ends up with, which is exactly
+why their base type's size differs from their own.
+
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Types_Decimal_Precision:
 
