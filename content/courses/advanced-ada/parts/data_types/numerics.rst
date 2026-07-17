@@ -8852,12 +8852,29 @@ the range of its base type. For example:
     end Show_Narrow_Base_Type;
 
 In this example, :ada:`T_Narrow` has a declared range from 0.0 to just
-below 4.0, with *small* = 2\ :sup:`-10`. Representing the maximum value
-4.0 requires 12 bits (2 integer bits + 10 fractional bits), plus a sign
-bit |mdash| this gives us 13 bits in total, which are stored in a 16-bit machine
-word. The base type's range therefore spans the full 16-bit range: from -32.0
-to just below 32.0. The range we declare for the :ada:`T_Narrow` type uses
-only a small portion of the range of its base type.
+below 4.0, with *small* = 2\ :sup:`-10`. Since :ada:`T_Narrow` has no
+negative values, representing its range takes 12 bits (2 integer bits +
+10 fractional bits, no sign bit needed) |mdash| and that's exactly what
+:ada:`T_Narrow'Size` reports. The *base* type is a different story: its
+range has to be symmetric around zero, so it needs a sign bit on top of
+those 12 bits, i.e. 13 bits at a minimum. On this typical desktop
+target, which only offers 8, 16, 32, or 64-bit words, the base type
+ends up using the next value above 13 bits: 16 bits. The range of the
+base type therefore covers the full 16-bit range: from -32.0 to just
+below 32.0 |mdash| even though :ada:`T_Narrow` itself only uses a small
+portion of it.
+
+.. admonition:: In the GNAT toolchain
+
+    The 8/16/32/64-bit progression of machine words is what GNAT rounds
+    up to on typical desktop and server targets, not something the Ada
+    standard requires: the base range only has to be symmetric around
+    zero and to include at least the declared multiples of *small*. A
+    different target could round the base type's size up differently.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.9 Fixed Point Types <3-5-9>`
 
 We talk about the size of fixed-point data types next.
 
