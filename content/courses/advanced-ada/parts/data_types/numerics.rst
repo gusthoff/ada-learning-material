@@ -7688,19 +7688,36 @@ not allowed |mdash| an explicit conversion is always required.
         end Show_Fixed_Point_Subtypes;
 
     In this example, we declare :ada:`TQ15_New` as a derived type of
-    :ada:`TQ15` with a coarser delta: :ada:`D7` = 2\ :sup:`-7` instead of
-    :ada:`D15` = 2\ :sup:`-15`. Because :ada:`TQ15_New` has a larger delta,
-    it has lower precision than its parent type :ada:`TQ15`. We then assign
-    0.25 to :ada:`Q15` and convert it to :ada:`TQ15_New` using the explicit
-    type conversion :ada:`TQ15_New (Q15)`. Since 0.25 is exactly representable
-    in both types, no rounding occurs during the conversion. However, the
-    difference in precision is clearly visible in the output:
-    :ada:`Q15'Image` displays ``0.25000`` (five decimal places, reflecting the
-    precision of :ada:`D15` = 2\ :sup:`-15`), while :ada:`Q15_New'Image`
-    displays ``0.250`` (three decimal places, reflecting the precision of
-    :ada:`D7` = 2\ :sup:`-7`). As noted, constraining the *delta* of a derived
-    type is an obsolescent feature, and compilers will typically emit a warning
-    for such declarations.
+    :ada:`TQ15` with a *delta* constraint: :ada:`D7` = 2\ :sup:`-7` instead
+    of :ada:`D15` = 2\ :sup:`-15`. This constraint only changes
+    :ada:`TQ15_New`'s *delta* attribute |mdash| it doesn't touch *small*,
+    which :ada:`TQ15_New` still inherits unchanged from :ada:`TQ15`. So
+    :ada:`TQ15_New` represents exactly the same set of values as
+    :ada:`TQ15` does; what changes is :ada:`'Aft` (the number of digits
+    :ada:`'Image` displays), which is derived from *delta*, not *small*:
+
+    +---------------+------------------+------------------+
+    |               | :ada:`TQ15`      | :ada:`TQ15_New`  |
+    +===============+==================+==================+
+    | *small*       | 2\ :sup:`-15`    | 2\ :sup:`-15`    |
+    +---------------+------------------+------------------+
+    | *delta*       | 2\ :sup:`-15`    | 2\ :sup:`-7`     |
+    +---------------+------------------+------------------+
+    | :ada:`'Aft`   | 5                | 3                |
+    +---------------+------------------+------------------+
+
+    We then assign 0.25 to :ada:`Q15` and convert it to :ada:`TQ15_New`
+    using the explicit type conversion :ada:`TQ15_New (Q15)`. Since 0.25 is
+    exactly representable in both types, no rounding occurs during the
+    conversion |mdash| only the display changes, matching the :ada:`'Aft`
+    values above: :ada:`Q15'Image` displays ``0.25000``, while
+    :ada:`Q15_New'Image` displays ``0.250``. As noted, constraining the
+    *delta* of a derived type is an obsolescent feature, and compilers will
+    typically emit a warning for such declarations.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`J.3 Reduced Accuracy Subtypes <J-3>`
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Subtypes:
