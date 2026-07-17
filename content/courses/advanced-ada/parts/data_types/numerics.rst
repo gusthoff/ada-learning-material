@@ -7756,10 +7756,18 @@ As we already mentioned
 :ref:`in a previous section <Adv_Ada_Fixed_Point_Types_Small_Delta>`, the small
 of a decimal type is always equal to the delta that we specified. However, for
 ordinary fixed-point types, this doesn't have to be the case |mdash| and if we
-select a delta that is not a power of two (i.e. the typical machine
-representation), the compiler will choose a *small* that is the largest power
-of two not exceeding the *delta*. In this case, *small* and *delta* will
-differ from each other.
+select a delta that is not a power of two, the compiler will choose a *small*
+that is an implementation-defined power of two no greater than the *delta*.
+In this case, *small* and *delta* will differ from each other.
+
+.. admonition:: In the GNAT toolchain
+
+    Among all the powers of two no greater than the *delta*, GNAT always
+    chooses the *largest* one. This is a compiler choice, however, not a
+    language guarantee: another conforming compiler is free to pick a
+    different power of two. See the GNAT Reference Manual's section on
+    `Writing Portable Fixed-Point Declarations <https://gcc.gnu.org/onlinedocs/gnat_rm/Writing-Portable-Fixed-Point-Declarations.html>`_
+    for a discussion of the portability issues this can cause.
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Point_Op
 
