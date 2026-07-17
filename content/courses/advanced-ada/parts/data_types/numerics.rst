@@ -7349,200 +7349,14 @@ power of 2 no greater than <delta-value>.
 Q format
 ~~~~~~~~
 
-Before we discuss ordinary fixed-point types, let's briefly look into the
-:wikipedia:`Q format <Q_(number_format)>`, or Q notation.
-
-There are actually two formats: one of them counts the sign bit, the other one
-does not. In this course, we use the latter, i.e. the format that doesn't count
-the sign bit.
-
-The Q format consists of two numbers: the number of bits for the integer part
-and the number of bits for the fractional part. When we talk about a 16-bit
-data type using the Q7.8 format, we're saying that this format contains 7 bits
-to represent the integer part, 8 bits to represent the fractional part |mdash|
-and finally, the sign bit.
-
-The simplest format is the one that doesn't have any fractional part |mdash|
-for example, a 16-bit data type with format Q15.0. This is essentially the
-same as the integer types that we know. Using the traditional
-:wikipedia:`two's-complement representation <Two's_complement>`, the range
-would be -2\ :sup:`15` to 2\ :sup:`15`-1 (or -32,768.0 to 32,767.0).
-For example:
-
-.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q15_0_Fixed_Point_Type
-
-    with Ada.Text_IO; use Ada.Text_IO;
-
-    procedure Q15_0_Fixed_Point_Type is
-       type TQ15_0 is
-         delta 1.0
-         range -2.0 ** 15 ..
-                2.0 ** 15 - 1.0;
-
-       type Int16 is
-         range -2 ** 15 ..
-                2 ** 15 - 1;
-    begin
-       Put_Line ("TQ15_0 requires "
-                 & TQ15_0'Size'Image
-                 & " bits");
-       Put_Line ("The delta    value of TQ15_0 is "
-                 & TQ15_0'Delta'Image);
-       Put_Line ("The minimum  value of TQ15_0 is "
-                 & TQ15_0'First'Image);
-       Put_Line ("The maximum  value of TQ15_0 is "
-                 & TQ15_0'Last'Image);
-
-       Put_Line ("------------------------------");
-       Put_Line ("Int16 requires "
-                 & Int16'Size'Image
-                 & " bits");
-       Put_Line ("The minimum  value of Int16 is "
-                 & Int16'First'Image);
-       Put_Line ("The maximum  value of Int16 is "
-                 & Int16'Last'Image);
-    end Q15_0_Fixed_Point_Type;
-
-When we run this example, we see that the :ada:`TQ15_0` type requires
-16 bits |mdash| the same as the :ada:`Int16` type |mdash| and that both
-types share the same range. Because the *delta* is 1.0, the :ada:`TQ15_0`
-type has no fractional part, so it behaves just like a plain 16-bit
-integer type.
-
-Now let's move one bit from the integer part to the fractional part,
-which gives us the Q14.1 format. Here, the *delta* becomes
-2\ :sup:`-1` |mdash| that is, 0.5 |mdash| so the type can represent
-multiples of one half:
-
-.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q14_1_Fixed_Point_Type
-
-    with Ada.Text_IO; use Ada.Text_IO;
-
-    procedure Q14_1_Fixed_Point_Type is
-       type TQ14_1 is
-         delta  0.5
-         range -2.0 ** 14 ..
-                2.0 ** 14 - 0.5;
-    begin
-       Put_Line ("TQ14_1 requires "
-                 & TQ14_1'Size'Image
-                 & " bits");
-       Put_Line ("The delta    value of TQ14_1 is "
-                 & TQ14_1'Delta'Image);
-       Put_Line ("The minimum  value of TQ14_1 is "
-                 & TQ14_1'First'Image);
-       Put_Line ("The maximum  value of TQ14_1 is "
-                 & TQ14_1'Last'Image);
-    end Q14_1_Fixed_Point_Type;
-
-To see that single fractional bit in action, let's assign a value that
-has only that bit set. For example, the based literal :ada:`2#0.1#` represents
-0.5 |mdash| the smallest non-zero value that the :ada:`TQ14_1` type can
-represent:
-
-.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q14_1_Fixed_Point_Type
-
-    with Ada.Text_IO; use Ada.Text_IO;
-
-    procedure Q14_1_Fixed_Point_Type is
-       type TQ14_1 is
-         delta  0.5
-         range -2.0 ** 14 ..
-                2.0 ** 14 - 0.5;
-
-       V : TQ14_1;
-    begin
-       V := 2#0.1#;
-       Put_Line ("V = " & V'Image);
-    end Q14_1_Fixed_Point_Type;
-
-Let's now look at the Q7.8 format, which uses 7 bits for the integer
-part and 8 bits for the fractional part. The *delta* is therefore
-2\ :sup:`-8` (0.00390625):
-
-.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q7_8_Fixed_Point_Type
-
-    with Ada.Text_IO; use Ada.Text_IO;
-
-    procedure Q7_8_Fixed_Point_Type is
-       type TQ7_8 is
-         delta  2.0 ** (-8)
-         range -2.0 ** 7 ..
-                2.0 ** 7 - 2.0 ** (-8);
-    begin
-       Put_Line ("TQ7_8 requires "
-                 & TQ7_8'Size'Image
-                 & " bits");
-       Put_Line ("The delta    value of TQ7_8 is "
-                 & TQ7_8'Delta'Image);
-       Put_Line ("The minimum  value of TQ7_8 is "
-                 & TQ7_8'First'Image);
-       Put_Line ("The maximum  value of TQ7_8 is "
-                 & TQ7_8'Last'Image);
-    end Q7_8_Fixed_Point_Type;
-
-So far, we've written the *delta* and the range as literals for each
-format. We can instead generalize the type definition by introducing
-named numbers for the integer and fractional bit counts, which makes the
-connection between the Q format and the declaration explicit. The
-following example reconstructs the Q14.1 type in this way:
-
-.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Gen_Fixed_Point_Type
-
-    with Ada.Text_IO; use Ada.Text_IO;
-
-    procedure Q14_1_Fixed_Point_Type is
-
-       --
-       --  Values for Q14.1
-       --
-       Int_Bits  : constant := 14;
-       Frac_Bits : constant := 1;
-
-       --
-       --  Generalized definition of a
-       --  fixed-point type
-       --
-       D : constant := 2.0 ** (-Frac_Bits);
-
-       type Fixed is
-         delta D
-         range -2.0 ** Int_Bits ..
-                2.0 ** Int_Bits - D;
-
-       --
-       --  Declaring Q14.1 fixed-point type
-       --  as a subtype of the "template"
-       --  declared above.
-       --
-       subtype TQ14_1 is
-         Fixed;
-    begin
-       Put_Line ("TQ14_1 requires "
-                 & TQ14_1'Size'Image
-                 & " bits");
-       Put_Line ("The delta    value of TQ14_1 is "
-                 & TQ14_1'Delta'Image);
-       Put_Line ("The minimum  value of TQ14_1 is "
-                 & TQ14_1'First'Image);
-       Put_Line ("The maximum  value of TQ14_1 is "
-                 & TQ14_1'Last'Image);
-    end Q14_1_Fixed_Point_Type;
-
-The previous examples use Q formats with at least one bit for the integer
-part. However, when talking about binary fixed-point types, a typical format
-is the normalized range, which spans from -1.0 to (1.0 - *small*) |mdash| here,
-the presence of the *small* indicates that the upper bound is not exactly 1.0.
-For this range, all bits (except the sign bit) are reserved for the fractional
-part. Examples of this are the Q15 format for 16-bit fixed-point data types and
-the Q31 format for 32-bit fixed-point data types.
-
-When the number of bits for the integer part is zero, we usually don't mention
-the integer part: instead of writing Q0.15, for example, we simply write Q15.
-We use this shorthand throughout this section.
-
-Let's see an example of a 16-bit fixed-point data type with a normalized
-range from -1.0 to (1.0 - *small*):
+Before we discuss ordinary fixed-point types, let's briefly look at the
+:wikipedia:`Q format <Q_(number_format)>`, or Q notation, a common way to
+describe binary fixed-point layouts. A Qm.n format uses *m* bits for the
+integer part and *n* bits for the fractional part, plus an implicit sign
+bit; when *m* is zero, we just write Qn. We name the example types in
+this section after their Q format |mdash| for instance, a normalized
+16-bit type, with all 15 non-sign bits reserved for the fractional part,
+is a Q15 type:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Normalized_Fixed_Point_Type
 
@@ -7566,11 +7380,190 @@ range from -1.0 to (1.0 - *small*):
                  & TQ15'Last'Image);
     end Normalized_Fixed_Point_Type;
 
-In this example, we are defining a 16-bit fixed-point data type for our
-normalized range. When running the application, we notice that the upper
-bound is close to one, but not exact one. This is a typical effect of
-fixed-point data types. (You can find more details in this discussion
-about the :wikipedia:`Q format <Q_(number_format)>`).
+In this example, we declare a 16-bit fixed-point type with a normalized
+range, from -1.0 to (1.0 - *small*). When we run this example, we see
+that the upper bound is close to one, but not exactly one |mdash| a
+typical effect of fixed-point data types that we'll come back to
+throughout this section.
+
+Q format actually comes in two variants: one counts the sign bit in
+*m*, the other doesn't; this course uses the latter.
+
+.. admonition:: For further reading...
+
+    Let's walk through a few more Q formats to see how *m* and *n* shape a
+    type's range and *delta*, starting with the simplest one: a format
+    with no fractional part at all, such as a 16-bit type in Q15.0
+    format |mdash| essentially a plain integer type in disguise.
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q15_0_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q15_0_Fixed_Point_Type is
+           type TQ15_0 is
+             delta 1.0
+             range -2.0 ** 15 ..
+                    2.0 ** 15 - 1.0;
+
+           type Int16 is
+             range -2 ** 15 ..
+                    2 ** 15 - 1;
+        begin
+           Put_Line ("TQ15_0 requires "
+                     & TQ15_0'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ15_0 is "
+                     & TQ15_0'Delta'Image);
+           Put_Line ("The minimum  value of TQ15_0 is "
+                     & TQ15_0'First'Image);
+           Put_Line ("The maximum  value of TQ15_0 is "
+                     & TQ15_0'Last'Image);
+
+           Put_Line ("------------------------------");
+           Put_Line ("Int16 requires "
+                     & Int16'Size'Image
+                     & " bits");
+           Put_Line ("The minimum  value of Int16 is "
+                     & Int16'First'Image);
+           Put_Line ("The maximum  value of Int16 is "
+                     & Int16'Last'Image);
+        end Q15_0_Fixed_Point_Type;
+
+    When we run this example, we see that the :ada:`TQ15_0` type requires
+    16 bits |mdash| the same as the :ada:`Int16` type |mdash| and that both
+    types share the same range. Because the *delta* is 1.0, the :ada:`TQ15_0`
+    type has no fractional part, so it behaves just like a plain 16-bit
+    integer type.
+
+    Now let's move one bit from the integer part to the fractional part,
+    which gives us the Q14.1 format. Here, the *delta* becomes
+    2\ :sup:`-1` |mdash| that is, 0.5 |mdash| so the type can represent
+    multiples of one half:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q14_1_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q14_1_Fixed_Point_Type is
+           type TQ14_1 is
+             delta  0.5
+             range -2.0 ** 14 ..
+                    2.0 ** 14 - 0.5;
+        begin
+           Put_Line ("TQ14_1 requires "
+                     & TQ14_1'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ14_1 is "
+                     & TQ14_1'Delta'Image);
+           Put_Line ("The minimum  value of TQ14_1 is "
+                     & TQ14_1'First'Image);
+           Put_Line ("The maximum  value of TQ14_1 is "
+                     & TQ14_1'Last'Image);
+        end Q14_1_Fixed_Point_Type;
+
+    To see that single fractional bit in action, let's assign a value that
+    has only that bit set. For example, the based literal :ada:`2#0.1#`
+    represents 0.5 |mdash| the smallest non-zero value that the :ada:`TQ14_1`
+    type can represent:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q14_1_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q14_1_Fixed_Point_Type is
+           type TQ14_1 is
+             delta  0.5
+             range -2.0 ** 14 ..
+                    2.0 ** 14 - 0.5;
+
+           V : TQ14_1;
+        begin
+           V := 2#0.1#;
+           Put_Line ("V = " & V'Image);
+        end Q14_1_Fixed_Point_Type;
+
+    Let's now look at the Q7.8 format, which uses 7 bits for the integer
+    part and 8 bits for the fractional part. The *delta* is therefore
+    2\ :sup:`-8` (0.00390625):
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q7_8_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q7_8_Fixed_Point_Type is
+           type TQ7_8 is
+             delta  2.0 ** (-8)
+             range -2.0 ** 7 ..
+                    2.0 ** 7 - 2.0 ** (-8);
+        begin
+           Put_Line ("TQ7_8 requires "
+                     & TQ7_8'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ7_8 is "
+                     & TQ7_8'Delta'Image);
+           Put_Line ("The minimum  value of TQ7_8 is "
+                     & TQ7_8'First'Image);
+           Put_Line ("The maximum  value of TQ7_8 is "
+                     & TQ7_8'Last'Image);
+        end Q7_8_Fixed_Point_Type;
+
+    So far, we've written the *delta* and the range as literals for each
+    format. We can instead generalize the type definition by introducing
+    named numbers for the integer and fractional bit counts, which makes the
+    connection between the Q format and the declaration explicit. The
+    following example reconstructs the Q14.1 type in this way:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Gen_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q14_1_Fixed_Point_Type is
+
+           --
+           --  Values for Q14.1
+           --
+           Int_Bits  : constant := 14;
+           Frac_Bits : constant := 1;
+
+           --
+           --  Generalized definition of a
+           --  fixed-point type
+           --
+           D : constant := 2.0 ** (-Frac_Bits);
+
+           type Fixed is
+             delta D
+             range -2.0 ** Int_Bits ..
+                    2.0 ** Int_Bits - D;
+
+           --
+           --  Declaring Q14.1 fixed-point type
+           --  as a subtype of the "template"
+           --  declared above.
+           --
+           subtype TQ14_1 is
+             Fixed;
+        begin
+           Put_Line ("TQ14_1 requires "
+                     & TQ14_1'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ14_1 is "
+                     & TQ14_1'Delta'Image);
+           Put_Line ("The minimum  value of TQ14_1 is "
+                     & TQ14_1'First'Image);
+           Put_Line ("The maximum  value of TQ14_1 is "
+                     & TQ14_1'Last'Image);
+        end Q14_1_Fixed_Point_Type;
+
+    We'll see this naming convention again for the Q31, Q47, and Q7.24
+    types used later in this section. It doesn't describe every
+    ordinary fixed-point type Ada lets us declare, though: it has no
+    notation for a *small* that isn't a power of two (set via the
+    :ada:`Small` aspect, discussed shortly), nor for a *delta* that's a
+    power of two greater than 1.0. See the
+    :wikipedia:`Q format <Q_(number_format)>` article for more on the
+    format itself.
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Subtypes:
