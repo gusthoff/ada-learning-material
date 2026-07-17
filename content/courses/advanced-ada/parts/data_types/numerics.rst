@@ -9662,6 +9662,116 @@ the exact mathematical sum 1.222222...
     - :arm22:`G.2.3 Model of Fixed Point Arithmetic <G-2-3>`
 
 
+.. _Adv_Ada_Ordinary_Fixed_Point_System_Fine_Delta:
+
+System.Fine_Delta
+~~~~~~~~~~~~~~~~~
+
+We've used normalized ordinary fixed-point types |mdash| ranging from -1.0
+to 1.0, like :ada:`TQ31` |mdash| throughout this chapter. Ada gives us a
+named number for the finest *delta* our compiler can offer for exactly
+this range: :ada:`System.Fine_Delta`. Let's declare a type using it and
+see how wide it needs to be:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fine_Delta_Fraction
+
+    with Ada.Text_IO; use Ada.Text_IO;
+    with System;
+
+    procedure Show_Fine_Delta is
+       type Fraction is
+         delta System.Fine_Delta
+         range -1.0 .. 1.0 - System.Fine_Delta;
+    begin
+       Put_Line ("Fraction'Small = "
+                 & Fraction'Small'Image);
+       Put_Line ("Fraction'Size  = "
+                 & Fraction'Size'Image);
+    end Show_Fine_Delta;
+
+When we run this example, we see that :ada:`Fraction'Small` matches
+:ada:`System.Fine_Delta` exactly, and that :ada:`Fraction'Size` requires
+128 bits |mdash| four times :ada:`TQ31`'s 32 bits, for a *delta*
+2\ :sup:`96` times finer. Note, however, that :ada:`Fine_Delta` doesn't
+parametrize by word size: it isn't a way to derive "the finest *small*
+for a 32-bit type," but rather the finest *delta* our compiler supports
+for this range *at all*, whatever word size that takes.
+
+We can put this extra precision to good use in an accumulator, and
+compare it directly against :ada:`TQ15_48` from the
+:ref:`Type conversions <Adv_Ada_Ordinary_Fixed_Point_Type_Conversion>`
+discussion. There, we gave the accumulator extra integer bits so a
+running sum had the *range* to avoid overflowing, and its 48 fractional
+bits already give us a lot more precision than :ada:`TQ31`'s own 31.
+Even so, multiplying two :ada:`TQ31` values produces an exact result
+that needs up to 62 fractional bits to represent, so :ada:`TQ15_48`
+still has to truncate part of every single product before adding it to
+the running sum. If we accumulate in :ada:`Fine_Delta` precision
+instead, we don't need to truncate anything until we finally convert
+the result back to a smaller type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fine_Delta_Accumulator
+
+    with Ada.Text_IO; use Ada.Text_IO;
+    with System;
+
+    procedure Show_Fine_Delta_Accumulator is
+       D_31 : constant := 2.0 ** (-31);
+       D_48 : constant := 2.0 ** (-48);
+
+       type TQ31 is
+         delta D_31
+         range -1.0 .. 1.0 - D_31;
+
+       type TQ15_48 is
+         delta D_48
+         range -2.0 ** 15 ..
+                2.0 ** 15 - D_48;
+
+       type Fine_Acc is
+         delta System.Fine_Delta
+         range -1.0 ..
+                1.0 - System.Fine_Delta;
+
+       Coeff  : constant TQ31 := 0.01;
+       Sample : constant TQ31 := 0.05;
+
+       N : constant := 1_000;
+
+       Sum_TQ15_48  : TQ15_48  := 0.0;
+       Sum_Fine_Acc : Fine_Acc := 0.0;
+    begin
+       for I in 1 .. N loop
+          Sum_TQ15_48 := Sum_TQ15_48 +
+                         TQ15_48 (Coeff * Sample);
+       end loop;
+
+       for I in 1 .. N loop
+          Sum_Fine_Acc := Sum_Fine_Acc +
+                          Fine_Acc (Coeff * Sample);
+       end loop;
+
+       Put_Line ("Sum_TQ15_48  = "
+                 & Sum_TQ15_48'Image);
+       Put_Line ("Sum_Fine_Acc = "
+                 & Sum_Fine_Acc'Image);
+    end Show_Fine_Delta_Accumulator;
+
+When we run both loops, we see that they compute the same sum of 1,000
+copies of :ada:`Coeff * Sample`. :ada:`Sum_TQ15_48` gives us
+``0.499999986960376``, and :ada:`Sum_Fine_Acc` gives us
+``0.499999986961483997016664204693370265886``. The two values agree for
+the first eleven digits after the decimal point, and only then start to
+diverge, so :ada:`TQ15_48`'s extra fractional bits already get us most
+of the way to the exact sum. :ada:`Fine_Acc`, however, keeps the
+computation exact well beyond that point, since its precision far
+exceeds what a single multiplication actually needs.
+
+.. admonition:: In the Ada Reference Manual
+
+    - :arm22:`13.7 The Package System <13-7>`
+
+
 .. _Adv_Ada_Ordinary_Fixed_Point_Examples:
 
 Practical examples
