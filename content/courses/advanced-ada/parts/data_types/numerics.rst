@@ -7829,9 +7829,10 @@ In this case, *small* and *delta* will differ from each other.
 When we run this example, we see that :ada:`Angle'Small` (2\ :sup:`-12`
 ≈ 2.44×10\ :sup:`-4`) is smaller than :ada:`Angle'Delta` (1/3600
 ≈ 2.78×10\ :sup:`-4`): the compiler picked the largest power of two
-not exceeding the *delta*. This means stored angle values are rounded
-to the nearest multiple of 2\ :sup:`-12`, which may not coincide with
-exact multiples of 1/3600.
+not exceeding the *delta*. This means stored angle values are converted
+to a neighboring multiple of 2\ :sup:`-12` |mdash| not necessarily the
+nearest one |mdash| which may not coincide with exact multiples of
+1/3600.
 
 By contrast, for :ada:`Angle_2`, we use :ada:`with Small => Angle_Delta` to
 force *small* = *delta*, so every multiple of 1/3600 is representable
@@ -9461,8 +9462,9 @@ floating-point value.
         - :arm22:`G.2.1 Model of Floating Point Arithmetic <G-2-1>`
 
 When converting in the other direction, from a floating-point value to a
-fixed-point type, the value is likewise rounded to the nearest representable
-fixed-point value:
+fixed-point type, the value is converted to a neighboring representable
+fixed-point value |mdash| Ada doesn't guarantee that this is the *nearest*
+one:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Float_Conversion
 
@@ -9491,15 +9493,22 @@ fixed-point value:
        Put_Line ("TQ15  (R)      = " & F'Image);
     end Show_Fixed_Float_Conversion;
 
-In this example, we first assign 0.1 to :ada:`F`. Because 0.1 is not a
-multiple of the *small* of :ada:`TQ15`, it is rounded to the nearest
-representable value. Converting :ada:`F` to :ada:`Float` then preserves that
-rounded value exactly |mdash| a :ada:`TQ15` value has at most 16 significant
-bits, which fit comfortably within the mantissa of :ada:`Float`.
+In this example, we first assign 0.1 to :ada:`F`. As we saw
+:ref:`earlier <Adv_Ada_Fixed_Point_String_Representation>`, 0.1 isn't a
+multiple of the *small* of :ada:`TQ15`, so it can't be represented
+exactly: :ada:`F'Image` shows the truncated value, ``0.09998``, not the
+nearest representable value. Converting :ada:`F` to :ada:`Float` then
+preserves that value exactly |mdash| a :ada:`TQ15` value has at most 16
+significant bits, which fit comfortably within the mantissa of
+:ada:`Float` (24 bits).
 
 In the second part, the :ada:`Float` value 0.333333 is converted to
-:ada:`TQ15`, which rounds it to the nearest representable fixed-point value
-for that type.
+:ada:`TQ15`, giving ``0.33331``. That's again the *truncated* value, not
+the nearest one: ``0.33334`` (the next representable multiple of *small*
+up) is actually closer to 0.333333 than ``0.33331`` is. Keep in mind,
+however, that Ada doesn't guarantee which of the two neighboring values a
+conversion like this produces |mdash| and GNAT truncates here, just as it
+did for :ada:`F := 0.1` above.
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Type_Illegal_Decl:
@@ -9645,10 +9654,17 @@ cannot represent exactly:
     end Show_Mixing_Fixed_Point;
 
 When :ada:`B` (a 31-bit-precision value) is converted to :ada:`TQ7_24`
-(24-bit precision), it is rounded to the nearest value representable with 24
-fractional bits. This introduces a small quantization error. Therefore, the
-result of :ada:`A := A + TQ7_24 (B)` differs slightly from the exact
-mathematical sum 1.222222...
+(24-bit precision), the conversion produces one of the two representable
+values neighboring :ada:`B`'s exact value |mdash| Ada doesn't guarantee
+which one (for this particular value, rounding to the nearer neighbor and
+truncating toward the lower one happen to give the same result:
+``0.22222221``). This introduces a small quantization error either way.
+Therefore, the result of :ada:`A := A + TQ7_24 (B)` differs slightly from
+the exact mathematical sum 1.222222...
+
+.. admonition:: In the Ada Reference Manual
+
+    - :arm22:`G.2.3 Model of Fixed Point Arithmetic <G-2-3>`
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Examples:
