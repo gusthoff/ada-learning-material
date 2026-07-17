@@ -7313,17 +7313,20 @@ values are, in effect, scaled integers. The difference between them is in the
 scale factor: for a
 :ref:`decimal fixed-point type <Adv_Ada_Decimal_Fixed_Point_Types>`, the
 *small* always equals its *delta*, which must be a power of ten.
-In contrast, for an ordinary fixed-point type, the scaling of the type's
-*small* is a power of two by default. Therefore, ordinary fixed-point
-types are sometimes called binary fixed-point types.
+In contrast, an ordinary fixed-point type's *small* is a power of two by
+default. However, unlike for decimal fixed-point types |mdash| which always
+use a power of ten |mdash| this isn't mandatory: if we use the :ada:`Small`
+aspect, we can set the ordinary fixed-point type's *small* to any value, not
+just a power of two. Note that an ordinary fixed-point type whose *small* is a
+power of two is usually called a binary fixed-point type.
 
 .. note::
-    Ordinary fixed-point types can be thought of being closer to the actual
+    A binary fixed-point type can be thought of as being closer to the actual
     representation on the machine, since hardware support for decimal
     fixed-point arithmetic is not widespread (decimal arithmetic requires
     rescalings by a power of ten, which processors generally do not provide
-    directly), while ordinary fixed-point types make use of the available
-    integer shift instructions.
+    directly), while a binary fixed-point type's power-of-two *small* lets
+    the compiler use the available integer shift instructions instead.
 
 We already know that, for decimal fixed-point types, the *small* is equal to
 the decimal type's *delta*. For ordinary fixed-point types, however, the
