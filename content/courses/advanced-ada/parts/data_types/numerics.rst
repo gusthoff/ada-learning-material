@@ -8050,7 +8050,9 @@ representation of the fixed-point types.
 As we've done before, we can use an
 :ref:`overlay <Adv_Ada_Address_Aspect_Overlay>` to uncover the actual integer
 values stored on the machine when assigning values to objects of fixed-point
-type. For example:
+type. (As with any overlay, this only works correctly when the two types
+match in size and :ref:`alignment <Adv_Ada_Data_Representation_Alignment>`.)
+For example:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Machine_Representation
     :class: ada-run
