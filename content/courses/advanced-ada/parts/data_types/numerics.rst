@@ -9188,9 +9188,10 @@ size:
     end Show_Full_Range_Base_Type;
 
 :ada:`TQ47` needs 48 bits, while :ada:`TQ47'Base` needs 64 bits. Again, this is
-because the base type uses the smallest standard machine size |mdash| 8, 16,
-32, or 64 bits |mdash| that can hold the type, while the size of the actual
-type depends only on its declaration.
+because the base type is rounded up to a size the target machine supports
+directly |mdash| on this typical desktop target, the smallest of 8, 16, 32,
+or 64 bits that can hold the type |mdash| while the size of the actual type
+depends only on its declaration.
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Types_Decimal_Precision:
