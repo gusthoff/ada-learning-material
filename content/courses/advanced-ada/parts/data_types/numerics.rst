@@ -10349,10 +10349,13 @@ against precision.
 
     In Ada, this is handled automatically: multiplying two :ada:`PCM_Sample`
     values yields :ada:`universal_fixed`, which the language computes at
-    the precision required (effectively 62 bits). The rounding to
-    :ada:`PCM_Sample` precision happens only at the explicit conversion
-    :ada:`PCM_Sample (B1 * Y)` |mdash| the intermediate product is never
-    silently truncated.
+    the precision required (effectively 62 bits), without rounding or
+    truncating in that computation. The conversion back to
+    :ada:`PCM_Sample` precision |mdash| and with it, the loss of precision
+    |mdash| happens only once: at the explicit conversion
+    :ada:`PCM_Sample (B1 * Y)`. The conversion produces one of two
+    neighboring representable values |mdash| Ada doesn't guarantee which value
+    is actually selected. (The GNAT toolchain truncates rather than rounds.)
 
 
 .. _Adv_Ada_Big_Numbers:
