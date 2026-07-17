@@ -7818,11 +7818,32 @@ exact multiples of 1/3600.
 
 By contrast, for :ada:`Angle_2`, we use :ada:`with Small => Angle_Delta` to
 force *small* = *delta*, so every multiple of 1/3600 is representable
-exactly. Note that Ada allows non-power-of-two *small* values via the
-:ada:`Small` aspect, but not all implementations are required to support
-them |mdash| see the note in the
-:ref:`Decimal precision <Adv_Ada_Ordinary_Fixed_Point_Types_Decimal_Precision>`
-subsection for more details.
+exactly. As mentioned before, Ada lets us use the :ada:`Small` aspect to set
+an ordinary fixed-point type's *small* to any value, not just a power of
+two. However, an implementation isn't required to support every such value.
+:ada:`Angle_2`'s *small* (1/3600) is neither a power of two nor a power of
+ten.
+
+.. admonition:: For further reading...
+
+    Because :ada:`Angle_2`'s *small* is neither a power of two nor a power
+    of ten, it isn't covered even by the guarantee that Annex F (the
+    Information Systems Annex) gives for decimal *smalls*. In fact, an Ada
+    compiler is free to reject this declaration as illegal if it doesn't
+    support those values of *small*. Even a compiler that conforms to
+    Annex F |mdash| which mandates support for decimal smalls |mdash| isn't
+    obligated to accept this value, either.
+
+    GNAT does actually support this value, as the previous example
+    demonstrates. However, that's a GNAT choice, not something the standard
+    guarantees; see the note in the
+    :ref:`Decimal precision <Adv_Ada_Ordinary_Fixed_Point_Types_Decimal_Precision>`
+    subsection for more details.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.9 Fixed Point Types <3-5-9>`
+        - :arm22:`F.2 The Package Decimal <F-2>`
 
 
 Small and delta of the base type
@@ -9180,11 +9201,16 @@ giving it the same decimal-exact representation as :ada:`T3_D6`.
 .. admonition:: For further reading
 
     The :ada:`Small` aspect may be set to a non-power-of-two value, as
-    :ada:`T3_Fake_Dec` demonstrates. However, the Ada standard (RM 3.5.9)
-    only requires compilers to support power-of-two *small* values by
-    default. Support for non-power-of-two smalls is optional |mdash| unless the
-    compiler conforms to the Information Systems Annex (Annex F), which
-    mandates support for decimal smalls.
+    :ada:`T3_Fake_Dec` demonstrates. However, the Ada standard only requires
+    compilers to support power-of-two *small* values by default. Support for
+    non-power-of-two smalls is optional |mdash| unless the compiler conforms
+    to the Information Systems Annex (Annex F), which mandates support for
+    decimal smalls.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.9 Fixed Point Types <3-5-9>`
+        - :arm22:`F.2 The Package Decimal <F-2>`
 
 .. admonition:: In the GNAT toolchain
 
