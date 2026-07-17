@@ -8120,7 +8120,7 @@ the :ada:`TQ15` type:
 
     As you might have expected, two fixed-point types with the same size can
     have different machine representations. Again, the actual integer value is
-    based solely on the type's *delta*, and not the type's size.
+    based solely on the type's *small*, and not the type's size.
 
     Consider the following 32-bit fixed-point types:
 
