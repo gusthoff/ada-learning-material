@@ -8378,13 +8378,23 @@ representation in exponential notation, such as ``2.50000E-01``.
           TQ15
           delta D7;
 
-    :ada:`TQ15_New` has the same *small* as :ada:`TQ15`
-    (2\ :sup:`-15`), but a larger *delta* (2\ :sup:`-7`) |mdash| and that's
-    why :ada:`TQ15_New'Image` prints ``0.250`` (three digits) instead of
-    :ada:`TQ15'Image`'s ``0.25000`` (five digits), even though both types
-    represent exactly the same set of values. For :ada:`TQ15` here, *delta*
-    and *small* happen to be the same value, so this distinction doesn't
-    change anything in this particular example.
+    :ada:`TQ15_New` has the same *small* as :ada:`TQ15`, but a larger
+    *delta* |mdash| and that's why :ada:`TQ15_New'Image` prints fewer
+    digits, even though both types represent exactly the same set of
+    values:
+
+    +---------------+------------------+------------------+
+    |               | :ada:`TQ15`      | :ada:`TQ15_New`  |
+    +===============+==================+==================+
+    | *small*       | 2\ :sup:`-15`    | 2\ :sup:`-15`    |
+    +---------------+------------------+------------------+
+    | *delta*       | 2\ :sup:`-15`    | 2\ :sup:`-7`     |
+    +---------------+------------------+------------------+
+    | :ada:`'Aft`   | 5                | 3                |
+    +---------------+------------------+------------------+
+
+    For :ada:`TQ15` here, *delta* and *small* happen to be the same value,
+    so this distinction doesn't change anything in this particular example.
 
     .. admonition:: In the Ada Reference Manual
 
