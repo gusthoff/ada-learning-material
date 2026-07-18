@@ -7316,9 +7316,10 @@ scale factor: for a
 In contrast, an ordinary fixed-point type's *small* is a power of two by
 default. However, unlike for decimal fixed-point types |mdash| which always
 use a power of ten |mdash| this isn't mandatory: if we use the :ada:`Small`
-aspect, we can set the ordinary fixed-point type's *small* to any value, not
-just a power of two. Note that an ordinary fixed-point type whose *small* is a
-power of two is usually called a binary fixed-point type.
+aspect, we can set the ordinary fixed-point type's *small* to any value no
+greater than the *delta*, not just a power of two. Note that an ordinary
+fixed-point type whose *small* is a power of two is usually called a binary
+fixed-point type.
 
 .. note::
     A binary fixed-point type can be thought of as being closer to the actual
@@ -7775,9 +7776,13 @@ In this case, *small* and *delta* will differ from each other.
     Among all the powers of two no greater than the *delta*, GNAT always
     chooses the *largest* one. This is a compiler choice, however, not a
     language guarantee: another conforming compiler is free to pick a
-    different power of two. See the GNAT Reference Manual's section on
+    different power of two. Specifying the *small* explicitly |mdash| as the
+    next example does |mdash| pins it down and makes the declaration
+    portable. The GNAT Reference Manual's section on
     `Writing Portable Fixed-Point Declarations <https://gcc.gnu.org/onlinedocs/gnat_rm/Writing-Portable-Fixed-Point-Declarations.html>`_
-    for a discussion of the portability issues this can cause.
+    recommends exactly that, and discusses another compiler freedom of the
+    same kind: the Ada standard also allows a compiler to narrow the declared
+    range bounds by one *small*.
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Point_Op
 
@@ -7830,8 +7835,9 @@ nearest one |mdash| which may not coincide with exact multiples of
 By contrast, for :ada:`Angle_2`, we use :ada:`with Small => Angle_Delta` to
 force *small* = *delta*, so every multiple of 1/3600 is representable
 exactly. As mentioned before, Ada lets us use the :ada:`Small` aspect to set
-an ordinary fixed-point type's *small* to any value, not just a power of
-two. However, a compiler isn't required to support every such value.
+an ordinary fixed-point type's *small* to any value no greater than the
+*delta*, not just a power of two. However, a compiler isn't required to
+support every such value.
 :ada:`Angle_2`'s *small* (1/3600) is neither a power of two nor a power of
 ten.
 
@@ -8400,9 +8406,12 @@ Let's focus on the :ada:`Show (0.1)` call. The value :ada:`0.1` isn't a
 multiple of the *small* of :ada:`TQ15`, so it can't be represented exactly:
 converting it to :ada:`TQ15` |mdash| to become the actual parameter
 :ada:`V` of the :ada:`Show` procedure |mdash| produces one of the two
-neighboring representable multiples of *small*. We cannot know for sure which
-one will be selected, as Ada doesn't give us any guarantees here. For this
-reason, :ada:`TQ15'Image` shows ``0.09998`` rather than ``0.10000``. The
+neighboring representable multiples of *small*. For a literal like this one
+|mdash| a static expression |mdash| Ada specifies which one: the compiler
+rounds to the nearest multiple if :ada:`TQ15'Machine_Rounds` is true, and
+truncates toward zero if it is false. The value of :ada:`Machine_Rounds`
+itself, however, is the compiler's own choice |mdash| and GNAT truncates. For
+this reason, :ada:`TQ15'Image` shows ``0.09998`` rather than ``0.10000``. The
 precision loss already happens at that conversion to :ada:`TQ15`, so the
 subsequent :ada:`Float (V)'Image` call cannot recover the exact value ``0.1``
 either |mdash| it just displays the same value that was already converted,
@@ -8811,7 +8820,7 @@ range of the :ada:`TQ47` type goes from -1.0 to (1.0 - *small*), while
 :ada:`TQ47'Base` ranges from about -65,536.0 to 65,536.0. So, unless the
 declared range already fills the machine representation |mdash| as it does for
 :ada:`TQ15` |mdash| the base type's range is wider than the type's range
-and symmetric around zero.
+and roughly symmetric around zero.
 
 Note that the range of an ordinary fixed-point type can be much smaller than
 the range of its base type. For example:
@@ -8852,7 +8861,8 @@ below 4.0, with *small* = 2\ :sup:`-10`. Since :ada:`T_Narrow` has no
 negative values, representing its range takes 12 bits (2 integer bits +
 10 fractional bits, no sign bit needed) |mdash| and that's exactly what
 :ada:`T_Narrow'Size` reports. The *base* type is a different story: its
-range has to be symmetric around zero, so it needs a sign bit on top of
+range has to be symmetric around zero |mdash| except for at most one extra
+value at the negative end |mdash| so it needs a sign bit on top of
 those 12 bits, i.e. 13 bits at a minimum. On this typical desktop
 target, which only offers 8, 16, 32, or 64-bit words, the base type
 ends up using the next value above 13 bits: 16 bits. The range of the
@@ -8865,8 +8875,10 @@ portion of it.
     The 8/16/32/64-bit progression of machine words is what GNAT rounds
     up to on typical desktop and server targets, not something the Ada
     standard requires: the base range only has to be symmetric around
-    zero and to include at least the declared multiples of *small*. A
-    different target could round the base type's size up differently.
+    zero |mdash| allowing for at most one extra value at the negative
+    end |mdash| and to include at least the declared multiples of
+    *small*. A different target could round the base type's size up
+    differently.
 
     .. admonition:: In the Ada Reference Manual
 
@@ -9457,9 +9469,9 @@ floating-point value.
         - :arm22:`G.2.1 Model of Floating Point Arithmetic <G-2-1>`
 
 When converting in the other direction, from a floating-point value to a
-fixed-point type, the value is converted to a neighboring representable
+fixed-point type, the value is converted to a nearby representable
 fixed-point value |mdash| Ada doesn't guarantee that this is the *nearest*
-one:
+one, or even one of the two neighboring multiples of the type's *small*:
 
 .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Float_Conversion
 
@@ -9501,9 +9513,9 @@ In the second part, the :ada:`Float` value 0.333333 is converted to
 :ada:`TQ15`, giving ``0.33331``. That's again the *truncated* value, not
 the nearest one: ``0.33334`` (the next representable multiple of *small*
 up) is actually closer to 0.333333 than ``0.33331`` is. Keep in mind,
-however, that Ada doesn't guarantee which of the two neighboring values a
-conversion like this produces |mdash| and GNAT truncates here, just as it
-did for :ada:`F := 0.1` above.
+however, that Ada doesn't guarantee which value a conversion like this
+produces |mdash| not even that it's one of the two neighboring multiples
+|mdash| and GNAT truncates here, just as it did for :ada:`F := 0.1` above.
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Type_Illegal_Decl:
@@ -10424,8 +10436,9 @@ as :ada:`Y` approaches full scale |mdash| well outside the
 settles at about
 :math:`-0.91`, just inside the range. However, once the input rises above
 roughly 0.55, the term reaches :math:`\pm 1.0` and the assignment to
-:ada:`D.Z1` raises :ada:`Constraint_Error` (or wraps around silently when range
-checks are suppressed). The half-scale input is therefore not arbitrary
+:ada:`D.Z1` raises :ada:`Constraint_Error`. (With range checks suppressed,
+execution would be erroneous |mdash| on typical hardware, the value wraps
+around silently.) The half-scale input is therefore not arbitrary
 |mdash| it is what keeps the feedback term inside the type's range.
 
 We can make the filter robust for *any* input by giving the feedback path the
