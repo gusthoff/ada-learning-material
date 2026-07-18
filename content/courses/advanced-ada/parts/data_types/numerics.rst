@@ -9932,125 +9932,301 @@ The exception-based version above is simple, but it has a cost: raising and
 handling an exception is very expensive in terms of performance |mdash| often,
 it's far more expensive than the arithmetic itself. In a DSP inner loop that
 runs millions of times per second, that cost is prohibitive whenever saturation
-happens often. We can avoid this extra cost by detecting the overflow ourselves
-instead of letting it raise an exception:
+happens often. We can avoid this cost without relying on suppressed checks at
+all: instead of detecting overflow after the fact, we perform the arithmetic
+in a wider fixed-point type where the result simply cannot leave the range,
+and only then bring it back down to a :ada:`Sample` value, clamping it to
+the bounds along the way.
 
-.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Wraparound
+Instead of calling functions like :ada:`Sat_Add` explicitly, we can override
+the arithmetic operators themselves, so that ordinary :ada:`A + B` syntax
+saturates automatically. Overriding :ada:`Sample`'s own operators directly
+would silently change the meaning of :ada:`A + B` everywhere :ada:`Sample` is
+used. To avoid that, we declare a second type, :ada:`Sat_Sample`, derived from
+:ada:`Sample` specifically to carry this saturating behavior. :ada:`Sample`
+keeps the default, checked arithmetic, and we convert a value to
+:ada:`Sat_Sample` only where we want it to saturate instead. This is the
+package specification:
 
-    with Ada.Text_IO; use Ada.Text_IO;
+.. code:: ada no_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
 
-    procedure Show_Saturating is
+    package Fixed_Types is
 
        D : constant := 2.0 ** (-15);
 
-       --  Q15: normalized range -1.0 .. 1.0.
-       --  This type fills its 16-bit machine word
-       --  exactly, so the arithmetic wraps around
-       --  at the type bounds when the overflow
-       --  check is suppressed.
+       --  Q15: normalized range,
+       --  -1.0 .. 1.0 - small
        type Sample is
          delta D
          range -1.0 .. 1.0 - D;
 
-       function Sat_Add (A, B : Sample)
-                         return Sample is
-          pragma Suppress (Overflow_Check);
-          pragma Suppress (Range_Check);
+       --  Same representation as Sample,
+       --  but "+"/"-"/"*" saturate instead
+       --  of raising Constraint_Error.
+       type Sat_Sample is new Sample;
 
-          C : constant Sample := A + B;
+       function "+" (A, B : Sat_Sample)
+                     return Sat_Sample;
+       function "-" (A, B : Sat_Sample)
+                     return Sat_Sample;
+       function "*" (A, B : Sat_Sample)
+                     return Sat_Sample;
+
+    end Fixed_Types;
+
+We declare :ada:`Sat_Sample` and its three overridden operators in the
+package specification, but keep the saturation logic itself out of
+view. The wide auxiliary types support that logic without being part
+of the public interface themselves, so we place them in a
+:ref:`private <Adv_Ada_Private_Packages>` child package,
+:ada:`Fixed_Types.Wide` |mdash| visible to :ada:`Fixed_Types` itself,
+but not to any other unit:
+
+.. code:: ada no_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    private package Fixed_Types.Wide is
+
+       --  Wide range: "+" and "-" have
+       --  different worst cases, and each
+       --  contributes one of Wide_Sample's
+       --  two bounds. Since Sample'Last
+       --  always equals -Sample'First -
+       --  Sample'Small, "-"'s extremes
+       --  always beat "+"'s by exactly one
+       --  Sample'Small.
+
+       --  The smallest possible result is
+       --  the smallest sum; the smallest
+       --  difference doesn't reach as far.
+       Wide_First : constant :=
+         Sample'First + Sample'First;
+
+       --  The largest possible result is
+       --  the largest difference; the
+       --  largest sum doesn't reach as far.
+       Wide_Last : constant :=
+         Sample'Last - Sample'First;
+
+       type Wide_Sample is
+         delta Sample'Small
+         range Wide_First .. Wide_Last;
+
+       --  Wide precision: Wide_Product has
+       --  two jobs, so it needs two
+       --  lower-bound values to compare.
+       --
+       --  Job 1: hold a raw Sample operand
+       --  before multiplying.
+       --  (Sample'First is that bound.)
+       --
+       --  Job 2: hold the product
+       --  afterward. Min_Product is the
+       --  most negative product two Sample
+       --  values can give.
+       Min_Product : constant :=
+         Sample'First * Sample'Last;
+
+       --  Most positive product.
+       Max_Product : constant :=
+         Sample'First * Sample'First;
+
+       --  Wide_Product's resolution: double
+       --  the fractional bits, so the
+       --  product is held exactly, with no
+       --  rounding.
+       Wide_Delta : constant :=
+         Sample'Small * Sample'Small;
+
+       --  The true lower bound is the
+       --  smaller of the two values. Which
+       --  of the two is smaller depends on
+       --  Sample's own bounds, so we derive
+       --  it instead of assuming it:
+       --
+       --  - for a normalized type such as
+       --    this one, Sample'First is
+       --    always the smaller value;
+       --
+       --  - for a type with a wider integer
+       --    part, such as a Q7.8 type
+       --    ranging over -128.0 .. 128.0 -
+       --    small, Min_Product is far
+       --    smaller instead.
+       Wide_Product_First : constant :=
+         (if Sample'First < Min_Product
+          then Sample'First
+          else Min_Product);
+
+       type Wide_Product is
+         delta Wide_Delta
+         range Wide_Product_First ..
+               Max_Product;
+
+    end Fixed_Types.Wide;
+
+In this example, :ada:`Fixed_Types.Wide` declares two auxiliary types:
+:ada:`Wide_Sample`, used by :ada:`"+"` and :ada:`"-"`; and
+:ada:`Wide_Product`, used by :ada:`"*"`.
+
+Addition and subtraction need extra *range*, since the sum or
+difference of two values already inside :ada:`Sample`'s range can
+reach up to twice that range. Multiplying two values already inside
+:ada:`Sample`'s normalized range, on the other hand, produces a result
+that barely leaves that same range |mdash| what it actually needs is
+extra *precision*, since an exact product of two 15-fractional-bit
+values takes up to 30 fractional bits to represent. We discussed this
+same range-versus-precision distinction
+:ref:`earlier <Adv_Ada_Ordinary_Fixed_Point_System_Fine_Delta>`, when we
+compared :ada:`TQ15_48` to :ada:`System.Fine_Delta` as accumulators.
+
+We derive every bound directly from :ada:`Sample`'s own attributes
+rather than writing it out as a literal. For example, :ada:`Wide_First`
+is computed as :ada:`Sample'First + Sample'First` rather than written
+as the literal :ada:`-2.0`: if :ada:`Sample`'s own bounds ever changed,
+:ada:`Wide_Sample`'s bounds would adjust automatically along with them,
+instead of silently becoming too narrow.
+
+The type declaration itself guarantees the range and precision suffice:
+a mistake in the derivation fails to compile instead of
+silently misbehaving at run time. This derivation applies unchanged to
+a narrower Q7.8 type with a wide integer part, to a wider, normalized
+Q31 type, or even to a Q15.48 type like :ada:`TQ15_48`: only
+:ada:`Sample`'s own declaration would need to change.
+
+There is a limit, though: :ada:`Wide_Product` needs twice
+:ada:`Sample`'s fractional bits. :ada:`Sample`'s size might already
+approach the maximum a fixed-point type can have on the target, as we
+saw :ref:`earlier <Adv_Ada_Ordinary_Fixed_Point_Type_Illegal_Decl>`.
+Once it does, doubling that precision for :ada:`Wide_Product` can exceed
+the limit and fail to compile.
+
+This is the package body of :ada:`Fixed_Types` itself, which withs
+:ada:`Fixed_Types.Wide` and implements the three operators using its
+types:
+
+.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    with Fixed_Types.Wide; use Fixed_Types.Wide;
+
+    package body Fixed_Types is
+
+       function "+" (A, B : Sat_Sample)
+                    return Sat_Sample
+       is
+          Res : constant Wide_Sample :=
+            Wide_Sample (A) +
+            Wide_Sample (B);
        begin
-          --  Two same-signed operands whose sum
-          --  changes sign indicate that the
-          --  addition wrapped around: saturate
-          --  to the bound that matches the
-          --  operands' sign.
-          if A >= 0.0 and then B >= 0.0
-             and then C < 0.0
+          if Res > Wide_Sample (Sample'Last)
           then
-             return Sample'Last;
-          elsif A < 0.0 and then B < 0.0
-             and then C >= 0.0
+             return Sat_Sample (Sample'Last);
+          elsif
+            Res < Wide_Sample (Sample'First)
           then
-             return Sample'First;
+             return Sat_Sample (Sample'First);
           else
-             return C;
+             return Sat_Sample (Res);
           end if;
-       end Sat_Add;
+       end "+";
 
-       function Sat_Sub (A, B : Sample)
-                         return Sample is
-          pragma Suppress (Overflow_Check);
-          pragma Suppress (Range_Check);
-
-          C : constant Sample := A - B;
+       function "-" (A, B : Sat_Sample)
+                    return Sat_Sample
+       is
+          Res : constant Wide_Sample :=
+            Wide_Sample (A) -
+            Wide_Sample (B);
        begin
-          --  Subtraction can only overflow when
-          --  the operands have opposite signs.
-          if A >= 0.0 and then B < 0.0
-             and then C < 0.0
+          if Res > Wide_Sample (Sample'Last)
           then
-             return Sample'Last;
-          elsif A < 0.0 and then B >= 0.0
-             and then C >= 0.0
+             return Sat_Sample (Sample'Last);
+          elsif
+            Res < Wide_Sample (Sample'First)
           then
-             return Sample'First;
+             return Sat_Sample (Sample'First);
           else
-             return C;
+             return Sat_Sample (Res);
           end if;
-       end Sat_Sub;
+       end "-";
 
-       function Sat_Mul (A, B : Sample)
-                         return Sample is
-          pragma Suppress (Overflow_Check);
-          pragma Suppress (Range_Check);
-
-          C : constant Sample := Sample (A * B);
+       function "*" (A, B : Sat_Sample)
+                    return Sat_Sample
+       is
+          Res : constant Wide_Product :=
+            Wide_Product (A) *
+            Wide_Product (B);
        begin
-          --  The true sign of the product is known
-          --  from the operands; if the wrapped
-          --  result has a different sign, it
-          --  overflowed.
-          if (A >= 0.0) = (B >= 0.0) then
-             return (if C < 0.0
-                     then Sample'Last else C);
+          if Res > Wide_Product (Sample'Last)
+          then
+             return Sat_Sample (Sample'Last);
+          elsif
+            Res < Wide_Product (Sample'First)
+          then
+             return Sat_Sample (Sample'First);
           else
-             return (if C > 0.0
-                     then Sample'First else C);
+             return Sat_Sample (Res);
           end if;
-       end Sat_Mul;
+       end "*";
 
+    end Fixed_Types;
+
+We then use the :ada:`Fixed_Types` package in a test application,
+keeping :ada:`A`, :ada:`B`, and :ada:`C` as plain :ada:`Sample`
+variables and converting to :ada:`Sat_Sample` only for the operation
+itself:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Fixed_Types; use Fixed_Types;
+
+    procedure Show_Saturating is
+       A, B, C : Sample;
+       R       : Sat_Sample;
     begin
+       A := 0.5;
+       B := 0.75;
+       R := Sat_Sample (A) + Sat_Sample (B);
+       C := Sample (R);
        Put_Line ("0.5 + 0.75    = "
-                 & Sat_Add (0.5, 0.75)'Image);
+                 & C'Image);
+
+       A := -1.0;
+       B := -1.0;
+       R := Sat_Sample (A) * Sat_Sample (B);
+       C := Sample (R);
        Put_Line ("(-1.0)*(-1.0) = "
-                 & Sat_Mul (-1.0, -1.0)'Image);
+                 & C'Image);
+
+       A := 0.5;
+       B := 0.25;
+       R := Sat_Sample (A) + Sat_Sample (B);
+       C := Sample (R);
        Put_Line ("0.5 + 0.25    = "
-                 & Sat_Add (0.5, 0.25)'Image);
+                 & C'Image);
+
+       A := -0.5;
+       B := 0.75;
+       R := Sat_Sample (A) - Sat_Sample (B);
+       C := Sample (R);
        Put_Line ("-0.5 - 0.75   = "
-                 & Sat_Sub (-0.5, 0.75)'Image);
+                 & C'Image);
     end Show_Saturating;
 
-This version produces the same results as the exception-based one |mdash|
-:ada:`Sat_Add (0.5, 0.75)` and :ada:`Sat_Mul (-1.0, -1.0)` both saturate to
-:ada:`Sample'Last`, while :ada:`Sat_Add (0.5, 0.25)` returns 0.75 unchanged
-|mdash| but no exception is ever raised or handled.
+We hold each result in :ada:`R`, a :ada:`Sat_Sample` variable, before
+converting it back to :ada:`Sample`.
 
-The trick relies on :ada:`Sample` being a Q15 type that fills its 16-bit
-machine word exactly. Suppressing the overflow check lets an out-of-range
-operation *wrap around* at the type bounds, just as the underlying machine
-integer would. We then recover the overflow from the signs: when two
-same-signed values produce a result of the opposite sign, the operation
-overflowed, and we clamp to the matching bound. Each saturating operation
-thus costs just a couple of comparisons instead of the exception machinery,
-which is what makes it suitable for a DSP inner loop.
+When we run this example, we see that each operation saturates correctly:
+:ada:`0.5 + 0.75` and :ada:`(-1.0) * (-1.0)` both give us :ada:`Sample'Last`,
+while :ada:`0.5 + 0.25` gives us 0.75 unchanged |mdash| exactly the same
+results as the exception-based version. Because the result always stays
+inside the wide type's range, none of the three operators ever suppresses
+a check or raises an exception.
 
-The trade-off is that this approach depends on suppressed checks and on the
-type filling its machine representation, so the wraparound is predictable. The
-exception-based version is simpler to read and works for any range, which makes
-it a fine illustration of the idea. In real DSP code, however, saturation is
-not a rare event |mdash| with "hot" signals it can happen on almost every
-sample |mdash| so the wraparound-checking version is the standard choice,
-because its cost doesn't depend on how often saturation occurs.
+The trade-off, if there is one, is that each operation now works in a type
+wider than :ada:`Sample` itself, so it costs a little more than the bare
+minimum arithmetic |mdash| but that cost is fixed and small, nowhere near
+the cost of raising and handling an exception.
 
 
 .. _Adv_Ada_Ordinary_Fixed_Point_Examples_Digital_Filter:
