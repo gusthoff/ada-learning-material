@@ -1,7 +1,7 @@
 // Import testing libs
 import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
-const chai = use(chaiDom);
+use(chaiDom);
 
 import {getElemById, getElemsByClass, getElemsByTag}
   from '../../src/ts/dom-utils';

@@ -2,7 +2,7 @@
 import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 
-const chai = use(chaiDom);
+use(chaiDom);
 
 import * as Ace from 'ace-builds';
 
@@ -40,7 +40,8 @@ describe('Editor', () => {
     });
 
     it('should set C_CPP mode for a .c file', () => {
-      const cResource: Resource = {basename: 'main.c', contents: 'int main() { return 0; }'};
+      const cResource: Resource =
+          {basename: 'main.c', contents: 'int main() { return 0; }'};
       inTest.addSession(cResource.basename, cResource.contents);
       inTest.setSession(cResource.basename);
       const session = editor.getSession();

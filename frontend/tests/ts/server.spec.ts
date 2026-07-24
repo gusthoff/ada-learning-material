@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 
 use(chaiAsPromised);
-const chai = use(chaiDom);
+use(chaiDom);
 
 import {Server, WebSocket} from 'mock-socket';
 
@@ -14,10 +14,9 @@ import {CheckOutput, RunProgram} from '../../src/ts/server-types';
 global.WebSocket = WebSocket as unknown as typeof globalThis.WebSocket;
 
 /**
-* Remove all event listeners from the server
-*
-* @param {Server} server - The server to remove the listeners from
-*/
+ * Remove all event listeners from the server
+ * @param {Server} server - The server to remove the listeners from
+ */
 function removeListeners(server: Server): void {
  for (let type in server.listeners) {
    server.listeners[type] = [];
@@ -36,7 +35,8 @@ describe('ServerWorker', () => {
     lab: false,
   };
   let server: Server = new Server(baseURL);
-  let client: ServerWorker = new ServerWorker(baseURL, (data: CheckOutput.FS): boolean => {
+  let client: ServerWorker = new ServerWorker(baseURL,
+      (data: CheckOutput.FS): boolean => {
     cbCount++;
     return data.completed;
   });
@@ -66,7 +66,7 @@ describe('ServerWorker', () => {
 
     before(() => {
       server.on('connection', (socket) => {
-        socket.on('message', (event) => {
+        socket.on('message', (_event) => {
           serverResponses.forEach((msg) => {
             socket.send(JSON.stringify(msg));
           });
@@ -95,7 +95,7 @@ describe('ServerWorker', () => {
 
     before(() => {
       server.on('connection', (socket) => {
-        socket.on('message', (event) => {
+        socket.on('message', (_event) => {
           socket.send(JSON.stringify(serverResponse));
         });
       });
@@ -106,7 +106,8 @@ describe('ServerWorker', () => {
     });
 
     it('should throw an exception when AWS rejects the request', async () => {
-      await expect(client.execute(tsData, 2000)).to.be.rejectedWith(expectedErrorMsg);
+      await expect(client.execute(tsData, 2000))
+          .to.be.rejectedWith(expectedErrorMsg);
     });
   });
 
@@ -117,7 +118,7 @@ describe('ServerWorker', () => {
 
     before(() => {
       server.on('connection', (socket) => {
-        socket.on('message', (event) => {});
+        socket.on('message', (_event) => {});
       });
     });
 
@@ -126,7 +127,8 @@ describe('ServerWorker', () => {
     });
 
     it('should timeout if no response is recieved', async () => {
-      await expect(client.execute(tsData, timeout)).to.be.rejectedWith(expectedErrorMsg);
+      await expect(client.execute(tsData, timeout))
+          .to.be.rejectedWith(expectedErrorMsg);
     });
   });
 });

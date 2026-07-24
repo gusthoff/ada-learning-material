@@ -2,11 +2,11 @@
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
-import {Client, Server, WebSocket} from 'mock-socket';
+import {Server, WebSocket} from 'mock-socket';
 import FileSaver from 'file-saver';
 
-// const chai = use(chaiDom);
-const chai = use(chaiAsPromised);
+use(chaiDom);
+use(chaiAsPromised);
 
 import {readFileSync} from 'fs';
 import {resolve} from 'path';
@@ -32,7 +32,6 @@ const __dirname = dirname(__filename);
 
 /**
  * Helper function to fill DOM from a file
- *
  * @param {string} filename - The filename to use
  */
 function fillDOM(filename: string): void {
@@ -53,7 +52,6 @@ function clearDOM(): void {
 
 /**
  * Helper function to trigger an event
- *
  * @param {HTMLElement} element - The element to trigger the event on
  * @param {string} eventName - The event name to trigger
  */
@@ -64,10 +62,9 @@ function triggerEvent(element: HTMLElement, eventName: string): void {
 }
 
 /**
-* Remove all event listeners from the server
-*
-* @param {Server} server - The server to remove the listeners from
-*/
+ * Remove all event listeners from the server
+ * @param {Server} server - The server to remove the listeners from
+ */
 function removeListeners(server: Server): void {
  for (let type in server.listeners) {
    server.listeners[type] = [];
@@ -139,7 +136,6 @@ describe('Widget', () => {
       let buttonGroup: HTMLElement;
       let outputDiv: HTMLElement;
       let runButton: HTMLButtonElement;
-      const identifier = 123;
 
       before(() => {
         buttonGroup = getElemById(root.id + '.button-group');
@@ -147,7 +143,7 @@ describe('Widget', () => {
 
         // stub scrollIntoView function beacuse JSDOM doesn't have it
         // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
         window.HTMLElement.prototype.scrollIntoView = (arg: any): void => {};
       });
 
@@ -223,7 +219,8 @@ describe('Widget', () => {
             'Compiler': ['-gnata', '-gnatX'],
           };
 
-          const request: RunProgram.TS = JSON.parse(receivedMessages[0]) as RunProgram.TS;
+          const request: RunProgram.TS =
+              JSON.parse(receivedMessages[0]) as RunProgram.TS;
 
           expect(request.data.files).to.have.length(1);
           expect(request.data.mode).to.equal('run');
@@ -264,7 +261,6 @@ describe('Widget', () => {
         let fakeDiv: HTMLDivElement;
         let fakeOA: OutputArea;
         let realDiv: HTMLElement;
-        let receivedMessages: Array<string> = [];
 
         beforeEach(() => {
           fakeDiv = document.createElement('div') as HTMLDivElement;
@@ -281,7 +277,7 @@ describe('Widget', () => {
             "requestId": "abc_-=2"
           };
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               socket.send(JSON.stringify(serverResponse));
             });
           });
@@ -313,7 +309,7 @@ describe('Widget', () => {
             }
           ];
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               serverResponses.forEach((msg) => {
                 socket.send(JSON.stringify(msg));
               });
@@ -347,7 +343,7 @@ describe('Widget', () => {
             }
           ];
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               serverResponses.forEach((msg) => {
                 socket.send(JSON.stringify(msg));
               });
@@ -384,7 +380,7 @@ describe('Widget', () => {
             }
           ];
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               serverResponses.forEach((msg) => {
                 socket.send(JSON.stringify(msg));
               });
@@ -406,11 +402,13 @@ describe('Widget', () => {
           root.dataset.switches = 'invalid json';
           runButton.click();
           await ServerWorker.delay(250);
-          expect(realDiv.textContent).to.include(Strings.INTERNAL_ERROR_MESSAGE);
+          expect(realDiv.textContent)
+              .to.include(Strings.INTERNAL_ERROR_MESSAGE);
           root.dataset.switches = originalSwitches as string;
         });
 
-        it('should add output line for stdout from a file not in viewMap', async () => {
+        it('should add output line for stdout from a file not in viewMap',
+            async () => {
           const serverResponse: CheckOutput.FS = {
             output: [
               {type: 'stdout', data: 'unknown.adb:1:2: error: test error'},
@@ -484,8 +482,8 @@ describe('Widget', () => {
       });
 
       it('should revert theme setting when user cancels', () => {
-        const themeSetting = getElemById(root.id + '.settings-bar.theme-setting') as
-          HTMLInputElement;
+        const themeSetting = getElemById(
+            root.id + '.settings-bar.theme-setting') as HTMLInputElement;
         window.confirm = (): boolean => false;
         const originalChecked = themeSetting.checked;
         themeSetting.checked = !originalChecked;
@@ -494,8 +492,8 @@ describe('Widget', () => {
       });
 
       it('should apply dark theme and reload when user confirms', () => {
-        const themeSetting = getElemById(root.id + '.settings-bar.theme-setting') as
-          HTMLInputElement;
+        const themeSetting = getElemById(
+            root.id + '.settings-bar.theme-setting') as HTMLInputElement;
         window.confirm = (): boolean => true;
         themeSetting.checked = true;
         try {
@@ -513,11 +511,12 @@ describe('Widget', () => {
           getElemById(root.id + '.settings-bar.compiler-switches');
       });
 
-      it('should deactivate mutually exclusive switches when one is checked', () => {
-        const gnato = document.getElementById(
-            root.id + '.settings-bar.compiler-switches.-gnato') as HTMLInputElement;
-        const gnato0 = document.getElementById(
-            root.id + '.settings-bar.compiler-switches.-gnato0') as HTMLInputElement;
+      it('should deactivate mutually exclusive switches when one is checked',
+          () => {
+        const gnatoId = root.id + '.settings-bar.compiler-switches.-gnato';
+        const gnato = document.getElementById(gnatoId) as HTMLInputElement;
+        const gnato0Id = root.id + '.settings-bar.compiler-switches.-gnato0';
+        const gnato0 = document.getElementById(gnato0Id) as HTMLInputElement;
         gnato.checked = true;
         gnato0.checked = true;
         triggerEvent(gnato0, 'change');
@@ -549,7 +548,8 @@ describe('Widget', () => {
             'compiler-switch-help-info')[0] as HTMLElement;
         const firstEntry = compilerSwitchesSetting.getElementsByClassName(
             'compiler-switch-entry')[0] as HTMLElement;
-        const b = firstEntry.getElementsByTagName('button')[0] as HTMLButtonElement;
+        const b =
+            firstEntry.getElementsByTagName('button')[0] as HTMLButtonElement;
         b.click();
         expect(d.classList.contains('disabled')).to.be.false;
         expect(d.querySelector('b')).to.not.be.null;
@@ -584,7 +584,8 @@ describe('Widget', () => {
         const outputDiv = getElemById(root.id + '.output-area');
         dlButton.click();
         await ServerWorker.delay(100);
-        expect(outputDiv.textContent).to.include(Strings.INTERNAL_ERROR_MESSAGE);
+        expect(outputDiv.textContent)
+            .to.include(Strings.INTERNAL_ERROR_MESSAGE);
         root.dataset.switches = originalSwitches as string;
       });
     });
@@ -640,7 +641,6 @@ describe('Widget', () => {
       });
 
       describe('Normal Behavior', () => {
-        const identifier = 123;
         const consoleMsg = 'General message';
         let receivedMessages: Array<string> = [];
 
@@ -784,7 +784,8 @@ describe('Widget', () => {
     });
 
     it('should populate the code-block-info output element', () => {
-      const cbiContents = getElemById(root.id + '.code_block_info.run info.contents');
+      const cbiContents =
+          getElemById(root.id + '.code_block_info.run info.contents');
       expect(cbiContents.innerText).to.include('Hello from run output!');
     });
   });

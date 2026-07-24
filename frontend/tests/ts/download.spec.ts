@@ -1,8 +1,7 @@
 import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
-import chaiAsPromised from 'chai-as-promised';
 
-const chai = use(chaiDom);
+use(chaiDom);
 
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
@@ -112,7 +111,8 @@ describe('Download', () => {
     });
 
     it('should find builder switches', () => {
-      const parsedSwitches = parseSwitches({Builder: ["test1", "test2"], Compiler: []});
+      const parsedSwitches = parseSwitches(
+          {Builder: ["test1", "test2"], Compiler: []});
       const expectedBuilder = 'for Switches ("Ada") use ("test1", "test2");';
       const expectedCompiler = 'for Switches ("Ada") use ();';
       expect(parsedSwitches['--BUILDER_SWITCHES_PLACEHOLDER--']).to.equal(
@@ -124,7 +124,8 @@ describe('Download', () => {
     });
 
     it('should find compiler switches', () => {
-      const parsedSwitches = parseSwitches({Builder: [], "Compiler": ["test3", "test4"]});
+      const parsedSwitches = parseSwitches(
+          {Builder: [], "Compiler": ["test3", "test4"]});
       const expectedBuilder = 'for Switches ("Ada") use ();';
       const expectedCompiler = 'for Switches ("Ada") use ("test3", "test4");';
       expect(parsedSwitches['--BUILDER_SWITCHES_PLACEHOLDER--']).to.equal(
@@ -213,7 +214,11 @@ describe('Download', () => {
     });
 
     it('should find a main (c file)', () => {
-      const cFile = `#include <stdio.h>\nint main() {\nprintf("Hello, World!");\nreturn 0;\n}`;
+      const cFile = `#include <stdio.h>
+int main() {
+printf("Hello, World!");
+return 0;
+}`;
       const files: ResourceList = [
         {basename: 'other.c', contents: cFile},
         {basename: 'test.ads', contents: ''},
@@ -259,13 +264,15 @@ describe('Download', () => {
   describe('#getGprContents()', () => {
     it('should replace all placeholders', () => {
       const files: ResourceList = [{basename: 'main.adb', contents: ''}];
-      const gpr = getGprContents(files, {Builder: [], Compiler: []}, 'main.adb', false);
+      const gpr =
+          getGprContents(files, {Builder: [], Compiler: []}, 'main.adb', false);
       expect(gpr).to.not.contain('--MAIN_PLACEHOLDER--');
       expect(gpr).to.not.contain('--LANGUAGE_PLACEHOLDER--');
       expect(gpr).to.not.contain('--COMPILER_SWITCHES_PLACEHOLDER--');
       expect(gpr).to.not.contain('--BUILDER_SWITCHES_PLACEHOLDER--');
       expect(gpr).to.not.contain('--');
-      const gpr_spark = getGprContents(files, {Builder: [], Compiler: []}, 'main.adb', true);
+      const gpr_spark =
+          getGprContents(files, {Builder: [], Compiler: []}, 'main.adb', true);
       expect(gpr_spark).to.not.contain('--MAIN_PLACEHOLDER--');
       expect(gpr_spark).to.not.contain('--LANGUAGE_PLACEHOLDER--');
       expect(gpr_spark).to.not.contain('--COMPILER_SWITCHES_PLACEHOLDER--');
@@ -281,7 +288,8 @@ describe('Download', () => {
     let origGenerateAsync: any;
 
     const files: ResourceList = [
-      {basename: 'main.adb', contents: 'procedure Main is begin null; end Main;'},
+      {basename: 'main.adb',
+        contents: 'procedure Main is begin null; end Main;'},
     ];
     const switches: UnparsedSwitches = {Builder: [], Compiler: []};
 
@@ -299,6 +307,7 @@ describe('Download', () => {
     });
 
     after(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (JSZip.prototype as any).generateAsync = origGenerateAsync;
     });
 
@@ -313,7 +322,8 @@ describe('Download', () => {
       expect(savedFilename).to.equal('MyProject.zip');
     });
 
-    it('should include source, main.gpr, and main.adc in non-SPARK mode', async () => {
+    it('should include source, main.gpr, and main.adc in non-SPARK mode',
+        async () => {
       downloadProject(files, switches, 'main.adb', 'Test', false);
       await new Promise((r) => setTimeout(r, 200));
       expect(capturedFileNames).to.include('main.adb');
@@ -323,7 +333,8 @@ describe('Download', () => {
       expect(capturedFileNames).not.to.include('main_spark.adc');
     });
 
-    it('should also include main_spark.gpr and main_spark.adc in SPARK mode', async () => {
+    it('should also include main_spark.gpr and main_spark.adc in SPARK mode',
+        async () => {
       downloadProject(files, switches, 'main.adb', 'Test', true);
       await new Promise((r) => setTimeout(r, 200));
       expect(capturedFileNames).to.include('main.gpr');

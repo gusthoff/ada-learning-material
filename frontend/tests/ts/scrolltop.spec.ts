@@ -2,13 +2,12 @@
 import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 
-const chai = use(chaiDom);
+use(chaiDom);
 
 import {scrollTop} from '../../src/ts/scrolltop';
 
 /**
  * Helper function to trigger window event
- *
  * @param {Window} element - The window element
  * @param {string} eventName - The event to do
  */
@@ -20,9 +19,8 @@ function triggerEvent(element: Window, eventName: string): void {
 
 /**
  * Helper function used to override default non implemented version in JSDOM
- *
- * @param {number} x
- * @param {number} y
+ * @param {number} x - The x-coordinate to scroll to
+ * @param {number} y - The y-coordinate to scroll to
  */
 function scrollTo(x: number, y: number): void {
   document.body.scrollTop = y;
