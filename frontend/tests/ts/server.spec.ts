@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 
 use(chaiAsPromised);
-const chai = use(chaiDom);
+use(chaiDom);
 
 import {Server, WebSocket} from 'mock-socket';
 
@@ -66,7 +66,7 @@ describe('ServerWorker', () => {
 
     before(() => {
       server.on('connection', (socket) => {
-        socket.on('message', (event) => {
+        socket.on('message', (_event) => {
           serverResponses.forEach((msg) => {
             socket.send(JSON.stringify(msg));
           });
@@ -95,7 +95,7 @@ describe('ServerWorker', () => {
 
     before(() => {
       server.on('connection', (socket) => {
-        socket.on('message', (event) => {
+        socket.on('message', (_event) => {
           socket.send(JSON.stringify(serverResponse));
         });
       });
@@ -117,7 +117,7 @@ describe('ServerWorker', () => {
 
     before(() => {
       server.on('connection', (socket) => {
-        socket.on('message', (event) => {});
+        socket.on('message', (_event) => {});
       });
     });
 

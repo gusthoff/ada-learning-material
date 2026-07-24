@@ -1,8 +1,7 @@
 import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
-import chaiAsPromised from 'chai-as-promised';
 
-const chai = use(chaiDom);
+use(chaiDom);
 
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';

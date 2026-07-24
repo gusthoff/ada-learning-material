@@ -2,11 +2,11 @@
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
-import {Client, Server, WebSocket} from 'mock-socket';
+import {Server, WebSocket} from 'mock-socket';
 import FileSaver from 'file-saver';
 
-// const chai = use(chaiDom);
-const chai = use(chaiAsPromised);
+use(chaiDom);
+use(chaiAsPromised);
 
 import {readFileSync} from 'fs';
 import {resolve} from 'path';
@@ -139,7 +139,6 @@ describe('Widget', () => {
       let buttonGroup: HTMLElement;
       let outputDiv: HTMLElement;
       let runButton: HTMLButtonElement;
-      const identifier = 123;
 
       before(() => {
         buttonGroup = getElemById(root.id + '.button-group');
@@ -147,7 +146,7 @@ describe('Widget', () => {
 
         // stub scrollIntoView function beacuse JSDOM doesn't have it
         // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
         window.HTMLElement.prototype.scrollIntoView = (arg: any): void => {};
       });
 
@@ -264,7 +263,6 @@ describe('Widget', () => {
         let fakeDiv: HTMLDivElement;
         let fakeOA: OutputArea;
         let realDiv: HTMLElement;
-        let receivedMessages: Array<string> = [];
 
         beforeEach(() => {
           fakeDiv = document.createElement('div') as HTMLDivElement;
@@ -281,7 +279,7 @@ describe('Widget', () => {
             "requestId": "abc_-=2"
           };
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               socket.send(JSON.stringify(serverResponse));
             });
           });
@@ -313,7 +311,7 @@ describe('Widget', () => {
             }
           ];
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               serverResponses.forEach((msg) => {
                 socket.send(JSON.stringify(msg));
               });
@@ -347,7 +345,7 @@ describe('Widget', () => {
             }
           ];
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               serverResponses.forEach((msg) => {
                 socket.send(JSON.stringify(msg));
               });
@@ -384,7 +382,7 @@ describe('Widget', () => {
             }
           ];
           server.on('connection', (socket) => {
-            socket.on('message', (event) => {
+            socket.on('message', (_event) => {
               serverResponses.forEach((msg) => {
                 socket.send(JSON.stringify(msg));
               });
@@ -640,7 +638,6 @@ describe('Widget', () => {
       });
 
       describe('Normal Behavior', () => {
-        const identifier = 123;
         const consoleMsg = 'General message';
         let receivedMessages: Array<string> = [];
 

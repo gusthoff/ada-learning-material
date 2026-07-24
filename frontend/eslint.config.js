@@ -29,6 +29,7 @@ export default [
       ...tsPlugin.configs.recommended.rules,
       'jsdoc/no-undefined-types': 'off',
       'max-len': ['error', {ignoreRegExpLiterals: true}],
+      '@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: '^_'}],
     },
   },
   {

@@ -2,7 +2,7 @@
 import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 
-const chai = use(chaiDom);
+use(chaiDom);
 
 import {scrollTop} from '../../src/ts/scrolltop';
 
