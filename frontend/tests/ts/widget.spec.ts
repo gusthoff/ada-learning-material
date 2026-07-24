@@ -22,7 +22,7 @@ import {CheckOutput, RunProgram} from '../../src/ts/server-types';
 import {getElemsByTag, getElemById, getElemsByClass}
   from '../../src/ts/dom-utils';
 
-global.WebSocket = WebSocket;
+global.WebSocket = WebSocket as unknown as typeof globalThis.WebSocket;
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';

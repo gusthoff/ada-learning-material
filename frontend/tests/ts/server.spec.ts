@@ -11,7 +11,7 @@ import {Server, WebSocket} from 'mock-socket';
 import {ServerWorker} from '../../src/ts/server';
 import {CheckOutput, RunProgram} from '../../src/ts/server-types';
 
-global.WebSocket = WebSocket;
+global.WebSocket = WebSocket as unknown as typeof globalThis.WebSocket;
 
 /**
 * Remove all event listeners from the server
