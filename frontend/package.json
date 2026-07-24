@@ -58,8 +58,6 @@
     "postcss": "^8.5.22",
     "postcss-loader": "^8.2.1",
     "sass": "^1.101.6",
-    "sass-lint": "^1.13.1",
-    "sass-lint-webpack": "^1.0.4",
     "sass-loader": "^17.0.0",
     "source-map-loader": "^5.0.0",
     "source-map-support": "^0.5.21",
@@ -76,19 +74,6 @@
     "webpack-node-externals": "^3.0.0",
     "webpack-shell-plugin-next": "^2.3.3",
     "webpack-watch-files-plugin": "^1.2.1"
-  },
-  "resolutions": {
-    "minimist": "^1.2.8",
-    "acorn": "^8.11.3",
-    "is-svg": "^5.0.1",
-    "ssri": "^10.0.6",
-    "whatwg-url": "^14",
-    "lodash": "4.18.1",
-    "serialize-javascript": "7.0.5",
-    "globule/minimatch": "3.1.5",
-    "follow-redirects": "1.16.0",
-    "picomatch": "4.0.4",
-    "uuid": "14.0.0"
   },
   "scripts": {
     "dev": "webpack serve --open --config webpack.dev.cjs --mode=development",
