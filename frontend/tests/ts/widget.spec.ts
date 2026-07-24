@@ -32,7 +32,6 @@ const __dirname = dirname(__filename);
 
 /**
  * Helper function to fill DOM from a file
- *
  * @param {string} filename - The filename to use
  */
 function fillDOM(filename: string): void {
@@ -53,7 +52,6 @@ function clearDOM(): void {
 
 /**
  * Helper function to trigger an event
- *
  * @param {HTMLElement} element - The element to trigger the event on
  * @param {string} eventName - The event name to trigger
  */
@@ -64,10 +62,9 @@ function triggerEvent(element: HTMLElement, eventName: string): void {
 }
 
 /**
-* Remove all event listeners from the server
-*
-* @param {Server} server - The server to remove the listeners from
-*/
+ * Remove all event listeners from the server
+ * @param {Server} server - The server to remove the listeners from
+ */
 function removeListeners(server: Server): void {
  for (let type in server.listeners) {
    server.listeners[type] = [];

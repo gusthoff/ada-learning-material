@@ -14,10 +14,9 @@ import {CheckOutput, RunProgram} from '../../src/ts/server-types';
 global.WebSocket = WebSocket as unknown as typeof globalThis.WebSocket;
 
 /**
-* Remove all event listeners from the server
-*
-* @param {Server} server - The server to remove the listeners from
-*/
+ * Remove all event listeners from the server
+ * @param {Server} server - The server to remove the listeners from
+ */
 function removeListeners(server: Server): void {
  for (let type in server.listeners) {
    server.listeners[type] = [];
