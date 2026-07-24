@@ -4,7 +4,6 @@
         "sourceMap": true,
         "allowJs": true,
         "esModuleInterop": true,
-        "downlevelIteration": true,
         "strict": true,
         "lib": ["es2023", "dom"],
         "module": "es2020",
