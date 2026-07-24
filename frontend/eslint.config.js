@@ -3,7 +3,14 @@ import tsParser from '@typescript-eslint/parser';
 import jsdocPlugin from 'eslint-plugin-jsdoc';
 
 export default [
-  jsdocPlugin.configs['flat/recommended'],
+  {
+    // tests/html/ is regenerated Sphinx build output (gitignored), not project code.
+    ignores: ['tests/html/**'],
+  },
+  {
+    ...jsdocPlugin.configs['flat/recommended'],
+    files: ['src/**/*.ts', 'tests/**/*.ts'],
+  },
   {
     files: ['src/**/*.ts', 'tests/**/*.ts'],
     plugins: {
