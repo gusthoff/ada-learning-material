@@ -307,6 +307,7 @@ return 0;
     });
 
     after(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (JSZip.prototype as any).generateAsync = origGenerateAsync;
     });
 
