@@ -6,7 +6,7 @@
         "esModuleInterop": true,
         "downlevelIteration": true,
         "strict": true,
-        "lib": ["es2023"],
+        "lib": ["es2023", "dom"],
         "module": "es2020",
         "target": "es2022",
         "moduleResolution": "bundler"
