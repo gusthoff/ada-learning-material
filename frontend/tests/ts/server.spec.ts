@@ -36,7 +36,8 @@ describe('ServerWorker', () => {
     lab: false,
   };
   let server: Server = new Server(baseURL);
-  let client: ServerWorker = new ServerWorker(baseURL, (data: CheckOutput.FS): boolean => {
+  let client: ServerWorker = new ServerWorker(baseURL,
+      (data: CheckOutput.FS): boolean => {
     cbCount++;
     return data.completed;
   });
@@ -106,7 +107,8 @@ describe('ServerWorker', () => {
     });
 
     it('should throw an exception when AWS rejects the request', async () => {
-      await expect(client.execute(tsData, 2000)).to.be.rejectedWith(expectedErrorMsg);
+      await expect(client.execute(tsData, 2000))
+          .to.be.rejectedWith(expectedErrorMsg);
     });
   });
 
@@ -126,7 +128,8 @@ describe('ServerWorker', () => {
     });
 
     it('should timeout if no response is recieved', async () => {
-      await expect(client.execute(tsData, timeout)).to.be.rejectedWith(expectedErrorMsg);
+      await expect(client.execute(tsData, timeout))
+          .to.be.rejectedWith(expectedErrorMsg);
     });
   });
 });

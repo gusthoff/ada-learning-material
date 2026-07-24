@@ -222,7 +222,8 @@ describe('Widget', () => {
             'Compiler': ['-gnata', '-gnatX'],
           };
 
-          const request: RunProgram.TS = JSON.parse(receivedMessages[0]) as RunProgram.TS;
+          const request: RunProgram.TS =
+              JSON.parse(receivedMessages[0]) as RunProgram.TS;
 
           expect(request.data.files).to.have.length(1);
           expect(request.data.mode).to.equal('run');
@@ -404,11 +405,13 @@ describe('Widget', () => {
           root.dataset.switches = 'invalid json';
           runButton.click();
           await ServerWorker.delay(250);
-          expect(realDiv.textContent).to.include(Strings.INTERNAL_ERROR_MESSAGE);
+          expect(realDiv.textContent)
+              .to.include(Strings.INTERNAL_ERROR_MESSAGE);
           root.dataset.switches = originalSwitches as string;
         });
 
-        it('should add output line for stdout from a file not in viewMap', async () => {
+        it('should add output line for stdout from a file not in viewMap',
+            async () => {
           const serverResponse: CheckOutput.FS = {
             output: [
               {type: 'stdout', data: 'unknown.adb:1:2: error: test error'},
@@ -482,8 +485,8 @@ describe('Widget', () => {
       });
 
       it('should revert theme setting when user cancels', () => {
-        const themeSetting = getElemById(root.id + '.settings-bar.theme-setting') as
-          HTMLInputElement;
+        const themeSetting = getElemById(
+            root.id + '.settings-bar.theme-setting') as HTMLInputElement;
         window.confirm = (): boolean => false;
         const originalChecked = themeSetting.checked;
         themeSetting.checked = !originalChecked;
@@ -492,8 +495,8 @@ describe('Widget', () => {
       });
 
       it('should apply dark theme and reload when user confirms', () => {
-        const themeSetting = getElemById(root.id + '.settings-bar.theme-setting') as
-          HTMLInputElement;
+        const themeSetting = getElemById(
+            root.id + '.settings-bar.theme-setting') as HTMLInputElement;
         window.confirm = (): boolean => true;
         themeSetting.checked = true;
         try {
@@ -511,11 +514,12 @@ describe('Widget', () => {
           getElemById(root.id + '.settings-bar.compiler-switches');
       });
 
-      it('should deactivate mutually exclusive switches when one is checked', () => {
-        const gnato = document.getElementById(
-            root.id + '.settings-bar.compiler-switches.-gnato') as HTMLInputElement;
-        const gnato0 = document.getElementById(
-            root.id + '.settings-bar.compiler-switches.-gnato0') as HTMLInputElement;
+      it('should deactivate mutually exclusive switches when one is checked',
+          () => {
+        const gnatoId = root.id + '.settings-bar.compiler-switches.-gnato';
+        const gnato = document.getElementById(gnatoId) as HTMLInputElement;
+        const gnato0Id = root.id + '.settings-bar.compiler-switches.-gnato0';
+        const gnato0 = document.getElementById(gnato0Id) as HTMLInputElement;
         gnato.checked = true;
         gnato0.checked = true;
         triggerEvent(gnato0, 'change');
@@ -547,7 +551,8 @@ describe('Widget', () => {
             'compiler-switch-help-info')[0] as HTMLElement;
         const firstEntry = compilerSwitchesSetting.getElementsByClassName(
             'compiler-switch-entry')[0] as HTMLElement;
-        const b = firstEntry.getElementsByTagName('button')[0] as HTMLButtonElement;
+        const b =
+            firstEntry.getElementsByTagName('button')[0] as HTMLButtonElement;
         b.click();
         expect(d.classList.contains('disabled')).to.be.false;
         expect(d.querySelector('b')).to.not.be.null;
@@ -582,7 +587,8 @@ describe('Widget', () => {
         const outputDiv = getElemById(root.id + '.output-area');
         dlButton.click();
         await ServerWorker.delay(100);
-        expect(outputDiv.textContent).to.include(Strings.INTERNAL_ERROR_MESSAGE);
+        expect(outputDiv.textContent)
+            .to.include(Strings.INTERNAL_ERROR_MESSAGE);
         root.dataset.switches = originalSwitches as string;
       });
     });
@@ -781,7 +787,8 @@ describe('Widget', () => {
     });
 
     it('should populate the code-block-info output element', () => {
-      const cbiContents = getElemById(root.id + '.code_block_info.run info.contents');
+      const cbiContents =
+          getElemById(root.id + '.code_block_info.run info.contents');
       expect(cbiContents.innerText).to.include('Hello from run output!');
     });
   });
