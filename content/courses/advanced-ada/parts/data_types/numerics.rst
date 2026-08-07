@@ -7635,6 +7635,8 @@ same :ada:`'Delta` and :ada:`'Small` values. Note the explicit type conversion
 so direct assignment between :ada:`TQ15` and :ada:`TQ15_Derived` variables is
 not allowed |mdash| an explicit conversion is always required.
 
+.. _Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Delta_Constraint:
+
 .. admonition:: For further reading...
 
     We saw earlier how we can constrain the decimal precision of a derived
