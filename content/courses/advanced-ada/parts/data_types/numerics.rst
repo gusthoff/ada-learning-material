@@ -7315,11 +7315,11 @@ scale factor: for a
 *small* always equals its *delta*, which must be a power of ten.
 In contrast, an ordinary fixed-point type's *small* is a power of two by
 default. However, unlike for decimal fixed-point types |mdash| which always
-use a power of ten |mdash| this isn't mandatory: if we use the :ada:`Small`
-aspect, we can set the ordinary fixed-point type's *small* to any value no
-greater than the *delta*, not just a power of two. Note that an ordinary
-fixed-point type whose *small* is a power of two is usually called a binary
-fixed-point type.
+use a power of ten |mdash| this isn't mandatory: by specifying the
+:ada:`Small` aspect, we can set the ordinary fixed-point type's *small* to
+any value no greater than the *delta*, not just a power of two. Note that an
+ordinary fixed-point type whose *small* is a power of two is usually called a
+binary fixed-point type.
 
 .. note::
     A binary fixed-point type can be thought of as being closer to the actual
