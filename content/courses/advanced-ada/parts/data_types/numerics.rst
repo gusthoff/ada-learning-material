@@ -7722,8 +7722,8 @@ Subtypes of ordinary fixed-point types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A subtype of an ordinary fixed-point type has the same *delta* and *small* as
-its parent type; the only constraint allowed in a subtype declaration is a
-range constraint.
+its parent type; the only constraint allowed in a subtype declaration
+(without using obsolescent language features) is a range constraint.
 
 .. admonition:: For further reading...
 
