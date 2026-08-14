@@ -3,6 +3,8 @@ Numerics
 
 .. include:: ../../../../global.txt
 
+.. include:: <isotech.txt>
+
 .. _Adv_Ada_Numeric_Literals:
 
 Numeric Literals
@@ -4870,6 +4872,8 @@ types, and the :ada:`A / B` expression makes use of universal fixed types.
     universal fixed types, too.)
 
 
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Multiplication_Division:
+
 Multiplication and division operations with ordinary fixed-point types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -5507,6 +5511,7 @@ beyond the range of the :ada:`Smaller_Money` type.
 
 
 
+.. _Adv_Ada_Decimal_Fixed_Point_Base_Type_Decimal_Precision:
 
 Decimal precision of the base type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -7292,149 +7297,3484 @@ a complex financial application can be significant and, therefore, it might be
 considered undesirable. As we've seen in this example, we can use decimal
 fixed-point types to avoid such unwanted side effects.
 
-.. ::
 
-    .. _Intro_Ada_Ordinary_Fixed_Point_Types:
+.. _Adv_Ada_Ordinary_Fixed_Point_Types:
 
-    Ordinary fixed-point types
-    --------------------------
+Ordinary fixed-point types
+--------------------------
 
-    .. TODO: add link to advanced lesson that discusses 'Delta vs. 'Small
+We've briefly discussed
+:ref:`ordinary fixed-point types <Intro_Ada_Ordinary_Fixed_Point_Types>` in the
+Introduction to Ada course. In this section, we look into more details about
+these types.
 
-    Ordinary fixed-point types are similar to decimal fixed-point types in that the
-    values are, in effect, scaled integers.  The difference between them is in the
-    scale factor: for a decimal fixed-point type, the scaling, given explicitly by
-    the type's :ada:`delta`, is always a power of ten.
+Ordinary fixed-point types are similar to decimal fixed-point types in that the
+values are, in effect, scaled integers. The difference between them is in the
+scale factor: for a
+:ref:`decimal fixed-point type <Adv_Ada_Decimal_Fixed_Point_Types>`, the
+*small* always equals its *delta*, which must be a power of ten.
+In contrast, an ordinary fixed-point type's *small* is a power of two by
+default. However, unlike for decimal fixed-point types |mdash| which always
+use a power of ten |mdash| this isn't mandatory: by specifying the
+:ada:`Small` aspect, we can set the ordinary fixed-point type's *small* to
+any value no greater than the *delta*, not just a power of two. Note that an
+ordinary fixed-point type whose *small* is a power of two is usually called a
+binary fixed-point type.
 
-    In contrast, for an ordinary fixed-point type, the scaling is defined by the
-    type's :ada:`small`, which is derived from the specified :ada:`delta` and, by
-    default, is a power of two. Therefore, ordinary fixed-point types are sometimes
-    called binary fixed-point types.
+.. note::
+    A binary fixed-point type can be thought of as being closer to the actual
+    representation on the machine, since hardware support for decimal
+    fixed-point arithmetic is not widespread (decimal arithmetic requires
+    rescalings by a power of ten, which processors generally do not provide
+    directly), while a binary fixed-point type's power-of-two *small* lets
+    the compiler use the available integer shift instructions instead.
 
-    .. note::
-       Ordinary fixed-point types can be thought of being closer to the actual
-       representation on the machine, since hardware support for decimal
-       fixed-point arithmetic is not widespread (rescalings by a power of ten),
-       while ordinary fixed-point types make use of the available integer shift
-       instructions.
+We already know that, for decimal fixed-point types, the *small* is equal to
+the decimal type's *delta*. For ordinary fixed-point types, however, the
+*delta* doesn't have to be equal to the type's *small*.
 
-    The syntax for an ordinary fixed-point type is
+The syntax for an ordinary fixed-point type is
 
-    .. code-block:: ada
+.. code-block:: ada
 
-        type <type-name> is
-          delta <delta-value>
-          range <lower-bound> .. <upper-bound>;
+    type <type-name> is
+      delta <delta-value>
+      range <lower-bound> .. <upper-bound>;
 
-    By default the compiler will choose a scale factor, or :ada:`small`, that is a
-    power of 2 no greater than <delta-value>.
+By default the compiler will choose a scale factor, or :ada:`small`, that is a
+power of 2 no greater than <delta-value>.
 
-    For example, we may define a normalized range between -1.0 and 1.0 as
-    following:
 
-    .. code:: ada run_button project=Courses.Advanced_Ada.Fixed_Point_Types.Normalized_Fixed_Point_Type
+.. _Adv_Ada_Q_Format:
 
-        with Ada.Text_IO; use Ada.Text_IO;
+Q format
+~~~~~~~~
 
-        procedure Normalized_Fixed_Point_Type is
-           D : constant := 2.0 ** (-31);
-           type TQ31 is delta D range -1.0 .. 1.0 - D;
-        begin
-           Put_Line ("TQ31 requires "
-                     & Integer'Image (TQ31'Size)
-                     & " bits");
-           Put_Line ("The delta    value of TQ31 is "
-                     & TQ31'Image (TQ31'Delta));
-           Put_Line ("The minimum  value of TQ31 is "
-                     & TQ31'Image (TQ31'First));
-           Put_Line ("The maximum  value of TQ31 is "
-                     & TQ31'Image (TQ31'Last));
-        end Normalized_Fixed_Point_Type;
+Before we discuss ordinary fixed-point types, let's briefly look at the
+:wikipedia:`Q format <Q_(number_format)>`, or Q notation, a common way to
+describe binary fixed-point layouts. A Qm.n format uses *m* bits for the
+integer part and *n* bits for the fractional part, plus an implicit sign
+bit; when *m* is zero, we just write Qn. We name the example types in
+this section after their Q format |mdash| for instance, a normalized
+16-bit type, with all 15 non-sign bits reserved for the fractional part,
+is a Q15 type:
 
-    In this example, we are defining a 32-bit fixed-point data type for our
-    normalized range. When running the application, we notice that the upper
-    bound is close to one, but not exact one. This is a typical effect of
-    fixed-point data types |mdash| you can find more details in this discussion
-    about the :wikipedia:`Q format <Q_(number_format)>`.
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Normalized_Fixed_Point_Type
 
-    We may also rewrite this code with an exact type definition:
+    with Ada.Text_IO; use Ada.Text_IO;
 
-    .. code:: ada compile_button project=Courses.Advanced_Ada.Fixed_Point_Types.Normalized_Adapted_Fixed_Point_Type
+    procedure Normalized_Fixed_Point_Type is
+       D : constant := 2.0 ** (-15);
 
-        procedure Normalized_Adapted_Fixed_Point_Type is
-           type TQ31 is
-             delta 2.0 ** (-31)
-             range -1.0 .. 1.0 - 2.0 ** (-31);
-        begin
-           null;
-        end Normalized_Adapted_Fixed_Point_Type;
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("TQ15 requires "
+                 & TQ15'Size'Image
+                 & " bits");
+       Put_Line ("The delta    value of TQ15 is "
+                 & TQ15'Delta'Image);
+       Put_Line ("The minimum  value of TQ15 is "
+                 & TQ15'First'Image);
+       Put_Line ("The maximum  value of TQ15 is "
+                 & TQ15'Last'Image);
+    end Normalized_Fixed_Point_Type;
 
-    We may also use any other range. For example:
+In this example, we declare a 16-bit fixed-point type with a normalized
+range, from -1.0 to (1.0 - *small*). When we run this example, we see
+that the upper bound is close to one, but not exactly one |mdash| a
+typical effect of fixed-point data types that we'll come back to
+throughout this section.
 
-    .. code:: ada run_button project=Courses.Advanced_Ada.Fixed_Point_Types.Custom_Fixed_Point_Range
+Q format actually comes in two variants: one counts the sign bit in
+*m*, the other doesn't; this course uses the latter.
 
-        with Ada.Text_IO;  use Ada.Text_IO;
-        with Ada.Numerics; use Ada.Numerics;
+.. admonition:: For further reading...
 
-        procedure Custom_Fixed_Point_Range is
-           type T_Inv_Trig is
-             delta 2.0 ** (-15) * Pi
-             range -Pi / 2.0 .. Pi / 2.0;
-        begin
-           Put_Line ("T_Inv_Trig requires "
-                     & Integer'Image (T_Inv_Trig'Size)
-                     & " bits");
-           Put_Line ("Delta    value of T_Inv_Trig: "
-                     & T_Inv_Trig'Image
-                         (T_Inv_Trig'Delta));
-           Put_Line ("Minimum  value of T_Inv_Trig: "
-                     & T_Inv_Trig'Image
-                         (T_Inv_Trig'First));
-           Put_Line ("Maximum  value of T_Inv_Trig: "
-                     & T_Inv_Trig'Image
-                         (T_Inv_Trig'Last));
-        end Custom_Fixed_Point_Range;
+    Let's walk through a few more Q formats to see how *m* and *n* shape a
+    type's range and *delta*, starting with the simplest one: a format
+    with no fractional part at all, such as a 16-bit type in Q15.0
+    format |mdash| essentially a plain integer type in disguise.
 
-    In this example, we are defining a 16-bit type called :ada:`T_Inv_Trig`,
-    which has a range from -π/2 to π/2.
-
-    All standard operations are available for fixed-point types. For example:
-
-    .. code:: ada run_button project=Courses.Advanced_Ada.Fixed_Point_Types.Fixed_Point_Op
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q15_0_Fixed_Point_Type
 
         with Ada.Text_IO; use Ada.Text_IO;
 
-        procedure Fixed_Point_Op is
-           type TQ31 is
-             delta 2.0 ** (-31)
-             range -1.0 .. 1.0 - 2.0 ** (-31);
+        procedure Q15_0_Fixed_Point_Type is
+           type TQ15_0 is
+             delta 1.0
+             range -2.0 ** 15 ..
+                    2.0 ** 15 - 1.0;
 
-           A, B, R : TQ31;
+           type Int16 is
+             range -2 ** 15 ..
+                    2 ** 15 - 1;
         begin
-           A := 0.25;
-           B := 0.50;
-           R := A + B;
-           Put_Line ("R is " & TQ31'Image (R));
-        end Fixed_Point_Op;
+           Put_Line ("TQ15_0 requires "
+                     & TQ15_0'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ15_0 is "
+                     & TQ15_0'Delta'Image);
+           Put_Line ("The minimum  value of TQ15_0 is "
+                     & TQ15_0'First'Image);
+           Put_Line ("The maximum  value of TQ15_0 is "
+                     & TQ15_0'Last'Image);
 
-    As expected, :ada:`R` contains 0.75 after the addition of :ada:`A` and :ada:`B`.
+           Put_Line ("------------------------------");
+           Put_Line ("Int16 requires "
+                     & Int16'Size'Image
+                     & " bits");
+           Put_Line ("The minimum  value of Int16 is "
+                     & Int16'First'Image);
+           Put_Line ("The maximum  value of Int16 is "
+                     & Int16'Last'Image);
+        end Q15_0_Fixed_Point_Type;
 
-    In fact the language is more general than these examples imply, since in
-    practice it is typical to need to multiply or divide values from different
-    fixed-point types, and obtain a result that may be of a third fixed-point type.
-    The details are outside the scope of this introductory course.
+    When we run this example, we see that the :ada:`TQ15_0` type requires
+    16 bits |mdash| the same as the :ada:`Int16` type |mdash| and that both
+    types share the same range. Because the *delta* is 1.0, the :ada:`TQ15_0`
+    type has no fractional part, so it behaves just like a plain 16-bit
+    integer type.
 
-    It is also worth noting, although again the details are outside the scope of
-    this course, that you can explicitly specify a value for an ordinary
-    fixed-point type's :ada:`small`.  This allows non-binary scaling, for example:
+    Now let's move one bit from the integer part to the fractional part,
+    which gives us the Q14.1 format. Here, the *delta* becomes
+    2\ :sup:`-1` |mdash| that is, 0.5 |mdash| so the type can represent
+    multiples of one half:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q14_1_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q14_1_Fixed_Point_Type is
+           type TQ14_1 is
+             delta  0.5
+             range -2.0 ** 14 ..
+                    2.0 ** 14 - 0.5;
+        begin
+           Put_Line ("TQ14_1 requires "
+                     & TQ14_1'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ14_1 is "
+                     & TQ14_1'Delta'Image);
+           Put_Line ("The minimum  value of TQ14_1 is "
+                     & TQ14_1'First'Image);
+           Put_Line ("The maximum  value of TQ14_1 is "
+                     & TQ14_1'Last'Image);
+        end Q14_1_Fixed_Point_Type;
+
+    To see that single fractional bit in action, let's assign a value that
+    has only that bit set. For example, the based literal :ada:`2#0.1#`
+    represents 0.5 |mdash| the smallest non-zero value that the :ada:`TQ14_1`
+    type can represent:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q14_1_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q14_1_Fixed_Point_Type is
+           type TQ14_1 is
+             delta  0.5
+             range -2.0 ** 14 ..
+                    2.0 ** 14 - 0.5;
+
+           V : TQ14_1;
+        begin
+           V := 2#0.1#;
+           Put_Line ("V = " & V'Image);
+        end Q14_1_Fixed_Point_Type;
+
+    Let's now look at the Q7.8 format, which uses 7 bits for the integer
+    part and 8 bits for the fractional part. The *delta* is therefore
+    2\ :sup:`-8` (0.00390625):
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Q7_8_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q7_8_Fixed_Point_Type is
+           type TQ7_8 is
+             delta  2.0 ** (-8)
+             range -2.0 ** 7 ..
+                    2.0 ** 7 - 2.0 ** (-8);
+        begin
+           Put_Line ("TQ7_8 requires "
+                     & TQ7_8'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ7_8 is "
+                     & TQ7_8'Delta'Image);
+           Put_Line ("The minimum  value of TQ7_8 is "
+                     & TQ7_8'First'Image);
+           Put_Line ("The maximum  value of TQ7_8 is "
+                     & TQ7_8'Last'Image);
+        end Q7_8_Fixed_Point_Type;
+
+    So far, we've written the *delta* and the range as literals for each
+    format. We can instead generalize the type definition by introducing
+    named numbers for the integer and fractional bit counts, which makes the
+    connection between the Q format and the declaration explicit. The
+    following example reconstructs the Q14.1 type in this way:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Gen_Fixed_Point_Type
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Q14_1_Fixed_Point_Type is
+
+           --
+           --  Values for Q14.1
+           --
+           Int_Bits  : constant := 14;
+           Frac_Bits : constant := 1;
+
+           --
+           --  Generalized definition of a
+           --  fixed-point type
+           --
+           D : constant := 2.0 ** (-Frac_Bits);
+
+           type Fixed is
+             delta D
+             range -2.0 ** Int_Bits ..
+                    2.0 ** Int_Bits - D;
+
+           --
+           --  Declaring Q14.1 fixed-point type
+           --  as a subtype of the "template"
+           --  declared above.
+           --
+           subtype TQ14_1 is
+             Fixed;
+        begin
+           Put_Line ("TQ14_1 requires "
+                     & TQ14_1'Size'Image
+                     & " bits");
+           Put_Line ("The delta    value of TQ14_1 is "
+                     & TQ14_1'Delta'Image);
+           Put_Line ("The minimum  value of TQ14_1 is "
+                     & TQ14_1'First'Image);
+           Put_Line ("The maximum  value of TQ14_1 is "
+                     & TQ14_1'Last'Image);
+        end Q14_1_Fixed_Point_Type;
+
+    We'll see this naming convention again for the Q31, Q47, and Q7.24
+    types used later in this section. It doesn't describe every
+    ordinary fixed-point type Ada lets us declare, though: it has no
+    notation for a *small* that isn't a power of two (set via the
+    :ada:`Small` aspect, discussed shortly), nor for a *delta* that's a
+    power of two greater than 1.0. See the
+    :wikipedia:`Q format <Q_(number_format)>` article for more on the
+    format itself.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Subtypes:
+
+Derived fixed-point types and subtypes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this section, we present a brief discussion about types derived from
+ordinary fixed-point types, as well as subtypes of ordinary fixed-point types.
+
+Derived fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We discussed deriving from ordinary fixed-point types earlier (see
+:ref:`derived fixed-point types <Adv_Ada_Fixed_Point_Derived_Types_Subtypes>`).
+To briefly recap: a derived ordinary fixed-point type inherits the *delta* and
+*small* of its parent type, and explicit type conversion is required when
+assigning between the parent type and a derived type.
+
+We can confirm this behavior by using the :ada:`'Delta` and :ada:`'Small`
+attributes of both types:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Ordinary_Fixed_Point_Derived_Types
+
+    package Custom_Fixed_Point is
+
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       type TQ15_Derived is new TQ15;
+
+    end Custom_Fixed_Point;
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Derived_Fixed_Point_Types is
+       Q15         : TQ15;
+       Q15_Derived : TQ15_Derived;
+    begin
+       Put_Line ("TQ15'Delta         = "
+                 & TQ15'Delta'Image);
+       Put_Line ("TQ15'Small         = "
+                 & TQ15'Small'Image);
+       Put_Line ("TQ15_Derived'Delta = "
+                 & TQ15_Derived'Delta'Image);
+       Put_Line ("TQ15_Derived'Small = "
+                 & TQ15_Derived'Small'Image);
+
+       Q15  := 0.25;
+       Put_Line ("Q15         = "
+                 & Q15'Image);
+
+       Q15_Derived := TQ15_Derived (Q15);
+       Put_Line ("Q15_Derived = "
+                 & Q15_Derived'Image);
+    end Show_Derived_Fixed_Point_Types;
+
+In this example, :ada:`TQ15_Derived` is derived from :ada:`TQ15` without any
+additional constraints. We can confirm in the output that both types share the
+same :ada:`'Delta` and :ada:`'Small` values. Note the explicit type conversion
+:ada:`TQ15_Derived (Q15)`: unlike subtypes, derived types are distinct types,
+so direct assignment between :ada:`TQ15` and :ada:`TQ15_Derived` variables is
+not allowed |mdash| an explicit conversion is always required.
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Delta_Constraint:
+
+.. admonition:: For further reading...
+
+    We saw earlier how we can constrain the decimal precision of a derived
+    decimal fixed-point type by specifying the :ada:`digits` of the derived
+    type (see
+    :ref:`derived decimal fixed-point types <Adv_Ada_Decimal_Fixed_Point_Derived_Types_Subtypes>`).
+    For ordinary fixed-point types, we can do something similar by
+    specifying the *delta* of the derived type |mdash| but note that
+    constraining the *delta* when deriving an ordinary fixed-point type is an
+    obsolescent feature. Let's see what happens when we try it:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Derived_Ordinary_Fixed_Point_Types
+
+        package Custom_Fixed_Point is
+
+           D15 : constant := 2.0 ** (-15);
+           D7  : constant := 2.0 ** (-7);
+
+           type TQ15 is
+             delta D15
+             range -1.0 .. 1.0 - D15;
+
+           type TQ15_New is new
+             TQ15
+             delta D7;
+
+        end Custom_Fixed_Point;
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        with Custom_Fixed_Point;
+        use  Custom_Fixed_Point;
+
+        procedure Show_Fixed_Point_Subtypes is
+           Q15     : TQ15;
+           Q15_New : TQ15_New;
+        begin
+           Q15  := 0.25;
+           Put_Line ("Q15     = "
+                     & Q15'Image);
+
+           Q15_New := TQ15_New (Q15);
+           Put_Line ("Q15_New = "
+                     & Q15_New'Image);
+        end Show_Fixed_Point_Subtypes;
+
+    In this example, we declare :ada:`TQ15_New` as a derived type of
+    :ada:`TQ15` with a *delta* constraint: :ada:`D7` = 2\ :sup:`-7` instead
+    of :ada:`D15` = 2\ :sup:`-15`. This constraint only changes
+    :ada:`TQ15_New`'s *delta* attribute |mdash| it doesn't touch *small*,
+    which :ada:`TQ15_New` still inherits unchanged from :ada:`TQ15`. So
+    :ada:`TQ15_New` represents exactly the same set of values as
+    :ada:`TQ15` does; what changes is :ada:`'Aft` (the number of digits
+    :ada:`'Image` displays), which is derived from *delta*, not *small*:
+
+    +---------------+------------------+------------------+
+    |               | :ada:`TQ15`      | :ada:`TQ15_New`  |
+    +===============+==================+==================+
+    | *small*       | 2\ :sup:`-15`    | 2\ :sup:`-15`    |
+    +---------------+------------------+------------------+
+    | *delta*       | 2\ :sup:`-15`    | 2\ :sup:`-7`     |
+    +---------------+------------------+------------------+
+    | :ada:`'Aft`   | 5                | 3                |
+    +---------------+------------------+------------------+
+
+    We then assign 0.25 to :ada:`Q15` and convert it to :ada:`TQ15_New`
+    using the explicit type conversion :ada:`TQ15_New (Q15)`. Since 0.25 is
+    exactly representable in both types, no rounding occurs during the
+    conversion |mdash| only the display changes, matching the :ada:`'Aft`
+    values above: :ada:`Q15'Image` displays ``0.25000``, while
+    :ada:`Q15_New'Image` displays ``0.250``. As noted, constraining the
+    *delta* of a derived type is an obsolescent feature, and compilers will
+    typically emit a warning for such declarations.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`J.3 Reduced Accuracy Subtypes <J-3>`
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Subtypes:
+
+Subtypes of ordinary fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A subtype of an ordinary fixed-point type has the same *delta* and *small* as
+its parent type; the only constraint allowed in a subtype declaration
+(without using obsolescent language features) is a range constraint.
+
+.. admonition:: For further reading...
+
+    A subtype declaration may also include a *delta* constraint, but, as
+    mentioned
+    :ref:`above <Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Delta_Constraint>`,
+    that's an obsolescent feature.
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Ordinary_Fixed_Point_Subtypes
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Ordinary_Fixed_Point_Subtypes is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       subtype TQ15_Pos is
+         TQ15 range 0.0 .. 1.0 - D;
+
+       A : TQ15     := 0.25;
+       B : TQ15_Pos := 0.5;
+    begin
+       --  Subtype to parent: always safe,
+       --  no conversion needed
+       A := B;
+       Put_Line ("A = " & A'Image);
+
+       --  Parent to subtype:
+       --  range check at run time
+       A := 0.75;
+       B := A;
+       Put_Line ("B = " & B'Image);
+    end Show_Ordinary_Fixed_Point_Subtypes;
+
+In this example, :ada:`TQ15_Pos` is a subtype of :ada:`TQ15` restricted to
+non-negative values. Assigning a :ada:`TQ15_Pos` value to a :ada:`TQ15`
+variable doesn't require an explicit conversion. However, when we assign from
+:ada:`TQ15` to its subtype :ada:`TQ15_Pos`, a range check is performed at run
+time.
+
+
+Small and delta
+~~~~~~~~~~~~~~~
+
+As we already mentioned
+:ref:`in a previous section <Adv_Ada_Fixed_Point_Types_Small_Delta>`, the small
+of a decimal type is always equal to the delta that we specified. However, for
+ordinary fixed-point types, this doesn't have to be the case |mdash| and if we
+select a delta that is not a power of two, the compiler will choose a *small*
+that is an implementation-defined power of two no greater than the *delta*.
+In this case, *small* and *delta* will differ from each other.
+
+.. admonition:: In the GNAT toolchain
+
+    Among all the powers of two no greater than the *delta*, GNAT always
+    chooses the *largest* one. This is a compiler choice, however, not a
+    language guarantee: another conforming compiler is free to pick a
+    different power of two. Specifying the *small* explicitly |mdash| as the
+    next example does |mdash| pins it down and makes the declaration
+    portable. The GNAT Reference Manual's section on
+    `Writing Portable Fixed-Point Declarations <https://gcc.gnu.org/onlinedocs/gnat_rm/Writing-Portable-Fixed-Point-Declarations.html>`_
+    recommends exactly that, and discusses another compiler freedom of the
+    same kind: the Ada standard also allows a compiler to narrow the declared
+    range bounds by one *small*.
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Point_Op
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Fixed_Point_Op is
+
+       Angle_Delta : constant := 1.0 / 3600.0;
+
+       type Angle is
+         delta Angle_Delta
+         range 0.0 .. 360.0 - Angle_Delta;
+
+       type Angle_2 is
+         delta Angle_Delta
+         range 0.0 .. 360.0 - Angle_Delta
+       with Small => Angle_Delta;
+
+    begin
+
+       Put_Line ("The small    of Angle         is "
+                 & Angle'Small'Image);
+       Put_Line ("The delta    value of Angle   is "
+                 & Angle'Delta'Image);
+       Put_Line ("The minimum  value of Angle   is "
+                 & Angle'First'Image);
+       Put_Line ("The maximum  value of Angle   is "
+                 & Angle'Last'Image);
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small    of Angle_2       is "
+                 & Angle_2'Small'Image);
+       Put_Line ("The delta    value of Angle_2 is "
+                 & Angle_2'Delta'Image);
+       Put_Line ("The minimum  value of Angle_2 is "
+                 & Angle_2'First'Image);
+       Put_Line ("The maximum  value of Angle_2 is "
+                 & Angle_2'Last'Image);
+    end Fixed_Point_Op;
+
+When we run this example, we see that :ada:`Angle'Small` (2\ :sup:`-12`
+≈ 2.44×10\ :sup:`-4`) is smaller than :ada:`Angle'Delta` (1/3600
+≈ 2.78×10\ :sup:`-4`): the compiler picked the largest power of two
+not exceeding the *delta*. This means stored angle values are converted
+to a neighboring multiple of 2\ :sup:`-12` |mdash| not necessarily the
+nearest one |mdash| which may not coincide with exact multiples of
+1/3600.
+
+By contrast, for :ada:`Angle_2`, we use :ada:`with Small => Angle_Delta` to
+force *small* = *delta*, so every multiple of 1/3600 is representable
+exactly. As mentioned before, Ada lets us use the :ada:`Small` aspect to set
+an ordinary fixed-point type's *small* to any value no greater than the
+*delta*, not just a power of two. However, a compiler isn't required to
+support every such value.
+:ada:`Angle_2`'s *small* (1/3600) is neither a power of two nor a power of
+ten.
+
+.. admonition:: For further reading...
+
+    Because :ada:`Angle_2`'s *small* is neither a power of two nor a power
+    of ten, it isn't covered even by the guarantee that Annex F (the
+    Information Systems Annex) gives for decimal *smalls*. In fact, an Ada
+    compiler is free to reject this declaration as illegal if it doesn't
+    support those values of *small*. Even a compiler that conforms to
+    Annex F |mdash| which mandates support for decimal smalls |mdash| isn't
+    obligated to accept this value, either.
+
+    GNAT does actually support this value, as the previous example
+    demonstrates. However, that's a GNAT choice, not something the standard
+    guarantees; see the note in the
+    :ref:`Decimal precision <Adv_Ada_Ordinary_Fixed_Point_Types_Decimal_Precision>`
+    subsection for more details.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.9 Fixed Point Types <3-5-9>`
+        - :arm22:`F.2 The Package Decimal <F-2>`
+
+
+Small and delta of the base type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We discussed :ref:`base types <Adv_Ada_Base_Types>` earlier on, as well
+as the decimal precision of the base type of
+:ref:`floating-point types <Adv_Ada_Floating_Point_Base_Type_Decimal_Precision>`
+and
+:ref:`decimal types <Adv_Ada_Decimal_Fixed_Point_Base_Type_Decimal_Precision>`.
+Let's now look at the *small* and the *delta* of the base type of an
+ordinary fixed-point type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Angle
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Fixed_Point_Base_Type is
+
+       Angle_Delta : constant := 1.0 / 3600.0;
+
+       type Angle is
+         delta Angle_Delta
+         range 0.0 .. 360.0 - Angle_Delta;
+
+    begin
+       Put_Line ("The small          of "
+                 & "Angle      is "
+                 & Angle'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "Angle      is "
+                 & Angle'Delta'Image);
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of "
+                 & "Angle'Base is "
+                 & Angle'Base'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "Angle'Base is "
+                 & Angle'Base'Delta'Image);
+
+       Put_Line ("------------------------------");
+
+    end Show_Fixed_Point_Base_Type;
+
+Here, the *small* of :ada:`Angle` (2\ :sup:`-12`) isn't equal to its
+*delta* (1/3600): the compiler chooses a *small* that is the largest power
+of two no greater than the *delta*. That being said, the most important detail
+now is that :ada:`Angle'Base` has the same *small* and the same *delta* as
+:ada:`Angle` |mdash| this means that deriving the base type doesn't change
+either of them.
+
+Let's see the same for a normalized fixed-point type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q15
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ15      is "
+                 & TQ15'Small'Image);
+       Put_Line ("The delta    value of TQ15      is "
+                 & TQ15'Delta'Image);
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ15'Base is "
+                 & TQ15'Base'Small'Image);
+       Put_Line ("The delta    value of TQ15'Base is "
+                 & TQ15'Base'Delta'Image);
+
+    end Show_Full_Range_Base_Type;
+
+For the normalized :ada:`TQ15` type, the *small* and the *delta* are
+equal, and once again :ada:`TQ15'Base` reports the same *small* and
+*delta* as :ada:`TQ15`. This doesn't depend on the number of fractional
+bits: we see the same behavior when using data types with bigger bit-widths:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q47
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-47);
+
+       type TQ47 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ47      is "
+                 & TQ47'Small'Image);
+       Put_Line ("The delta    value of TQ47      is "
+                 & TQ47'Delta'Image);
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ47'Base is "
+                 & TQ47'Base'Small'Image);
+       Put_Line ("The delta    value of TQ47'Base is "
+                 & TQ47'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ47'Base is "
+                 & TQ47'Base'First'Image);
+       Put_Line ("The maximum  value of TQ47'Base is "
+                 & TQ47'Base'Last'Image);
+       Put_Line ("The size    of TQ47'Base        is "
+                 & TQ47'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+As expected, we again see the same results for :ada:`TQ47` and
+:ada:`TQ47'Base`, i.e. they have the same *small* and the same *delta*. So,
+regardless of the type, deriving the base type leaves the *small* and the
+*delta* untouched |mdash| as we'll see in the next subsections, it's the range
+and the size that differ.
+
+
+.. _Adv_Ada_Normalized_Ordinary_Fixed_Point_Machine_Representation:
+
+Machine representation of normalized fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's revisit the topic of machine representation |mdash| this time, using
+normalized fixed-point types:
+
+.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Machine_Representation
+
+    package Custom_Fixed_Point is
+       D_15 : constant := 2.0 ** (-15);
+       D_31 : constant := 2.0 ** (-31);
+
+       type TQ15 is
+         delta D_15
+         range -1.0 .. 1.0 - D_15;
+
+       type TQ31 is
+         delta D_31
+         range -1.0 .. 1.0 - D_31;
+
+       type Int_TQ15 is
+         range -2 ** (TQ15'Size - 1) ..
+                2 ** (TQ15'Size - 1) - 1;
+
+       type Int_TQ31 is
+         range -2 ** (TQ31'Size - 1) ..
+                2 ** (TQ31'Size - 1) - 1;
+
+    end Custom_Fixed_Point;
+
+In this package, we declare two normalized fixed-point types (:ada:`TQ15`
+and :ada:`TQ31`) alongside two integer types (:ada:`Int_TQ15` and
+:ada:`Int_TQ31`) that have the same range of values. Those integer types are
+included in this package because we want to use them to retrieve the machine
+representation of the fixed-point types.
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Machine_Representation
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Fixed_Point_Conversions is
+       V_31 : TQ31;
+       V_15 : TQ15;
+
+       procedure Show_Vars is
+       begin
+          Put_Line ("V_31 = "
+                    & V_31'Image);
+          Put_Line ("V_15 = "
+                    & V_15'Image);
+          Put_Line ("--------------");
+       end Show_Vars;
+    begin
+       V_15 := 2#0.111_1111_1111_1111#;
+       V_31 := TQ31 (V_15);
+       Show_Vars;
+
+       V_31 :=
+         2#0.111_1111_1111_1111_1111_1111_1111_1111#;
+       V_15 := TQ15 (V_31);
+       Show_Vars;
+    end Show_Fixed_Point_Conversions;
+
+
+As we've done before, we can use an
+:ref:`overlay <Adv_Ada_Address_Aspect_Overlay>` to uncover the actual integer
+values stored on the machine when assigning values to objects of fixed-point
+type. (As with any overlay, this only works correctly when the two types
+match in size and :ref:`alignment <Adv_Ada_Data_Representation_Alignment>`.)
+For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Machine_Representation
+    :class: ada-run
+
+    generic
+       type T_Fixed     is delta <>;
+       type T_Int_Fixed is range <>;
+    procedure Gen_Show_Info (V     : T_Fixed;
+                             V_Str : String);
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Gen_Show_Info (V     : T_Fixed;
+                             V_Str : String)
+    is
+       V_Local       : T_Fixed;
+       V_Int_Overlay : T_Int_Fixed
+         with Address => V_Local'Address,
+              Import, Volatile;
+       V_Real        : Float;
+    begin
+       V_Local := V;
+       V_Real  := Float (V_Int_Overlay) *
+         T_Fixed'Small;
+
+       Put_Line (V_Str
+                 & " (fixed-point) : "
+                 & Float (V_Local)'Image);
+       Put_Line (V_Str
+                 & " (integer)     : "
+                 & V_Int_Overlay'Image);
+       Put_Line (V_Str
+                 & " (floating-p.) : "
+                 & V_Real'Image);
+       Put_Line ("----------");
+    end Gen_Show_Info;
+
+    with Ada.Text_IO;   use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    with Gen_Show_Info;
+
+    procedure Show_Machine_Representation
+    is
+       procedure Show_Info is new
+         Gen_Show_Info (T_Fixed     => TQ31,
+                        T_Int_Fixed => Int_TQ31);
+       procedure Show_Info is new
+         Gen_Show_Info (T_Fixed     => TQ15,
+                        T_Int_Fixed => Int_TQ15);
+    begin
+       Show_Info (TQ15'First,     "TQ15'First  ");
+       Show_Info (TQ15'(0.25),    "0.25        ");
+       Show_Info (TQ15'(0.50),    "0.50        ");
+       Show_Info (TQ15'Last,      "TQ15'Last   ");
+       Put_Line ("-----------------------------");
+
+       Show_Info (TQ31'First,     "TQ31'First  ");
+       Show_Info (TQ31'(0.25),    "0.25        ");
+       Show_Info (TQ31'(0.50),    "0.50        ");
+       Show_Info (TQ31'Last,      "TQ31'Last   ");
+       Put_Line ("-----------------------------");
+    end Show_Machine_Representation;
+
+In this example, the generic :ada:`Gen_Show_Info` procedure uses an overlay
+to retrieve the integer representation of each fixed-point value |mdash|
+this gives us the machine representation of the real values for the
+:ada:`TQ15` and :ada:`TQ31` types.
+In the following table, we see the resulting values:
+
++-------------+-------------------------------+
+| Real value  | Integer representation        |
+|             +--------------+----------------+
+|             | :ada:`TQ15`  | :ada:`TQ31`    |
+|             | type         | type           |
++=============+==============+================+
+|       -1.00 |      -32,768 | -2,147,483,648 |
++-------------+--------------+----------------+
+|        0.25 |        8,192 |    536,870,912 |
++-------------+--------------+----------------+
+|        0.50 |       16,384 |  1,073,741,824 |
++-------------+--------------+----------------+
+
+In other words, integer values are being used |mdash| with an associated
+scalefactor based on powers of two |mdash| to represent ordinary fixed-point
+types on the target machine.
+
+The scalefactor is 2\ :sup:`-15` for the :ada:`TQ15` type and 2\ :sup:`-31`
+for the :ada:`TQ31` type. This scalefactor corresponds to
+the *small*  of each type. For example, if we multiply the integer
+representation of the real value by the *small*, we get these real values for
+the :ada:`TQ15` type:
+
++-------------+-------------------------------+
+| Real value  | :ada:`TQ15` type              |
+|             +-------------------------------+
+|             | Integer representation        |
+|             | multiplied by the *small*     |
++=============+===============================+
+|       -1.00 |     = -32,768 * 2\ :sup:`-15` |
++-------------+-------------------------------+
+|        0.25 |     =   8,192 * 2\ :sup:`-15` |
++-------------+-------------------------------+
+|        0.50 |     =  16,384 * 2\ :sup:`-15` |
++-------------+-------------------------------+
+
+.. admonition:: For further reading...
+
+    As you might have expected, two fixed-point types with the same size can
+    have different machine representations. Again, the actual integer value is
+    based solely on the type's *small*, and not the type's size.
+
+    Consider the following 32-bit fixed-point types:
+
+    .. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Machine_Representation_Delta_Vs_Size
+
+        package Custom_Fixed_Point is
+           D_24 : constant := 2.0 ** (-24);
+           D_31 : constant := 2.0 ** (-31);
+
+           type TQ31 is
+             delta D_31
+             range -1.0 .. 1.0 - D_31;
+
+           type TQ7_24 is
+             delta  D_24
+             range -2.0 ** 7 ..
+                    2.0 ** 7 - D_24;
+
+           type Int_TQ31 is
+             range -2 ** (TQ31'Size - 1) ..
+                    2 ** (TQ31'Size - 1) - 1;
+
+           type Int_TQ7_24 is
+             range -2 ** (TQ7_24'Size - 1) ..
+                    2 ** (TQ7_24'Size - 1) - 1;
+
+        end Custom_Fixed_Point;
+
+    Here's the corresponding test application, reusing the same
+    :ada:`Gen_Show_Info` generic from before:
+
+    .. code:: ada no_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Machine_Representation_Delta_Vs_Size
+        :class: ada-run
+
+        generic
+           type T_Fixed     is delta <>;
+           type T_Int_Fixed is range <>;
+        procedure Gen_Show_Info (V     : T_Fixed;
+                                 V_Str : String);
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        procedure Gen_Show_Info (V     : T_Fixed;
+                                 V_Str : String)
+        is
+           V_Local       : T_Fixed;
+           V_Int_Overlay : T_Int_Fixed
+             with Address => V_Local'Address,
+                  Import, Volatile;
+           V_Real        : Float;
+        begin
+           V_Local := V;
+           V_Real  := Float (V_Int_Overlay) *
+             T_Fixed'Small;
+
+           Put_Line (V_Str
+                     & " (fixed-point) : "
+                     & Float (V_Local)'Image);
+           Put_Line (V_Str
+                     & " (integer)     : "
+                     & V_Int_Overlay'Image);
+           Put_Line (V_Str
+                     & " (floating-p.) : "
+                     & V_Real'Image);
+           Put_Line ("----------");
+        end Gen_Show_Info;
+
+        with Ada.Text_IO;   use Ada.Text_IO;
+
+        with Custom_Fixed_Point;
+        use  Custom_Fixed_Point;
+
+        with Gen_Show_Info;
+
+        procedure Show_Machine_Repr_Delta_Vs_Size
+        is
+           procedure Show_Info is new
+             Gen_Show_Info (T_Fixed     => TQ31,
+                            T_Int_Fixed => Int_TQ31);
+           procedure Show_Info is new
+             Gen_Show_Info (T_Fixed     => TQ7_24,
+                            T_Int_Fixed => Int_TQ7_24);
+        begin
+           Show_Info (TQ31'First,
+                      "TQ31'First    ");
+           Show_Info (TQ31'(0.25),
+                      "0.25          ");
+           Show_Info (TQ31'(0.50),
+                      "0.50          ");
+           Show_Info (TQ31'Last,
+                      "TQ31'Last     ");
+           Put_Line
+              ("-----------------------------");
+
+           Show_Info (TQ7_24'First,
+                      "TQ7_24'First ");
+           Show_Info (TQ7_24'(-1.0),
+                      "-1.0         ");
+           Show_Info (TQ7_24'(0.25),
+                      "0.25         ");
+           Show_Info (TQ7_24'(0.50),
+                      "0.50         ");
+           Show_Info (TQ7_24'Last,
+                      "TQ7_24'Last  ");
+           Put_Line
+              ("-----------------------------");
+
+        end Show_Machine_Repr_Delta_Vs_Size;
+
+    The following table presents the values we get when running this
+    application:
+
+    +-------------+--------------------------------+
+    | Real value  | Integer representation         |
+    |             +----------------+---------------+
+    |             | :ada:`TQ31`    | :ada:`TQ7_24` |
+    |             | type           | type          |
+    +=============+================+===============+
+    |       -1.00 | -2,147,483,648 |   -16,777,216 |
+    +-------------+----------------+---------------+
+    |        0.25 |    536,870,912 |     4,194,304 |
+    +-------------+----------------+---------------+
+    |        0.50 |  1,073,741,824 |     8,388,608 |
+    +-------------+----------------+---------------+
+
+    The real value is based on the multiplication of the integer value by the
+    type's *small* (2\ :sup:`-24`):
+
+    +-------------+---------------------------------+
+    | Real value  | :ada:`TQ7_24`                   |
+    |             +---------------------------------+
+    |             | Integer representation          |
+    |             | multiplied by the *small*       |
+    +=============+=================================+
+    |       -1.00 |   = -16,777,216 * 2\ :sup:`-24` |
+    +-------------+---------------------------------+
+    |        0.25 |   =   4,194,304 * 2\ :sup:`-24` |
+    +-------------+---------------------------------+
+    |        0.50 |   =   8,388,608 * 2\ :sup:`-24` |
+    +-------------+---------------------------------+
+
+
+.. _Adv_Ada_Fixed_Point_String_Representation:
+
+String representation of fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Throughout this section, we've used the :ada:`'Image` attribute to display
+fixed-point values. There are actually two natural ways to turn a
+fixed-point value into a string: we can use the :ada:`'Image` attribute of
+the fixed-point type directly, or we can first convert the value to a
+floating-point type and use that type's :ada:`'Image`. Let's compare them:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.String_Representation
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_String_Representation is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       procedure Show (V : TQ15) is
+       begin
+          Put_Line ("TQ15'Image  : "
+                    & V'Image);
+          Put_Line ("Float'Image : "
+                    & Float (V)'Image);
+          Put_Line ("----------");
+       end Show;
+    begin
+       Show (0.25);
+       Show (TQ15'Last);
+       Show (0.1);
+    end Show_String_Representation;
+
+In this example, :ada:`TQ15'Image` displays the value in plain decimal
+notation |mdash| for instance, :ada:`0.25` as ``0.25000`` |mdash| with
+:ada:`TQ15'Aft` fractional digits (a count derived from the type's *delta*,
+not its *small*). Converting to :ada:`Float` first and using
+:ada:`Float'Image`, on the other hand, produces the floating-point
+representation in exponential notation, such as ``2.50000E-01``.
+
+.. admonition:: For further reading...
+
+    :ada:`'Aft` is the attribute that tells :ada:`'Image` how many digits to
+    print after the decimal point. It's derived from the type's *delta*, not
+    its *small*, so two fixed-point types with the same *small* can still
+    print a different number of digits if their *delta* differs. We already
+    saw exactly that in the
+    :ref:`derived fixed-point types <Adv_Ada_Ordinary_Fixed_Point_Derived_Types_Subtypes>`
+    example:
 
     .. code-block:: ada
 
-        type Angle is
-          delta 1.0/3600.0
-          range 0.0 .. 360.0 - 1.0 / 3600.0;
-        for Angle'Small use Angle'Delta;
+        D15 : constant := 2.0 ** (-15);
+        D7  : constant := 2.0 ** (-7);
 
+        type TQ15 is
+          delta D15
+          range -1.0 .. 1.0 - D15;
+
+        type TQ15_New is new
+          TQ15
+          delta D7;
+
+    :ada:`TQ15_New` has the same *small* as :ada:`TQ15`, but a larger
+    *delta* |mdash| and that's why :ada:`TQ15_New'Image` prints fewer
+    digits, even though both types represent exactly the same set of
+    values:
+
+    +---------------+------------------+------------------+
+    |               | :ada:`TQ15`      | :ada:`TQ15_New`  |
+    +===============+==================+==================+
+    | *small*       | 2\ :sup:`-15`    | 2\ :sup:`-15`    |
+    +---------------+------------------+------------------+
+    | *delta*       | 2\ :sup:`-15`    | 2\ :sup:`-7`     |
+    +---------------+------------------+------------------+
+    | :ada:`'Aft`   | 5                | 3                |
+    +---------------+------------------+------------------+
+
+    For :ada:`TQ15` here, *delta* and *small* happen to be the same value,
+    so this distinction doesn't change anything in this particular example.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.10 Operations of Fixed Point Types <3-5-10>`
+
+Let's focus on the :ada:`Show (0.1)` call. The value :ada:`0.1` isn't a
+multiple of the *small* of :ada:`TQ15`, so it can't be represented exactly:
+converting it to :ada:`TQ15` |mdash| to become the actual parameter
+:ada:`V` of the :ada:`Show` procedure |mdash| produces one of the two
+neighboring representable multiples of *small*. For a literal like this one
+|mdash| a static expression |mdash| Ada specifies which one: the compiler
+rounds to the nearest multiple if :ada:`TQ15'Machine_Rounds` is true, and
+truncates toward zero if it is false. The value of :ada:`Machine_Rounds`
+itself, however, is the compiler's own choice |mdash| and GNAT truncates. For
+this reason, :ada:`TQ15'Image` shows ``0.09998`` rather than ``0.10000``. The
+precision loss already happens at that conversion to :ada:`TQ15`, so the
+subsequent :ada:`Float (V)'Image` call cannot recover the exact value ``0.1``
+either |mdash| it just displays the same value that was already converted,
+but in this case, in floating-point notation.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Ranges:
+
+Range of fixed-point types and subtypes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Unlike decimal fixed-point types, the range of an ordinary fixed-point
+type is an important part of its definition. This makes them look more
+similar to integer types than decimal fixed-point types. In fact, the
+:ada:`range` specification must be part of the declaration of an ordinary
+fixed-point type.
+
+
+Range of fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As we discussed in the :ref:`Q format <Adv_Ada_Q_Format>` section, a
+normalized ordinary fixed-point type uses a range from -1.0 to (1.0 - *small*).
+This is called the *full range* because all storage bits except the sign bit
+are used for the fractional part, leaving none for the integer part.
+
+For a type with *n* total bits (including the sign bit), the *small* is
+2\ :sup:`-(n-1)`, and there are exactly 2\ :sup:`n` representable values
+evenly spaced over the interval [-1.0, 1.0 - *small*]. For example, a
+normalized 16-bit type (:ada:`TQ15`) has the *small* = 2\ :sup:`-15` ≈
+3.1×10\ :sup:`-5` |mdash| this gives us 65,536 distinct values between -1.0 and
+approximately 0.999969.
+
+
+Custom range of fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Of course, we don't have to use a normalized range in the declaration of
+an ordinary fixed-point type. In fact, we may also use any other range.
+For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Custom_Fixed_Point_Range
+
+    with Ada.Text_IO;  use Ada.Text_IO;
+    with Ada.Numerics; use Ada.Numerics;
+
+    procedure Custom_Fixed_Point_Range is
+       type T_Inv_Trig is
+         delta 2.0 ** (-15) * Pi
+         range -Pi / 2.0 .. Pi / 2.0;
+    begin
+       Put_Line ("T_Inv_Trig requires "
+                 & Integer'Image (T_Inv_Trig'Size)
+                 & " bits");
+       Put_Line ("Delta    value of T_Inv_Trig: "
+                 & T_Inv_Trig'Image
+                     (T_Inv_Trig'Delta));
+       Put_Line ("Minimum  value of T_Inv_Trig: "
+                 & T_Inv_Trig'Image
+                     (T_Inv_Trig'First));
+       Put_Line ("Maximum  value of T_Inv_Trig: "
+                 & T_Inv_Trig'Image
+                     (T_Inv_Trig'Last));
+    end Custom_Fixed_Point_Range;
+
+In this example, we are defining a 16-bit type called :ada:`T_Inv_Trig`,
+which has a range from -π/2 to π/2.
+
+
+Range of derived fixed-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When we derive a new ordinary fixed-point type, we can constrain its
+range at the same time. For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Derived_Ordinary_Fixed_Point_Types
+
+    package Custom_Fixed_Point is
+
+       D : constant := 2.0 ** (-15);
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       type TQ15_05 is new
+         TQ15 range -0.5 .. 0.5;
+
+    end Custom_Fixed_Point;
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Fixed_Point_Subtypes is
+       Q15    : TQ15;
+       Q15_05 : TQ15_05;
+    begin
+       Q15  := 0.25;
+       Put_Line ("Q15    = "
+                 & Q15'Image);
+
+       Q15_05 := TQ15_05 (Q15);
+       Put_Line ("Q15_05 = "
+                 & Q15_05'Image);
+    end Show_Fixed_Point_Subtypes;
+
+In this example, the :ada:`TQ15_05` type is derived from :ada:`TQ15`,
+but we limit its range to the interval between -0.5 and 0.5. The derived
+type keeps the *delta* and *small* of its parent type |mdash| only the
+range is narrower.
+
+We can also derive multiple types from the same ordinary fixed-point type,
+each with a different range constraint. For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Multiple_Derived_Fixed_Point_Types
+
+    package Custom_Fixed_Point is
+
+       D : constant := 2.0 ** (-15);
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       type TQ15_Half is new
+         TQ15 range -0.5 .. 0.5 - D;
+
+       type TQ15_Quarter is new
+         TQ15 range -0.25 .. 0.25 - D;
+
+    end Custom_Fixed_Point;
+
+    with Ada.Text_IO;   use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Derived_Fixed_Point_Ranges is
+    begin
+       Put_Line ("TQ15'Range         : "
+                 & TQ15'First'Image
+                 & " .. "
+                 & TQ15'Last'Image);
+       Put_Line ("TQ15_Half'Range    : "
+                 & TQ15_Half'First'Image
+                 & " .. "
+                 & TQ15_Half'Last'Image);
+       Put_Line ("TQ15_Quarter'Range : "
+                 & TQ15_Quarter'First'Image
+                 & " .. "
+                 & TQ15_Quarter'Last'Image);
+    end Show_Derived_Fixed_Point_Ranges;
+
+In this example, :ada:`TQ15_Half` and :ada:`TQ15_Quarter` are both derived
+from :ada:`TQ15`. For :ada:`TQ15_Half`, we constrain the range to -0.5 to
+(0.5 - *small*). For :ada:`TQ15_Quarter`, we constrain it further to -0.25
+to (0.25 - *small*).
+
+
+Range of fixed-point subtypes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Similarly, we can declare subtypes of ordinary fixed-point types and limit the
+range at the same time. For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Derived_Ordinary_Fixed_Point_Types
+
+    package Custom_Fixed_Point is
+
+       D : constant := 2.0 ** (-15);
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       subtype TQ15_05 is
+         TQ15 range -0.5 .. 0.5;
+
+    end Custom_Fixed_Point;
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Fixed_Point_Subtypes is
+       Q15    : TQ15;
+       Q15_05 : TQ15_05;
+    begin
+       Q15  := 0.25;
+       Put_Line ("Q15    = "
+                 & Q15'Image);
+
+       Q15_05 := Q15;
+       Put_Line ("Q15_05 = "
+                 & Q15_05'Image);
+    end Show_Fixed_Point_Subtypes;
+
+In this example, :ada:`TQ15_05` is a subtype of :ada:`TQ15` restricted to
+the interval between -0.5 and 0.5. Because it is a subtype (not a derived
+type), we can assign a :ada:`TQ15` value directly to a :ada:`TQ15_05`
+variable without an explicit type conversion |mdash| a range check is
+performed at run time.
+
+In addition, we can declare multiple subtypes from the same type, each with a
+different range constraint. For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Multiple_Fixed_Point_Subtypes
+
+    package Custom_Fixed_Point is
+
+       D : constant := 2.0 ** (-15);
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       subtype TQ15_Half is
+         TQ15 range -0.5 .. 0.5;
+
+       subtype TQ15_Quarter is
+         TQ15 range -0.25 .. 0.25;
+
+    end Custom_Fixed_Point;
+
+    with Ada.Text_IO;   use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Fixed_Point_Subtype_Ranges is
+    begin
+       Put_Line ("TQ15'Range         : "
+                 & TQ15'First'Image
+                 & " .. "
+                 & TQ15'Last'Image);
+       Put_Line ("TQ15_Half'Range    : "
+                 & TQ15_Half'First'Image
+                 & " .. "
+                 & TQ15_Half'Last'Image);
+       Put_Line ("TQ15_Quarter'Range : "
+                 & TQ15_Quarter'First'Image
+                 & " .. "
+                 & TQ15_Quarter'Last'Image);
+    end Show_Fixed_Point_Subtype_Ranges;
+
+Here, :ada:`TQ15_Half` and :ada:`TQ15_Quarter` are subtypes of :ada:`TQ15`
+with the same *delta* and *small* as the parent type, but narrower ranges.
+
+
+Range of the base type
+^^^^^^^^^^^^^^^^^^^^^^
+
+We saw that the base type keeps the *small* and the *delta* of the type.
+The range, on the other hand, can be different. Let's compare the range
+of an ordinary fixed-point type with the range of its base type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Angle
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Fixed_Point_Base_Type is
+
+       Angle_Delta : constant := 1.0 / 3600.0;
+
+       type Angle is
+         delta Angle_Delta
+         range 0.0 .. 360.0 - Angle_Delta;
+
+    begin
+       Put_Line ("The small          of "
+                 & "Angle      is "
+                 & Angle'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "Angle      is "
+                 & Angle'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "Angle      is "
+                 & Angle'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "Angle      is "
+                 & Angle'Last'Image);
+       Put_Line ("The size           of "
+                 & "Angle      is "
+                 & Angle'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of "
+                 & "Angle'Base is "
+                 & Angle'Base'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "Angle'Base is "
+                 & Angle'Base'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "Angle'Base is "
+                 & Angle'Base'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "Angle'Base is "
+                 & Angle'Base'Last'Image);
+       Put_Line ("The size           of "
+                 & "Angle'Base is "
+                 & Angle'Base'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+    end Show_Fixed_Point_Base_Type;
+
+Here, the range of :ada:`Angle'Base` is much wider than the range that we
+declared for :ada:`Angle`. Also, the range is roughly symmetric around zero:
+while the range of :ada:`Angle` goes from 0.0 to 360.0, for :ada:`Angle'Base`,
+the range goes from about -524,288.0 to 524,288.0. This happens because the
+base type uses every bit of its machine representation. Therefore, its range is
+the widest that the *small* and the base type's size allow.
+
+Let's now look at the range of a normalized fixed-point type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q15
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ15      is "
+                 & TQ15'Small'Image);
+       Put_Line ("The delta    value of TQ15      is "
+                 & TQ15'Delta'Image);
+       Put_Line ("The minimum  value of TQ15      is "
+                 & TQ15'First'Image);
+       Put_Line ("The maximum  value of TQ15      is "
+                 & TQ15'Last'Image);
+       Put_Line ("The size           of TQ15      is "
+                 & TQ15'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ15'Base is "
+                 & TQ15'Base'Small'Image);
+       Put_Line ("The delta    value of TQ15'Base is "
+                 & TQ15'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ15'Base is "
+                 & TQ15'Base'First'Image);
+       Put_Line ("The maximum  value of TQ15'Base is "
+                 & TQ15'Base'Last'Image);
+       Put_Line ("The size           of TQ15'Base is "
+                 & TQ15'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+For the normalized :ada:`TQ15` type, however, we see that the base type doesn't
+have a wider range: :ada:`TQ15` already fills a 16-bit representation exactly,
+so :ada:`TQ15` and :ada:`TQ15'Base` have the same range.
+
+If we use a normalized 48-bit fixed-point data type, we see the distinction
+between the data type and its base type again:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q47
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-47);
+
+       type TQ47 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small    of TQ47            is "
+                 & TQ47'Small'Image);
+       Put_Line ("The delta    value of TQ47      is "
+                 & TQ47'Delta'Image);
+       Put_Line ("The minimum  value of TQ47      is "
+                 & TQ47'First'Image);
+       Put_Line ("The maximum  value of TQ47      is "
+                 & TQ47'Last'Image);
+       Put_Line ("The size    of TQ47             is "
+                 & TQ47'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ47'Base is "
+                 & TQ47'Base'Small'Image);
+       Put_Line ("The delta    value of TQ47'Base is "
+                 & TQ47'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ47'Base is "
+                 & TQ47'Base'First'Image);
+       Put_Line ("The maximum  value of TQ47'Base is "
+                 & TQ47'Base'Last'Image);
+       Put_Line ("The size           of TQ47'Base is "
+                 & TQ47'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+Like the :ada:`Angle` data type from the previous example, the range of
+:ada:`TQ47'Base` is much wider than that of the :ada:`TQ47` type. In fact, the
+range of the :ada:`TQ47` type goes from -1.0 to (1.0 - *small*), while
+:ada:`TQ47'Base` ranges from about -65,536.0 to 65,536.0. So, unless the
+declared range already fills the machine representation |mdash| as it does for
+:ada:`TQ15` |mdash| the base type's range is wider than the type's range
+and roughly symmetric around zero.
+
+Note that the range of an ordinary fixed-point type can be much smaller than
+the range of its base type. For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Narrow_Type
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Narrow_Base_Type is
+
+       D : constant := 2.0 ** (-10);
+
+       type T_Narrow is
+         delta D
+         range 0.0 .. 4.0 - D;
+
+    begin
+       Put_Line ("T_Narrow'First      = "
+                 & T_Narrow'First'Image);
+       Put_Line ("T_Narrow'Last       = "
+                 & T_Narrow'Last'Image);
+       Put_Line ("T_Narrow'Size       = "
+                 & T_Narrow'Size'Image);
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("T_Narrow'Base'First = "
+                 & T_Narrow'Base'First'Image);
+       Put_Line ("T_Narrow'Base'Last  = "
+                 & T_Narrow'Base'Last'Image);
+       Put_Line ("T_Narrow'Base'Size  = "
+                 & T_Narrow'Base'Size'Image);
+
+    end Show_Narrow_Base_Type;
+
+In this example, :ada:`T_Narrow` has a declared range from 0.0 to just
+below 4.0, with *small* = 2\ :sup:`-10`. Since :ada:`T_Narrow` has no
+negative values, representing its range takes 12 bits (2 integer bits +
+10 fractional bits, no sign bit needed) |mdash| and that's exactly what
+:ada:`T_Narrow'Size` reports. The *base* type is a different story: its
+range has to be symmetric around zero |mdash| except for at most one extra
+value at the negative end |mdash| so it needs a sign bit on top of
+those 12 bits, i.e. 13 bits at a minimum. On this typical desktop
+target, which only offers 8, 16, 32, or 64-bit words, the base type
+ends up using the next value above 13 bits: 16 bits. The range of the
+base type therefore covers the full 16-bit range: from -32.0 to just
+below 32.0 |mdash| even though :ada:`T_Narrow` itself only uses a small
+portion of it.
+
+.. admonition:: In the GNAT toolchain
+
+    The 8/16/32/64-bit progression of machine words is what GNAT rounds
+    up to on typical desktop and server targets, not something the Ada
+    standard requires: the base range only has to be symmetric around
+    zero |mdash| allowing for at most one extra value at the negative
+    end |mdash| and to include at least the declared multiples of
+    *small*. A different target could round the base type's size up
+    differently.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.9 Fixed Point Types <3-5-9>`
+
+We talk about the size of fixed-point data types next.
+
+
+Size of ordinary fixed-point types
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The size of ordinary fixed-point types depends both on the *delta* and
+the range of the type. Let's look again at some of the previous examples, but
+now focus on the size of the data types.
+
+Let's start with the :ada:`Angle` type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Angle
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Fixed_Point_Base_Type is
+
+       Angle_Delta : constant := 1.0 / 3600.0;
+
+       type Angle is
+         delta Angle_Delta
+         range 0.0 .. 360.0 - Angle_Delta;
+
+    begin
+       Put_Line ("The small          of Angle   is "
+                 & Angle'Small'Image);
+       Put_Line ("The delta    value of Angle   is "
+                 & Angle'Delta'Image);
+       Put_Line ("The minimum  value of Angle   is "
+                 & Angle'First'Image);
+       Put_Line ("The maximum  value of Angle   is "
+                 & Angle'Last'Image);
+       Put_Line ("The size           of Angle   is "
+                 & Angle'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "Angle'Base   is "
+                 & Angle'Base'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Last'Image);
+       Put_Line ("The size           of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+    end Show_Fixed_Point_Base_Type;
+
+Here, :ada:`Angle` needs 21 bits |mdash| the smallest number of bits that
+can represent its range from 0.0 to 360.0 in steps of its *small*
+(2\ :sup:`-12`).
+
+Let's now look at the size of a normalized fixed-point type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q15
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ15      is "
+                 & TQ15'Small'Image);
+       Put_Line ("The delta    value of TQ15      is "
+                 & TQ15'Delta'Image);
+       Put_Line ("The minimum  value of TQ15      is "
+                 & TQ15'First'Image);
+       Put_Line ("The maximum  value of TQ15      is "
+                 & TQ15'Last'Image);
+       Put_Line ("The size           of TQ15      is "
+                 & TQ15'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ15'Base is "
+                 & TQ15'Base'Small'Image);
+       Put_Line ("The delta    value of TQ15'Base is "
+                 & TQ15'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ15'Base is "
+                 & TQ15'Base'First'Image);
+       Put_Line ("The maximum  value of TQ15'Base is "
+                 & TQ15'Base'Last'Image);
+       Put_Line ("The size           of TQ15'Base is "
+                 & TQ15'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+The normalized :ada:`TQ15` type needs 16 bits |mdash| one sign bit plus
+the 15 fractional bits of its *small*. Let's check a normalized type with
+many more fractional bits:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q47
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-47);
+
+       type TQ47 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ47      is "
+                 & TQ47'Small'Image);
+       Put_Line ("The delta    value of TQ47      is "
+                 & TQ47'Delta'Image);
+       Put_Line ("The minimum  value of TQ47      is "
+                 & TQ47'First'Image);
+       Put_Line ("The maximum  value of TQ47      is "
+                 & TQ47'Last'Image);
+       Put_Line ("The size           of TQ47      is "
+                 & TQ47'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ47'Base is "
+                 & TQ47'Base'Small'Image);
+       Put_Line ("The delta    value of TQ47'Base is "
+                 & TQ47'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ47'Base is "
+                 & TQ47'Base'First'Image);
+       Put_Line ("The maximum  value of TQ47'Base is "
+                 & TQ47'Base'Last'Image);
+       Put_Line ("The size           of TQ47'Base is "
+                 & TQ47'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+The :ada:`TQ47` type needs 48 bits, again one sign bit plus the 47
+fractional bits of its *small*. :ada:`'Size` reports this minimum
+number of bits |mdash| :ada:`Angle'Size` is 21, not a full machine word
+|mdash| which is why it can differ from the size of the base type, as
+we'll see next.
+
+.. admonition:: In the Ada Reference Manual
+
+    :ada:`'Size` reporting the minimum number of bits needed for the
+    subtype is the Ada standard's *recommended level of support*, not a
+    strict requirement |mdash| a conforming compiler is free to pick a
+    larger size. GNAT follows the recommendation, which is why the sizes
+    above match what we computed by hand.
+
+    - :arm22:`13.3 Operational and Representation Attributes <13-3>`
+
+
+Size of base type
+~~~~~~~~~~~~~~~~~
+
+We've just seen that :ada:`'Size` gives the minimum number of bits
+recommended for the type. The base type, on the other hand, uses a size
+that the target machine supports directly. Let's compare the two sizes
+for our three types:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Angle
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Fixed_Point_Base_Type is
+
+       Angle_Delta : constant := 1.0 / 3600.0;
+
+       type Angle is
+         delta Angle_Delta
+         range 0.0 .. 360.0 - Angle_Delta;
+
+    begin
+       Put_Line ("The small          of Angle   is "
+                 & Angle'Small'Image);
+       Put_Line ("The delta    value of Angle   is "
+                 & Angle'Delta'Image);
+       Put_Line ("The minimum  value of Angle   is "
+                 & Angle'First'Image);
+       Put_Line ("The maximum  value of Angle   is "
+                 & Angle'Last'Image);
+       Put_Line ("The size           of Angle   is "
+                 & Angle'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "Angle'Base   is "
+                 & Angle'Base'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Last'Image);
+       Put_Line ("The size           of "
+                 & "Angle'Base   is "
+                 & Angle'Base'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+    end Show_Fixed_Point_Base_Type;
+
+Here, :ada:`Angle` needs 21 bits, so :ada:`Angle'Base` is rounded up to
+the next size the machine supports directly |mdash| in this case, 32 bits.
+
+Let's now look at the base type of a normalized fixed-point type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q15
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ15      is "
+                 & TQ15'Small'Image);
+       Put_Line ("The delta    value of TQ15      is "
+                 & TQ15'Delta'Image);
+       Put_Line ("The minimum  value of TQ15      is "
+                 & TQ15'First'Image);
+       Put_Line ("The maximum  value of TQ15      is "
+                 & TQ15'Last'Image);
+       Put_Line ("The size           of TQ15      is "
+                 & TQ15'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ15'Base is "
+                 & TQ15'Base'Small'Image);
+       Put_Line ("The delta    value of TQ15'Base is "
+                 & TQ15'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ15'Base is "
+                 & TQ15'Base'First'Image);
+       Put_Line ("The maximum  value of TQ15'Base is "
+                 & TQ15'Base'Last'Image);
+       Put_Line ("The size           of TQ15'Base is "
+                 & TQ15'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+The normalized :ada:`TQ15` type already needs exactly 16 bits, which is
+itself a machine size, so :ada:`TQ15` and :ada:`TQ15'Base` have the same
+size.
+
+If we look at :ada:`TQ47`, we see that :ada:`TQ47'Base` does not have the same
+size:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Base_Type_Q47
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Full_Range_Base_Type is
+       D : constant := 2.0 ** (-47);
+
+       type TQ47 is
+         delta D
+         range -1.0 .. 1.0 - D;
+    begin
+       Put_Line ("The small          of TQ47      is "
+                 & TQ47'Small'Image);
+       Put_Line ("The delta    value of TQ47      is "
+                 & TQ47'Delta'Image);
+       Put_Line ("The minimum  value of TQ47      is "
+                 & TQ47'First'Image);
+       Put_Line ("The maximum  value of TQ47      is "
+                 & TQ47'Last'Image);
+       Put_Line ("The size           of TQ47      is "
+                 & TQ47'Size'Image
+                 & " bits");
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of TQ47'Base is "
+                 & TQ47'Base'Small'Image);
+       Put_Line ("The delta    value of TQ47'Base is "
+                 & TQ47'Base'Delta'Image);
+       Put_Line ("The minimum  value of TQ47'Base is "
+                 & TQ47'Base'First'Image);
+       Put_Line ("The maximum  value of TQ47'Base is "
+                 & TQ47'Base'Last'Image);
+       Put_Line ("The size           of TQ47'Base is "
+                 & TQ47'Base'Size'Image
+                 & " bits");
+
+    end Show_Full_Range_Base_Type;
+
+:ada:`TQ47` needs 48 bits, while :ada:`TQ47'Base` needs 64 bits. Again, this is
+because the base type is rounded up to a size the target machine supports
+directly |mdash| on this typical desktop target, the smallest of 8, 16, 32,
+or 64 bits that can hold the type |mdash| while the size of the actual type
+depends only on its declaration.
+
+The table below gathers *small*, *delta*, range, and :ada:`'Size` for all
+four types we've just discussed, together with their base types for a typical
+desktop PC target:
+
++------------------------+-----------------+-----------------+----------------------+------+
+| Type                   | *small*         | *delta*         | Range                | Size |
++========================+=================+=================+======================+======+
+| :ada:`Angle`           | 2\ :sup:`-12`   | 1/3600          | [0.0, 360.0)         | 21   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`Angle'Base`      | 2\ :sup:`-12`   | 1/3600          | [-524288.0, 524288.0)| 32   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ15`            | 2\ :sup:`-15`   | 2\ :sup:`-15`   | [-1.0, 1.0)          | 16   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ15'Base`       | 2\ :sup:`-15`   | 2\ :sup:`-15`   | [-1.0, 1.0)          | 16   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ47`            | 2\ :sup:`-47`   | 2\ :sup:`-47`   | [-1.0, 1.0)          | 48   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`TQ47'Base`       | 2\ :sup:`-47`   | 2\ :sup:`-47`   | [-65536.0, 65536.0)  | 64   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`T_Narrow`        | 2\ :sup:`-10`   | 2\ :sup:`-10`   | [0.0, 4.0)           | 12   |
++------------------------+-----------------+-----------------+----------------------+------+
+| :ada:`T_Narrow'Base`   | 2\ :sup:`-10`   | 2\ :sup:`-10`   | [-32.0, 32.0)        | 16   |
++------------------------+-----------------+-----------------+----------------------+------+
+
+Note how :ada:`TQ15` and :ada:`TQ15'Base` share the same *Range* and
+:ada:`'Size` |mdash| :ada:`TQ15` already uses the full 16-bit machine word, so
+there's nothing left for the base type to widen. The other three types all
+declare a narrower range than their base type ends up with, which is exactly
+why their base type's size differs from their own.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Types_Decimal_Precision:
+
+Decimal precision
+~~~~~~~~~~~~~~~~~
+
+Previously, we talked about the
+:ref:`decimal precision of floating-point types <Adv_Ada_Floating_Point_Types_Decimal_Precision>`
+and the
+:ref:`decimal precision of decimal types <Adv_Ada_Decimal_Fixed_Point_Types_Decimal_Precision>`.
+For ordinary fixed-point types, however, the situation is different.
+Let's look at an example that compares the *small* of three data types |mdash|
+one decimal and two ordinary fixed-point types |mdash| that share the same
+*delta*:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Decimal_Precision
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Decimal_Precision is
+       Delta_3 : constant := 10.0 ** (-3);
+
+       --  Decimal fixed-point type:
+       --  small = delta = 10^(-3)
+       --  (exact decimal scaling)
+       type T3_D6 is
+         delta Delta_3
+         digits 6;
+
+       --  Ordinary fixed-point type
+       --  (default binary small):
+       --  small = largest power of two <= delta
+       --        = 2^(-10) ~= 9.77e-04
+       --            (< delta = 10^(-3))
+       type T3_Fixed is
+         delta Delta_3
+         range -999.999 .. 999.999;
+
+       --  Ordinary fixed-point type with
+       --  explicit non-binary small:
+       --  small = delta = 10^(-3)
+       --  (forced via Small aspect)
+       type T3_Fake_Dec is
+         delta Delta_3
+         range -999.999 .. 999.999
+         with Small => Delta_3;
+    begin
+       Put_Line ("The small          of "
+                 & "T3_D6       is "
+                 & T3_D6'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "T3_D6       is "
+                 & T3_D6'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "T3_D6       is "
+                 & T3_D6'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "T3_D6       is "
+                 & T3_D6'Last'Image);
+       New_Line;
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of "
+                 & "T3_Fixed    is "
+                 & T3_Fixed'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "T3_Fixed    is "
+                 & T3_Fixed'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "T3_Fixed    is "
+                 & T3_Fixed'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "T3_Fixed    is "
+                 & T3_Fixed'Last'Image);
+
+       Put_Line ("------------------------------");
+
+       Put_Line ("The small          of "
+                 & "T3_Fake_Dec is "
+                 & T3_Fake_Dec'Small'Image);
+       Put_Line ("The delta    value of "
+                 & "T3_Fake_Dec is "
+                 & T3_Fake_Dec'Delta'Image);
+       Put_Line ("The minimum  value of "
+                 & "T3_Fake_Dec is "
+                 & T3_Fake_Dec'First'Image);
+       Put_Line ("The maximum  value of "
+                 & "T3_Fake_Dec is "
+                 & T3_Fake_Dec'Last'Image);
+    end Show_Decimal_Precision;
+
+When we run this example, we see three different behaviours. :ada:`T3_D6`
+is a decimal fixed-point type, so its *small* equals its *delta*
+(10\ :sup:`-3`) exactly. :ada:`T3_Fixed` is an ordinary fixed-point type
+with the default binary *small*: the compiler picks 2\ :sup:`-10`
+≈ 9.77×10\ :sup:`-4`, which is the largest power of two not exceeding
+10\ :sup:`-3`, so :ada:`T3_Fixed'Small` differs from
+:ada:`T3_Fixed'Delta`. :ada:`T3_Fake_Dec` is also an ordinary fixed-point
+type, but its :ada:`Small` aspect forces *small* = *delta* = 10\ :sup:`-3`,
+giving it the same decimal-exact representation as :ada:`T3_D6`.
+
+.. admonition:: For further reading
+
+    The :ada:`Small` aspect may be set to a non-power-of-two value, as
+    :ada:`T3_Fake_Dec` demonstrates. However, the Ada standard only requires
+    compilers to support power-of-two *small* values by default. Support for
+    non-power-of-two smalls is optional |mdash| unless the compiler conforms
+    to the Information Systems Annex (Annex F), which mandates support for
+    decimal smalls.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`3.5.9 Fixed Point Types <3-5-9>`
+        - :arm22:`F.2 The Package Decimal <F-2>`
+
+.. admonition:: In the GNAT toolchain
+
+    GNAT supports non-power-of-two smalls on all standard targets.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Conversions:
+
+Type conversions
+~~~~~~~~~~~~~~~~
+
+In this section, we discuss type conversions for ordinary fixed-point types:
+conversions between fixed-point types, and conversions to and from
+floating-point types.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Conversion:
+
+Fixed-point type conversions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's start with conversions between fixed-point types and focus on their
+range. Of course, type conversions may fail when the ranges of two types don't
+match |mdash| more specifically, when the value of an object is out of the
+range of the type we're converting to. However, as expected, we can safely
+convert to an ordinary fixed-point type with a wider range.
+
+We can also safely convert between ordinary fixed-point types that have roughly
+the same range. For example:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Type_Conversions
+    :class: ada-run-expect-failure
+
+    package Custom_Fixed_Point is
+       D_31 : constant := 2.0 ** (-31);
+       D_48 : constant := 2.0 ** (-48);
+
+       type TQ31 is
+         delta D_31
+         range -1.0 .. 1.0 - D_31;
+
+       type TQ15_48 is
+         delta  D_48
+         range -2.0 ** 15 ..
+                2.0 ** 15 - D_48;
+
+    end Custom_Fixed_Point;
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Fixed_Point_Conversions is
+       In_Data : constant array (1 .. 5)
+                   of TQ31 :=
+                     (0.5, 0.75, 0.5, 0.25, 0.125);
+       Res     : TQ31;
+       Acc     : TQ15_48;
+    begin
+       Acc := 0.0;
+       for I in In_Data'Range loop
+          Acc := Acc + TQ15_48 (In_Data (I));
+       end loop;
+
+       --  ERROR: Acc might be out-of-range
+       --         when converted to TQ31
+       Res := TQ31 (Acc) / In_Data'Length;
+
+       --  CORRECT: put Acc in the expected range
+       --           before converting to TQ31
+       Res := TQ31 (Acc / In_Data'Length);
+
+       Put_Line ("Res = "
+                 & Res'Image);
+    end Show_Fixed_Point_Conversions;
+
+In this example, the line indicated by "ERROR" raises the
+:ada:`Constraint_Error` exception at run time because :ada:`Acc` has
+accumulated five values and its total (≈ 2.125) lies outside the range of
+:ada:`TQ31`.
+
+The execution therefore stops before it reaches the line indicated by
+"CORRECT". The correct line below shows the safe pattern: divide while the
+value is still in the wider :ada:`TQ15_48` type, and only then convert the
+quotient |mdash| which is then back in the expected range of :ada:`TQ31`.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Conversion_Other_Types:
+
+Conversions to and from floating-point types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ordinary fixed-point values can be converted to and from floating-point types
+using ordinary type conversion syntax.
+
+The conversion from fixed-point to floating-point is exact only when the
+floating-point type has enough mantissa bits to hold the value. A fixed-point
+value is an integer multiple of its *small*, so representing it exactly in a
+binary floating-point type requires that type's mantissa to be wide enough to
+hold all the significant bits of that integer multiplier. When it isn't |mdash|
+for example, when we convert a wide fixed-point type (say, a 128-bit type) to a
+narrower floating-point type such as the 32-bit :ada:`Float` (with a 24-bit
+mantissa) |mdash| the value is rounded to the nearest representable
+floating-point value.
+
+.. admonition:: In the GNAT toolchain
+
+    If the exact value falls exactly halfway between two representable
+    values, GNAT rounds to the nearest *even* one instead of
+    consistently rounding up or down |mdash| for example, the
+    fixed-point value 16,777,217 (2\ :sup:`24` + 1) converts to
+    ``16,777,216.0`` rather than ``16,777,218.0``, since both neighbors
+    are equally close but ``16,777,216.0`` (2\ :sup:`24`) is the even
+    one. Round-to-nearest for this direction isn't a language guarantee,
+    though: the Ada standard only requires the result to fall within
+    the target floating-point type's accuracy.
+
+    .. admonition:: In the Ada Reference Manual
+
+        - :arm22:`G.2.1 Model of Floating Point Arithmetic <G-2-1>`
+
+When converting in the other direction, from a floating-point value to a
+fixed-point type, the value is converted to a nearby representable
+fixed-point value |mdash| Ada doesn't guarantee that this is the *nearest*
+one, or even one of the two neighboring multiples of the type's *small*:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fixed_Float_Conversion
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Fixed_Float_Conversion is
+       D : constant := 2.0 ** (-15);
+
+       type TQ15 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       F : TQ15;
+       R : Float;
+    begin
+       F := 0.1;
+       R := Float (F);
+       Put_Line ("Fixed 0.1  = " & F'Image);
+       Put_Line ("Float (F)  = " & R'Image);
+
+       Put_Line ("----------");
+
+       R := 0.333_333;
+       F := TQ15 (R);
+       Put_Line ("Float 0.333333 = " & R'Image);
+       Put_Line ("TQ15  (R)      = " & F'Image);
+    end Show_Fixed_Float_Conversion;
+
+In this example, we first assign 0.1 to :ada:`F`. As we saw
+:ref:`earlier <Adv_Ada_Fixed_Point_String_Representation>`, 0.1 isn't a
+multiple of the *small* of :ada:`TQ15`, so it can't be represented
+exactly: :ada:`F'Image` shows the truncated value, ``0.09998``, not the
+nearest representable value. Converting :ada:`F` to :ada:`Float` then
+preserves that value exactly |mdash| a :ada:`TQ15` value has at most 16
+significant bits, which fit comfortably within the mantissa of
+:ada:`Float` (24 bits).
+
+In the second part, the :ada:`Float` value 0.333333 is converted to
+:ada:`TQ15`, giving ``0.33331``. That's again the *truncated* value, not
+the nearest one: ``0.33334`` (the next representable multiple of *small*
+up) is actually closer to 0.333333 than ``0.33331`` is. Keep in mind,
+however, that Ada doesn't guarantee which value a conversion like this
+produces |mdash| not even that it's one of the two neighboring multiples
+|mdash| and GNAT truncates here, just as it did for :ada:`F := 0.1` above.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Illegal_Decl:
+
+Illegal ordinary fixed-point type declarations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We've seen that the size of an ordinary fixed-point type grows with the
+number of fractional bits in its *small*. If we assume that the compiler stores
+such a type in at most 128 bits, there's therefore a limit to how fine the
+*small* can be: the largest normalized type we can declare in this case is the
+one with 127 fractional bits. Let's see what happens if we ask for one more
+than the compiler supports:
+
+.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Illegal_Ordinary_Fixed_Point_Types
+    :class: ada-expect-compile-error
+
+    package Illegal_Fixed_Point is
+
+       D : constant := 2.0 ** (-128);
+
+       type TQ128 is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+    end Illegal_Fixed_Point;
+
+As we can see when we try to build this example, the compiler rejects the
+declaration: a :ada:`TQ128` value would need 129 bits |mdash| one sign bit
+plus 128 fractional bits |mdash| but the maximum size the compiler allows
+for a fixed-point type is 128 bits.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Ops:
+
+Operations on ordinary types
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this section, we discuss some aspects of operations using objects of
+ordinary fixed-point types.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Type_Mixing_Ops:
+
+Mixing ordinary types
+^^^^^^^^^^^^^^^^^^^^^
+
+First, let's look at how we can mix ordinary fixed-point types in operations
+such as additions and subtractions.
+
+Consider the following package:
+
+.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Mixing_Fixed_Point_Types
+
+    package Custom_Fixed_Point is
+       D_15 : constant := 2.0 ** (-15);
+       D_24 : constant := 2.0 ** (-24);
+       D_31 : constant := 2.0 ** (-31);
+
+       type TQ15 is
+         delta D_15
+         range -1.0 .. 1.0 - D_15;
+
+       type TQ31 is
+         delta D_31
+         range -1.0 .. 1.0 - D_31;
+
+       type TQ7_24 is
+         delta  D_24
+         range -2.0 ** 7 ..
+                2.0 ** 7 - D_24;
+
+    end Custom_Fixed_Point;
+
+Let's look at simple operations such as :ada:`1000 + 500.25` and
+:ada:`1000 - 500.25` when mixing these two fixed-point types:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Mixing_Fixed_Point_Types
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Mixing_Fixed_Point is
+       A : TQ7_24;
+       B : TQ31;
+    begin
+       A := 2.0;
+       B := 0.75;
+       Put_Line ("A = " &
+                 A'Image);
+       Put_Line ("B = " &
+                 B'Image);
+
+       Put_Line ("--------------");
+       Put_Line ("A := A + B");
+       A := A + TQ7_24 (B);
+       Put_Line ("A = " &
+                 A'Image);
+
+       A := 2.0;
+       B := 0.75;
+
+       Put_Line ("--------------");
+       Put_Line ("A := A - B");
+       A := A - TQ7_24 (B);
+       Put_Line ("A = " &
+                 A'Image);
+    end Show_Mixing_Fixed_Point;
+
+To combine :ada:`A` and :ada:`B` in an arithmetic operation, we first
+have to convert one operand to the type of the other |mdash| here, we
+convert :ada:`B` to the :ada:`TQ7_24` type, as in :ada:`A + TQ7_24 (B)`.
+In this first example, the value 0.75 is exactly representable in both
+types, so the conversion is lossless. The difference in precision
+becomes visible, however, once we use a value that the coarser type
+cannot represent exactly:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Mixing_Fixed_Point_Types
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Custom_Fixed_Point;
+    use  Custom_Fixed_Point;
+
+    procedure Show_Mixing_Fixed_Point is
+       A : TQ7_24;
+       B : TQ31;
+    begin
+       A := 1.0;
+       B := 0.222_222_222_222_222;
+       Put_Line ("A = " &
+                 A'Image);
+       Put_Line ("B = " &
+                 B'Image);
+
+       Put_Line ("--------------");
+       Put_Line ("A := A + B");
+       A := A + TQ7_24 (B);
+       Put_Line ("A = " &
+                 A'Image);
+    end Show_Mixing_Fixed_Point;
+
+When :ada:`B` (a 31-bit-precision value) is converted to :ada:`TQ7_24`
+(24-bit precision), the conversion produces one of the two representable
+values neighboring :ada:`B`'s exact value |mdash| Ada doesn't guarantee
+which one (for this particular value, rounding to the nearer neighbor and
+truncating toward the lower one happen to give the same result:
+``0.22222221``). This introduces a small quantization error either way.
+Therefore, the result of :ada:`A := A + TQ7_24 (B)` differs slightly from
+the exact mathematical sum 1.222222...
+
+.. admonition:: In the Ada Reference Manual
+
+    - :arm22:`G.2.3 Model of Fixed Point Arithmetic <G-2-3>`
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_System_Fine_Delta:
+
+System.Fine_Delta
+~~~~~~~~~~~~~~~~~
+
+We've used normalized ordinary fixed-point types |mdash| ranging from -1.0
+to 1.0, like :ada:`TQ31` |mdash| throughout this chapter. Ada gives us a
+named number for the finest *delta* our compiler can offer for exactly
+this range: :ada:`System.Fine_Delta`. Let's declare a type using it and
+see how wide it needs to be:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fine_Delta_Fraction
+
+    with Ada.Text_IO; use Ada.Text_IO;
+    with System;
+
+    procedure Show_Fine_Delta is
+       type Fraction is
+         delta System.Fine_Delta
+         range -1.0 .. 1.0 - System.Fine_Delta;
+    begin
+       Put_Line ("Fraction'Small = "
+                 & Fraction'Small'Image);
+       Put_Line ("Fraction'Size  = "
+                 & Fraction'Size'Image);
+    end Show_Fine_Delta;
+
+When we run this example, we see that :ada:`Fraction'Small` matches
+:ada:`System.Fine_Delta` exactly, and that :ada:`Fraction'Size` requires
+128 bits |mdash| four times :ada:`TQ31`'s 32 bits, for a *delta*
+2\ :sup:`96` times finer. Note, however, that :ada:`Fine_Delta` doesn't
+parametrize by word size: it isn't a way to derive "the finest *small*
+for a 32-bit type," but rather the finest *delta* our compiler supports
+for this range *at all*, whatever word size that takes.
+
+We can put this extra precision to good use in an accumulator, and
+compare it directly against :ada:`TQ15_48` from the
+:ref:`Type conversions <Adv_Ada_Ordinary_Fixed_Point_Type_Conversion>`
+discussion. There, we gave the accumulator extra integer bits so a
+running sum had the *range* to avoid overflowing, and its 48 fractional
+bits already give us a lot more precision than :ada:`TQ31`'s own 31.
+Even so, multiplying two :ada:`TQ31` values produces an exact result
+that needs up to 62 fractional bits to represent, so :ada:`TQ15_48`
+still has to truncate part of every single product before adding it to
+the running sum. If we accumulate in :ada:`Fine_Delta` precision
+instead, we don't need to truncate anything until we finally convert
+the result back to a smaller type:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Fine_Delta_Accumulator
+
+    with Ada.Text_IO; use Ada.Text_IO;
+    with System;
+
+    procedure Show_Fine_Delta_Accumulator is
+       D_31 : constant := 2.0 ** (-31);
+       D_48 : constant := 2.0 ** (-48);
+
+       type TQ31 is
+         delta D_31
+         range -1.0 .. 1.0 - D_31;
+
+       type TQ15_48 is
+         delta D_48
+         range -2.0 ** 15 ..
+                2.0 ** 15 - D_48;
+
+       type Fine_Acc is
+         delta System.Fine_Delta
+         range -1.0 ..
+                1.0 - System.Fine_Delta;
+
+       Coeff  : constant TQ31 := 0.01;
+       Sample : constant TQ31 := 0.05;
+
+       N : constant := 1_000;
+
+       Sum_TQ15_48  : TQ15_48  := 0.0;
+       Sum_Fine_Acc : Fine_Acc := 0.0;
+    begin
+       for I in 1 .. N loop
+          Sum_TQ15_48 := Sum_TQ15_48 +
+                         TQ15_48 (Coeff * Sample);
+       end loop;
+
+       for I in 1 .. N loop
+          Sum_Fine_Acc := Sum_Fine_Acc +
+                          Fine_Acc (Coeff * Sample);
+       end loop;
+
+       Put_Line ("Sum_TQ15_48  = "
+                 & Sum_TQ15_48'Image);
+       Put_Line ("Sum_Fine_Acc = "
+                 & Sum_Fine_Acc'Image);
+    end Show_Fine_Delta_Accumulator;
+
+When we run both loops, we see that they compute the same sum of 1,000
+copies of :ada:`Coeff * Sample`. :ada:`Sum_TQ15_48` gives us
+``0.499999986960376``, and :ada:`Sum_Fine_Acc` gives us
+``0.499999986961483997016664204693370265886``. The two values agree for
+the first eleven digits after the decimal point, and only then start to
+diverge, so :ada:`TQ15_48`'s extra fractional bits already get us most
+of the way to the exact sum. :ada:`Fine_Acc`, however, keeps the
+computation exact well beyond that point, since its precision far
+exceeds what a single multiplication actually needs.
+
+.. admonition:: In the Ada Reference Manual
+
+    - :arm22:`13.7 The Package System <13-7>`
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Examples:
+
+Practical examples
+~~~~~~~~~~~~~~~~~~
+
+In this section, we bring together what we've seen by looking at a few
+practical uses of ordinary fixed-point types, comparing them with
+floating-point and integer code where it's instructive. These examples come
+from the digital signal processing (DSP) field, where fixed-point data types
+can be quite useful.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Examples_Powers_Two:
+
+Scaling by powers of two
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A common operation in DSP algorithms is scaling a sample by a power
+of two |mdash| a gain or an attenuation. With an ordinary fixed-point type we
+can simply multiply or divide the value, and because the *small* is itself
+a power of two, this is the same as shifting the integer representation.
+Let's use an :ref:`overlay <Adv_Ada_Address_Aspect_Overlay>` to watch both
+the fixed-point value and its integer representation as we scale:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Scaling
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Scaling is
+
+       D : constant := 2.0 ** (-15);
+
+       type Sample is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       --  Integer representation of Sample
+       type Sample_Int is
+         range -2 ** 15 .. 2 ** 15 - 1;
+
+       V   : Sample := 0.25;
+       V_I : Sample_Int
+         with Address  => V'Address,
+              Import,
+              Volatile;
+    begin
+       Put_Line ("start : " & V'Image
+                 & " | int " & V_I'Image);
+
+       --  Downscale (attenuate) by two
+       V := V / 2;
+       Put_Line ("/ 2   : " & V'Image
+                 & " | int " & V_I'Image);
+
+       --  Upscale (gain) by two
+       V := V * 2;
+       Put_Line ("* 2   : " & V'Image
+                 & " | int " & V_I'Image);
+    end Show_Scaling;
+
+When we run this, dividing :ada:`V` by two halves its integer
+representation (from 8,192 to 4,096), and multiplying by two doubles it
+again. In other words, scaling a fixed-point value by a power of two is
+just an integer shift |mdash| the same operation we'd use if we stored
+the samples as plain integers.
+
+One important use of this technique is gaining *headroom*. By downscaling a
+signal before a computation that might otherwise overflow, we keep the
+intermediate results inside the type's range. We then restore the original
+level by upscaling at the end. Because both steps are exact |mdash| they only
+shift the binary point |mdash| the only cost is one bit of resolution. We apply
+this technique later in the
+:ref:`digital filter example <Adv_Ada_Ordinary_Fixed_Point_Examples_Digital_Filter>`.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Examples_Saturating:
+
+Saturating arithmetic
+^^^^^^^^^^^^^^^^^^^^^
+
+When a fixed-point computation leaves the range of its type, the default
+behavior is to raise :ada:`Constraint_Error`. In DSP algorithms, we often
+prefer to *saturate* instead |mdash| that is, to clamp the result to the
+largest or smallest representable value. We can implement saturating operations
+by catching the overflow:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    procedure Show_Saturating is
+
+       D : constant := 2.0 ** (-15);
+
+       --  Q15: normalized range,
+       --  -1.0 .. 1.0 - small
+       type Sample is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       function Sat_Add (A, B : Sample)
+                         return Sample is
+       begin
+          return A + B;
+       exception
+          when Constraint_Error =>
+             return (if A >= 0.0
+                     then Sample'Last
+                     else Sample'First);
+       end Sat_Add;
+
+       function Sat_Sub (A, B : Sample)
+                         return Sample is
+       begin
+          return A - B;
+       exception
+          when Constraint_Error =>
+             return (if A >= 0.0
+                     then Sample'Last
+                     else Sample'First);
+       end Sat_Sub;
+
+       function Sat_Mul (A, B : Sample)
+                         return Sample is
+       begin
+          return Sample (A * B);
+       exception
+          when Constraint_Error =>
+             return (if (A >= 0.0) = (B >= 0.0)
+                     then Sample'Last
+                     else Sample'First);
+       end Sat_Mul;
+
+    begin
+       Put_Line ("0.5 + 0.75    = "
+                 & Sat_Add (0.5, 0.75)'Image);
+       Put_Line ("(-1.0)*(-1.0) = "
+                 & Sat_Mul (-1.0, -1.0)'Image);
+       Put_Line ("0.5 + 0.25    = "
+                 & Sat_Add (0.5, 0.25)'Image);
+       Put_Line ("-0.5 - 0.75   = "
+                 & Sat_Sub (-0.5, 0.75)'Image);
+    end Show_Saturating;
+
+In this example, each saturating operation performs the ordinary
+operation and, if that raises :ada:`Constraint_Error`, returns
+:ada:`Sample'Last` or :ada:`Sample'First` according to the sign of the
+result. So :ada:`Sat_Add (0.5, 0.75)` returns :ada:`Sample'Last` (about
+1.0) instead of overflowing, while :ada:`Sat_Add (0.5, 0.25)` returns 0.75
+unchanged. For a normalized type, the only multiplication that can leave the
+range is :ada:`(-1.0) * (-1.0)`, whose mathematical result 1.0 lies just above
+:ada:`Sample'Last`; so :ada:`Sat_Mul (-1.0, -1.0)` saturates to
+:ada:`Sample'Last` as well. Without the handler, the plain operation |mdash|
+for example :ada:`A + B` in :ada:`Sat_Add` |mdash| would raise
+:ada:`Constraint_Error` when the result leaves the range of :ada:`Sample`.
+
+The exception-based version above is simple, but it has a cost: raising and
+handling an exception is very expensive in terms of performance |mdash| often,
+it's far more expensive than the arithmetic itself. In a DSP inner loop that
+runs millions of times per second, that cost is prohibitive whenever saturation
+happens often. We can avoid this cost without relying on suppressed checks at
+all: instead of detecting overflow after the fact, we perform the arithmetic
+in a wider fixed-point type where the result simply cannot leave the range,
+and only then bring it back down to a :ada:`Sample` value, clamping it to
+the bounds along the way.
+
+Instead of calling functions like :ada:`Sat_Add` explicitly, we can override
+the arithmetic operators themselves, so that ordinary :ada:`A + B` syntax
+saturates automatically. Overriding :ada:`Sample`'s own operators directly
+would silently change the meaning of :ada:`A + B` everywhere :ada:`Sample` is
+used. To avoid that, we declare a second type, :ada:`Sat_Sample`, derived from
+:ada:`Sample` specifically to carry this saturating behavior. :ada:`Sample`
+keeps the default, checked arithmetic, and we convert a value to
+:ada:`Sat_Sample` only where we want it to saturate instead. This is the
+package specification:
+
+.. code:: ada no_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    package Fixed_Types is
+
+       D : constant := 2.0 ** (-15);
+
+       --  Q15: normalized range,
+       --  -1.0 .. 1.0 - small
+       type Sample is
+         delta D
+         range -1.0 .. 1.0 - D;
+
+       --  Same representation as Sample,
+       --  but "+"/"-"/"*" saturate instead
+       --  of raising Constraint_Error.
+       type Sat_Sample is new Sample;
+
+       function "+" (A, B : Sat_Sample)
+                     return Sat_Sample;
+       function "-" (A, B : Sat_Sample)
+                     return Sat_Sample;
+       function "*" (A, B : Sat_Sample)
+                     return Sat_Sample;
+
+    end Fixed_Types;
+
+We declare :ada:`Sat_Sample` and its three overridden operators in the
+package specification, but keep the saturation logic itself out of
+view. The wide auxiliary types support that logic without being part
+of the public interface themselves, so we place them in a
+:ref:`private <Adv_Ada_Private_Packages>` child package,
+:ada:`Fixed_Types.Wide` |mdash| visible to :ada:`Fixed_Types` itself,
+but not to any other unit:
+
+.. code:: ada no_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    private package Fixed_Types.Wide is
+
+       --  Wide range: "+" and "-" have
+       --  different worst cases, and each
+       --  contributes one of Wide_Sample's
+       --  two bounds. Since Sample'Last
+       --  always equals -Sample'First -
+       --  Sample'Small, "-"'s extremes
+       --  always beat "+"'s by exactly one
+       --  Sample'Small.
+
+       --  The smallest possible result is
+       --  the smallest sum; the smallest
+       --  difference doesn't reach as far.
+       Wide_First : constant :=
+         Sample'First + Sample'First;
+
+       --  The largest possible result is
+       --  the largest difference; the
+       --  largest sum doesn't reach as far.
+       Wide_Last : constant :=
+         Sample'Last - Sample'First;
+
+       type Wide_Sample is
+         delta Sample'Small
+         range Wide_First .. Wide_Last;
+
+       --  Wide precision: Wide_Product has
+       --  two jobs, so it needs two
+       --  lower-bound values to compare.
+       --
+       --  Job 1: hold a raw Sample operand
+       --  before multiplying.
+       --  (Sample'First is that bound.)
+       --
+       --  Job 2: hold the product
+       --  afterward. Min_Product is the
+       --  most negative product two Sample
+       --  values can give.
+       Min_Product : constant :=
+         Sample'First * Sample'Last;
+
+       --  Most positive product.
+       Max_Product : constant :=
+         Sample'First * Sample'First;
+
+       --  Wide_Product's resolution: double
+       --  the fractional bits, so the
+       --  product is held exactly, with no
+       --  rounding.
+       Wide_Delta : constant :=
+         Sample'Small * Sample'Small;
+
+       --  The true lower bound is the
+       --  smaller of the two values. Which
+       --  of the two is smaller depends on
+       --  Sample's own bounds, so we derive
+       --  it instead of assuming it:
+       --
+       --  - for a normalized type such as
+       --    this one, Sample'First is
+       --    always the smaller value;
+       --
+       --  - for a type with a wider integer
+       --    part, such as a Q7.8 type
+       --    ranging over -128.0 .. 128.0 -
+       --    small, Min_Product is far
+       --    smaller instead.
+       Wide_Product_First : constant :=
+         (if Sample'First < Min_Product
+          then Sample'First
+          else Min_Product);
+
+       type Wide_Product is
+         delta Wide_Delta
+         range Wide_Product_First ..
+               Max_Product;
+
+    end Fixed_Types.Wide;
+
+In this example, :ada:`Fixed_Types.Wide` declares two auxiliary types:
+:ada:`Wide_Sample`, used by :ada:`"+"` and :ada:`"-"`; and
+:ada:`Wide_Product`, used by :ada:`"*"`.
+
+Addition and subtraction need extra *range*, since the sum or
+difference of two values already inside :ada:`Sample`'s range can
+reach up to twice that range. Multiplying two values already inside
+:ada:`Sample`'s normalized range, on the other hand, produces a result
+that barely leaves that same range |mdash| what it actually needs is
+extra *precision*, since an exact product of two 15-fractional-bit
+values takes up to 30 fractional bits to represent. We discussed this
+same range-versus-precision distinction
+:ref:`earlier <Adv_Ada_Ordinary_Fixed_Point_System_Fine_Delta>`, when we
+compared :ada:`TQ15_48` to :ada:`System.Fine_Delta` as accumulators.
+
+We derive every bound directly from :ada:`Sample`'s own attributes
+rather than writing it out as a literal. For example, :ada:`Wide_First`
+is computed as :ada:`Sample'First + Sample'First` rather than written
+as the literal :ada:`-2.0`: if :ada:`Sample`'s own bounds ever changed,
+:ada:`Wide_Sample`'s bounds would adjust automatically along with them,
+instead of silently becoming too narrow.
+
+The type declaration itself guarantees the range and precision suffice:
+a mistake in the derivation fails to compile instead of
+silently misbehaving at run time. This derivation applies unchanged to
+a narrower Q7.8 type with a wide integer part, to a wider, normalized
+Q31 type, or even to a Q15.48 type like :ada:`TQ15_48`: only
+:ada:`Sample`'s own declaration would need to change.
+
+There is a limit, though: :ada:`Wide_Product` needs twice
+:ada:`Sample`'s fractional bits. :ada:`Sample`'s size might already
+approach the maximum a fixed-point type can have on the target, as we
+saw :ref:`earlier <Adv_Ada_Ordinary_Fixed_Point_Type_Illegal_Decl>`.
+Once it does, doubling that precision for :ada:`Wide_Product` can exceed
+the limit and fail to compile.
+
+This is the package body of :ada:`Fixed_Types` itself, which withs
+:ada:`Fixed_Types.Wide` and implements the three operators using its
+types:
+
+.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    with Fixed_Types.Wide; use Fixed_Types.Wide;
+
+    package body Fixed_Types is
+
+       function "+" (A, B : Sat_Sample)
+                    return Sat_Sample
+       is
+          Res : constant Wide_Sample :=
+            Wide_Sample (A) +
+            Wide_Sample (B);
+       begin
+          if Res > Wide_Sample (Sample'Last)
+          then
+             return Sat_Sample (Sample'Last);
+          elsif
+            Res < Wide_Sample (Sample'First)
+          then
+             return Sat_Sample (Sample'First);
+          else
+             return Sat_Sample (Res);
+          end if;
+       end "+";
+
+       function "-" (A, B : Sat_Sample)
+                    return Sat_Sample
+       is
+          Res : constant Wide_Sample :=
+            Wide_Sample (A) -
+            Wide_Sample (B);
+       begin
+          if Res > Wide_Sample (Sample'Last)
+          then
+             return Sat_Sample (Sample'Last);
+          elsif
+            Res < Wide_Sample (Sample'First)
+          then
+             return Sat_Sample (Sample'First);
+          else
+             return Sat_Sample (Res);
+          end if;
+       end "-";
+
+       function "*" (A, B : Sat_Sample)
+                    return Sat_Sample
+       is
+          Res : constant Wide_Product :=
+            Wide_Product (A) *
+            Wide_Product (B);
+       begin
+          if Res > Wide_Product (Sample'Last)
+          then
+             return Sat_Sample (Sample'Last);
+          elsif
+            Res < Wide_Product (Sample'First)
+          then
+             return Sat_Sample (Sample'First);
+          else
+             return Sat_Sample (Res);
+          end if;
+       end "*";
+
+    end Fixed_Types;
+
+We then use the :ada:`Fixed_Types` package in a test application,
+keeping :ada:`A`, :ada:`B`, and :ada:`C` as plain :ada:`Sample`
+variables and converting to :ada:`Sat_Sample` only for the operation
+itself:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Saturating_Operators
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Fixed_Types; use Fixed_Types;
+
+    procedure Show_Saturating is
+       A, B, C : Sample;
+       R       : Sat_Sample;
+    begin
+       A := 0.5;
+       B := 0.75;
+       R := Sat_Sample (A) + Sat_Sample (B);
+       C := Sample (R);
+       Put_Line ("0.5 + 0.75    = "
+                 & C'Image);
+
+       A := -1.0;
+       B := -1.0;
+       R := Sat_Sample (A) * Sat_Sample (B);
+       C := Sample (R);
+       Put_Line ("(-1.0)*(-1.0) = "
+                 & C'Image);
+
+       A := 0.5;
+       B := 0.25;
+       R := Sat_Sample (A) + Sat_Sample (B);
+       C := Sample (R);
+       Put_Line ("0.5 + 0.25    = "
+                 & C'Image);
+
+       A := -0.5;
+       B := 0.75;
+       R := Sat_Sample (A) - Sat_Sample (B);
+       C := Sample (R);
+       Put_Line ("-0.5 - 0.75   = "
+                 & C'Image);
+    end Show_Saturating;
+
+We hold each result in :ada:`R`, a :ada:`Sat_Sample` variable, before
+converting it back to :ada:`Sample`.
+
+When we run this example, we see that each operation saturates correctly:
+:ada:`0.5 + 0.75` and :ada:`(-1.0) * (-1.0)` both give us :ada:`Sample'Last`,
+while :ada:`0.5 + 0.25` gives us 0.75 unchanged |mdash| exactly the same
+results as the exception-based version. Because the result always stays
+inside the wide type's range, none of the three operators ever suppresses
+a check or raises an exception.
+
+The trade-off, if there is one, is that each operation now works in a type
+wider than :ada:`Sample` itself, so it costs a little more than the bare
+minimum arithmetic |mdash| but that cost is fixed and small, nowhere near
+the cost of raising and handling an exception.
+
+
+.. _Adv_Ada_Ordinary_Fixed_Point_Examples_Digital_Filter:
+
+Implementing a digital filter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As a larger example, let's implement a
+:wikipedia:`biquad filter <Digital_biquad_filter>` |mdash| a second-order
+:wikipedia:`IIR filter <Infinite_impulse_response>` that's a basic building
+block of digital signal processing. We'll use the *transposed direct form II*,
+which requires only two state variables:
+
+::
+
+    y(n)  = a0*x(n) + z1(n-1)
+    z1(n) = a1*x(n) - b1*y(n) + z2(n-1)
+    z2(n) = a2*x(n) - b2*y(n)
+
+We'll implement a low-pass biquad with design frequency Fc = 500 Hz at a
+44,100 Hz sample rate and run it on a half-scale step, first in
+floating-point and then with an ordinary fixed-point type, so that we can
+compare the two versions. The 16-bit quantized filter coefficients are:
+
+::
+
+    a0 =  0.00115966796875
+    a1 =  0.0023193359375
+    a2 =  0.00115966796875
+    b1 = -1.8319091796875
+    b2 =  0.836578369140625
+
+For the implementation using fixed-point types, we should be careful with the
+ranges. The feedforward coefficients (a0, a1, a2) and b2 are all in (-1, 1)
+and fit in a normalized Q31 type, which we'll call :ada:`PCM_Sample`. The
+feedback coefficient b1 = -1.83... does not. The
+solution is to store :ada:`B1` at half its value and compensate by
+multiplying the corresponding term by 2 in the feedback path. We place each
+filter in its own child package |mdash| :ada:`Biquads.Fixed_P` for the
+fixed-point version and :ada:`Biquads.Float_P` for the floating-point
+reference, both under a common :ada:`Biquads` parent |mdash| and compare them
+in the :ada:`Show_Biquad` procedure:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Biquad
+
+    --  Transposed direct form II biquad:
+    --
+    --     y(n)  = a0*x(n) + z1(n-1)
+    --     z1(n) = a1*x(n) - b1*y(n) + z2(n-1)
+    --     z2(n) = a2*x(n) - b2*y(n)
+    package Biquads is
+
+    end Biquads;
+
+    package Biquads.Fixed_P is
+
+       --  PCM_Sample fixed-point type
+       --  (-1.0 .. 1.0)
+       D_31 : constant := 2.0 ** (-31);
+       type PCM_Sample is
+         delta D_31
+         range -1.0 .. 1.0 - D_31;
+
+       --  Two-element delay line
+       --  (transposed direct form II)
+       type Filter_Delay is record
+          Z1 : PCM_Sample := 0.0;
+          Z2 : PCM_Sample := 0.0;
+       end record;
+
+       --  Fixed-point biquad filter
+       function Biquad (D    : in out Filter_Delay;
+                        X_In : PCM_Sample)
+                        return PCM_Sample;
+
+    end Biquads.Fixed_P;
+
+    package body Biquads.Fixed_P is
+
+       --  Low-pass biquad (16-bit quantized):
+       --  sample rate = 44,100 Hz, Fc = 500 Hz,
+       --  Q = 0.4
+       A0 : constant PCM_Sample
+              :=  0.00115966796875;
+       A1 : constant PCM_Sample
+              :=  0.0023193359375;
+       A2 : constant PCM_Sample
+              :=  0.00115966796875;
+       B1 : constant PCM_Sample
+              := -1.8319091796875 / 2;
+       B2 : constant PCM_Sample
+              :=  0.836578369140625;
+
+       function Biquad (D    : in out Filter_Delay;
+                        X_In : PCM_Sample)
+                        return PCM_Sample
+       is
+          X, Y : PCM_Sample;
+       begin
+          X    := X_In;
+          Y    := PCM_Sample (X * A0) + D.Z1;
+          D.Z1 := PCM_Sample (X * A1) + D.Z2
+                  - PCM_Sample (B1 * Y) * 2;
+          D.Z2 := PCM_Sample (X * A2) -
+                  PCM_Sample (B2 * Y);
+          return Y;
+       end Biquad;
+
+    end Biquads.Fixed_P;
+
+    package Biquads.Float_P is
+
+       --  Two-element delay line
+       --  (transposed direct form II)
+       type Filter_Delay is record
+          Z1 : Float := 0.0;
+          Z2 : Float := 0.0;
+       end record;
+
+       --  Floating-point biquad filter
+       function Biquad (D    : in out Filter_Delay;
+                        X_In : Float)
+                        return Float;
+
+    end Biquads.Float_P;
+
+    package body Biquads.Float_P is
+
+       --  Floating-point coefficients
+       --  (for comparison)
+       FA0 : constant Float :=  0.00115966796875;
+       FA1 : constant Float :=  0.0023193359375;
+       FA2 : constant Float :=  0.00115966796875;
+       FB1 : constant Float := -1.8319091796875;
+       FB2 : constant Float :=  0.836578369140625;
+
+       function Biquad (D    : in out Filter_Delay;
+                        X_In : Float)
+                        return Float
+       is
+          X, Y : Float;
+       begin
+          X    := X_In;
+          Y    := FA0 * X + D.Z1;
+          D.Z1 := FA1 * X + D.Z2 - FB1 * Y;
+          D.Z2 := FA2 * X - FB2 * Y;
+          return Y;
+       end Biquad;
+
+    end Biquads.Float_P;
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Biquads.Fixed_P;
+    with Biquads.Float_P;
+
+    procedure Show_Biquad is
+       FD : Biquads.Float_P.Filter_Delay;
+       QD : Biquads.Fixed_P.Filter_Delay;
+       FY : Float;
+       QY : Biquads.Fixed_P.PCM_Sample;
+    begin
+       Put_Line (" n |    float    |   fixed");
+       for N in 0 .. 2000 loop
+          FY := Biquads.Float_P.Biquad (FD, 0.5);
+          QY := Biquads.Fixed_P.Biquad (QD, 0.5);
+
+          --  Print the first few samples and
+          --  then every 400th, to watch the
+          --  step response settle towards its
+          --  steady-state value.
+          if N <= 4 or else N mod 400 = 0 then
+             Put_Line (N'Image
+                       & " | " & FY'Image
+                       & " | " & QY'Image);
+          end if;
+       end loop;
+    end Show_Biquad;
+
+When we run this, the fixed-point filter tracks the floating-point one
+closely as the step response settles |mdash| over the 2000 samples both
+columns converge to about 0.497. The coefficient :ada:`B1` is stored at
+half its actual value (:math:`-1.8319\ldots / 2 \approx -0.916`), which
+fits in the :ada:`PCM_Sample` range, and the term
+:ada:`PCM_Sample (B1 * Y) * 2` restores the correct scale in the feedback path.
+The two state variables :ada:`Z1` and
+:ada:`Z2` hold all the filter memory.
+
+This filter stays within range only because the input is a *half-scale*
+step. The feedback term :ada:`PCM_Sample (B1 * Y) * 2` is the product
+:math:`b_1 \cdot y`, whose magnitude grows with the output :ada:`Y`.
+Since :math:`b_1 = -1.83`, the term approaches :math:`|b_1| \approx 1.83`
+as :ada:`Y` approaches full scale |mdash| well outside the
+:ada:`PCM_Sample` range of :math:`[-1, 1)`. For the half-scale step it
+settles at about
+:math:`-0.91`, just inside the range. However, once the input rises above
+roughly 0.55, the term reaches :math:`\pm 1.0` and the assignment to
+:ada:`D.Z1` raises :ada:`Constraint_Error`. (With range checks suppressed,
+execution would be erroneous |mdash| on typical hardware, the value wraps
+around silently.) The half-scale input is therefore not arbitrary
+|mdash| it is what keeps the feedback term inside the type's range.
+
+We can make the filter robust for *any* input by giving the feedback path the
+headroom it needs. In fact, when designing DSP algorithms |mdash| especially
+when targeting fixed-point types |mdash| we have to make sure that the result
+is **always** in the expected type range. Using headroom is common practice to
+guarantee this is always true.
+
+The idea here is to run the filter on a scaled-down copy of the signal: if we
+halve the input, every internal value |mdash| including :ada:`Y`, and therefore
+the feedback term |mdash| is halved as well, so :math:`b_1 \cdot y` can no
+longer leave the range. We restore the original level by doubling the result in
+the very last step:
+
+.. code:: ada compile_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Biquad
+
+    package body Biquads.Fixed_P is
+
+       --  Low-pass biquad (16-bit quantized):
+       --  sample rate = 44,100 Hz, Fc = 500 Hz,
+       --  Q = 0.4
+       A0 : constant PCM_Sample
+              :=  0.00115966796875;
+       A1 : constant PCM_Sample
+              :=  0.0023193359375;
+       A2 : constant PCM_Sample
+              :=  0.00115966796875;
+       B1 : constant PCM_Sample
+              := -1.8319091796875 / 2;
+       B2 : constant PCM_Sample
+              :=  0.836578369140625;
+
+       --  Fixed-point biquad with headroom:
+       --  the signal runs through the filter
+       --  at half level, so the feedback term
+       --  b1 * y stays inside the PCM_Sample
+       --  range for any full-scale input.
+       --
+       --  The original level is restored when
+       --  the result is returned.
+       function Biquad (D    : in out Filter_Delay;
+                        X_In : PCM_Sample)
+                        return PCM_Sample
+       is
+          X, Y : PCM_Sample;
+       begin
+          X    := X_In / 2;
+          Y    := PCM_Sample (X * A0) + D.Z1;
+          D.Z1 := PCM_Sample (X * A1) + D.Z2
+                  - PCM_Sample (B1 * Y) * 2;
+          D.Z2 := PCM_Sample (X * A2) -
+                  PCM_Sample (B2 * Y);
+          return Y * 2;
+       end Biquad;
+
+    end Biquads.Fixed_P;
+
+Let's run the test application again:
+
+.. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Biquad
+
+    with Ada.Text_IO; use Ada.Text_IO;
+
+    with Biquads.Fixed_P;
+    with Biquads.Float_P;
+
+    procedure Show_Biquad is
+       FD : Biquads.Float_P.Filter_Delay;
+       QD : Biquads.Fixed_P.Filter_Delay;
+       FY : Float;
+       QY : Biquads.Fixed_P.PCM_Sample;
+    begin
+       Put_Line (" n |    float    |   fixed");
+       for N in 0 .. 2000 loop
+          --  7/8-scale step: above the ~0.55
+          --  limit, so the unscaled filter
+          --  would overflow here.
+          FY := Biquads.Float_P.Biquad (FD, 0.875);
+          QY := Biquads.Fixed_P.Biquad (QD, 0.875);
+
+          if N <= 4 or else N mod 400 = 0 then
+             Put_Line (N'Image
+                       & " | " & FY'Image
+                       & " | " & QY'Image);
+          end if;
+       end loop;
+    end Show_Biquad;
+
+Now the filter handles a 7/8-scale step |mdash| an input the unscaled
+version could not |mdash| and still tracks the floating-point reference,
+settling near 0.869. The :ada:`X_In / 2` and :ada:`Y * 2` operations are
+exact (they only shift the binary point), so the only cost is one bit of
+signal resolution. Because the signal travels through the filter at half
+amplitude, the fixed-point output is very slightly less precise than
+before. This is the classic fixed-point trade-off |mdash| dynamic range
+against precision.
+
+.. admonition:: For further reading
+
+    Scaling the signal is not the only way to find the missing headroom.
+    Instead of squeezing everything into :ada:`PCM_Sample`, we could give
+    the type a couple of *integer* (guard) bits |mdash| for example a Q2.29
+    type with
+    :ada:`delta 2.0 ** (-29)` and :ada:`range -4.0 .. 4.0`. Values such as
+    :math:`b_1 = -1.83` and the feedback term :math:`b_1 \cdot y` then fit
+    directly, with no halving and no input scaling, and the type still
+    occupies a single 32-bit word. The trade-off is the mirror image of
+    scaling: we spend two fractional bits to buy integer range, rather than
+    spending signal amplitude. Which approach is preferable depends on
+    whether the application is short of dynamic range or of precision.
+
+    Here's the same biquad with the guard bits applied *internally*: the public
+    interface keeps the normalized Q31 sample type (:ada:`PCM_Sample`), while
+    the filter body and its delay line use an internal Q2.29 type with two
+    integer guard bits. This gives the feedback path enough headroom to process a
+    full-scale step directly, with no halving of :ada:`B1` and no explicit
+    input/output scaling:
+
+    .. code:: ada run_button project=Courses.Advanced_Ada.Data_Types.Numerics.Ordinary_Fixed_Point_Types.Biquad
+
+        package Biquads.Fixed_P is
+
+           --  Public sample type: normalized Q31
+           --  (the "pcm_sample" type in
+           --  the C version)
+           Sample_Bits : constant := 31;
+           D_Sample    : constant
+             := 2.0 ** (-Sample_Bits);
+           type PCM_Sample is
+             delta D_Sample
+             range -1.0 .. 1.0 - D_Sample;
+
+           --  Two-element delay line
+           --  (transposed direct form II)
+           type Filter_Delay is private;
+
+           --  Fixed-point biquad filter
+           function Biquad (D    : in out Filter_Delay;
+                            X_In : PCM_Sample)
+                            return PCM_Sample;
+
+        private
+
+           --  Internal type with two guard bits: the
+           --  same delta as PCM_Sample, but two extra
+           --  integer bits of headroom so the feedback
+           --  term b1 * y stays in range, with no
+           --  input/output scaling.
+           Headroom_Bits      : constant := 2;
+           Scaled_Sample_Bits : constant :=
+             Sample_Bits - Headroom_Bits;
+           D_Scaled           : constant :=
+             2.0 ** (-Scaled_Sample_Bits);
+           type Scaled_PCM_Sample is
+             delta D_Scaled
+             range -(2.0 ** Headroom_Bits)
+                     .. 2.0 ** Headroom_Bits - D_Scaled;
+
+           type Filter_Delay is record
+              Z1 : Scaled_PCM_Sample := 0.0;
+              Z2 : Scaled_PCM_Sample := 0.0;
+           end record;
+
+        end Biquads.Fixed_P;
+
+        package body Biquads.Fixed_P is
+
+           --  Low-pass biquad (16-bit quantized):
+           --  sample rate = 44,100 Hz, Fc = 500 Hz,
+           --  Q = 0.4
+           A0 : constant Scaled_PCM_Sample
+                  :=  0.00115966796875;
+           A1 : constant Scaled_PCM_Sample
+                  :=  0.0023193359375;
+           A2 : constant Scaled_PCM_Sample
+                  :=  0.00115966796875;
+           B1 : constant Scaled_PCM_Sample
+                  := -1.8319091796875;
+           B2 : constant Scaled_PCM_Sample
+                  :=  0.836578369140625;
+
+           --  The two guard bits give the feedback
+           --  path enough headroom for any full-scale
+           --  input, so the body needs no input/output
+           --  scaling.
+           function Biquad (D    : in out Filter_Delay;
+                            X_In : PCM_Sample)
+                            return PCM_Sample
+           is
+              X : constant Scaled_PCM_Sample :=
+                Scaled_PCM_Sample (X_In);
+              Y : Scaled_PCM_Sample;
+           begin
+              Y    := Scaled_PCM_Sample (X * A0) + D.Z1;
+              D.Z1 := Scaled_PCM_Sample (X * A1) + D.Z2
+                      - Scaled_PCM_Sample (B1 * Y);
+              D.Z2 := Scaled_PCM_Sample (X * A2)
+                      - Scaled_PCM_Sample (B2 * Y);
+              return PCM_Sample (Y);
+           end Biquad;
+
+        end Biquads.Fixed_P;
+
+        with Ada.Text_IO; use Ada.Text_IO;
+
+        with Biquads.Fixed_P;
+
+        procedure Show_Biquad is
+           QD : Biquads.Fixed_P.Filter_Delay;
+           QY : Biquads.Fixed_P.PCM_Sample;
+        begin
+           Put_Line (" n |   fixed (guard bits)");
+           for N in 0 .. 2000 loop
+              QY := Biquads.Fixed_P.Biquad (QD, 0.875);
+              if N <= 4 or else N mod 400 = 0 then
+                 Put_Line (N'Image & " | " & QY'Image);
+              end if;
+           end loop;
+        end Show_Biquad;
+
+    Running it on the same 7/8-scale step, the output settles near 0.869
+    |mdash| the same value as the scaled version |mdash| but the filter body
+    contains no *explicit* scaling: there's no halving of :ada:`B1` and no
+    :ada:`X_In / 2` or :ada:`Y * 2`.
+
+    A rescaling still happens, though |mdash| it's just hidden inside the type
+    conversions. As we saw in the
+    :ref:`Type conversion and machine representation of ordinary fixed-point types <Adv_Ada_Ordinary_Fixed_Point_Type_Conversion_Machine_Representation>`
+    section, converting between two fixed-point types rescales the underlying
+    integer representation to match the *small* of the target type. Here, the
+    *small* of :ada:`Scaled_PCM_Sample` (2\ :sup:`-29`) is four times that of
+    :ada:`PCM_Sample` (2\ :sup:`-31`) |mdash| a power of two |mdash| so the
+    rescaling is just a two-bit shift of the binary point. Converting
+    :ada:`X_In` to :ada:`Scaled_PCM_Sample` keeps the *value* but stores it
+    with two fewer fractional bits and two more integer bits; that's why the
+    same 32-bit word now spans :math:`[-4, 4)` instead of :math:`[-1, 1)`.
+    Converting the result back with :ada:`PCM_Sample (Y)` shifts the binary
+    point the other way, restoring the original 31 fractional bits.
+
+    For example, 0.5 is :ada:`2#0.1#` in both types, so converting it changes
+    nothing: :ada:`PCM_Sample'(2#0.1#)` and :ada:`Scaled_PCM_Sample'(2#0.1#)`
+    both denote 0.5. The two extra integer bits only matter for values outside
+    :math:`[-1, 1)`: :ada:`Scaled_PCM_Sample` can hold :ada:`2#1.1#` (1.5), or
+    the coefficient :ada:`B1` |mdash| whose exact value is
+    :ada:`-2#1.1101010011111#` (-1.8319091796875) |mdash| and the feedback term
+    :ada:`B1 * Y` built from it, whereas :ada:`PCM_Sample` cannot represent any
+    of these at all.
+
+    The two fractional bits we give up in the :ada:`Scaled_PCM_Sample (X_In)`
+    conversion are the price of the two integer (headroom) bits we gain |mdash|
+    and it's that headroom that keeps the feedback term from overflowing.
+
+
+.. admonition:: In other languages
+
+    In C, the same transposed direct form II is implemented with explicit
+    64-bit products and arithmetic right shifts in place of Ada's type
+    conversions. The version below includes the headroom fix: the input is
+    scaled down by one bit (:c:`x_in / 2`) and the result scaled back up
+    (:c:`y * 2`), so the feedback term stays within range for any full-scale
+    input. As in the Ada code, only :c:`B1` is stored at half its value so it
+    fits in a 32-bit integer, and the term is multiplied by 2 to compensate:
+
+    .. code-block:: c
+
+        #include <stdint.h>
+
+        typedef int32_t pcm_sample;
+
+        typedef struct {
+            int32_t Z1, Z2;
+        } filter_delay;
+
+        pcm_sample
+        biquad_c(filter_delay *D, pcm_sample x_in)
+        {
+            const int     M_SHR = 31;
+            const int64_t FACT  = (int64_t)1 << M_SHR;
+
+            const int32_t A0 =
+              (int32_t)( 0.00115966796875  * FACT);
+            const int32_t A1 =
+              (int32_t)( 0.0023193359375   * FACT);
+            const int32_t A2 =
+              (int32_t)( 0.00115966796875  * FACT);
+            const int32_t B1 =
+              (int32_t)(-1.8319091796875/2 * FACT);
+            const int32_t B2 =
+              (int32_t)( 0.836578369140625 * FACT);
+
+            int32_t x, y;
+            x     = x_in / 2;   /* scale down:
+                                   headroom for b1*y */
+            y     = (int32_t)((int64_t)x
+                               * A0 >> M_SHR) + D->Z1;
+            D->Z1 = (int32_t)((int64_t)x
+                               * A1 >> M_SHR) + D->Z2
+                    - (int32_t)((int64_t)y
+                               * B1 >> M_SHR) * 2;
+            D->Z2 = (int32_t)((int64_t)x
+                               * A2 >> M_SHR)
+                    - (int32_t)((int64_t)y
+                               * B2 >> M_SHR);
+            return y * 2;       /* restore level */
+        }
+
+    The structure mirrors the Ada one-to-one: two state variables, the
+    same input/output scaling, the same :c:`B1` halving, and the same update
+    ordering. The differences are in how fixed-point arithmetic is handled.
+
+    Each product involves two 32-bit Q31 operands, each as large as
+    2\ :sup:`31` in magnitude, so the product can reach (2\ :sup:`31`)\
+    :sup:`2` = 2\ :sup:`62` |mdash| too large for :c:`int32_t` (max
+    2\ :sup:`31` |minus| 1) but within :c:`int64_t` (max 2\ :sup:`63`
+    |minus| 1). The right shift by 31 then brings the result back to Q31 scale.
+    Multiplying two :c:`int32_t` values directly would overflow, which is
+    undefined behaviour in C, so one operand must be cast to :c:`int64_t`
+    before the multiplication.
+
+    In Ada, this is handled automatically: multiplying two :ada:`PCM_Sample`
+    values yields :ada:`universal_fixed`, which the language computes at
+    the precision required (effectively 62 bits), without rounding or
+    truncating in that computation. The conversion back to
+    :ada:`PCM_Sample` precision |mdash| and with it, the loss of precision
+    |mdash| happens only once: at the explicit conversion
+    :ada:`PCM_Sample (B1 * Y)`. The conversion produces one of two
+    neighboring representable values |mdash| Ada doesn't guarantee which value
+    is actually selected. (The GNAT toolchain truncates rather than rounds.)
 
 
 .. _Adv_Ada_Big_Numbers:
