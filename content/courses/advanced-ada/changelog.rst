@@ -5,6 +5,14 @@ CHANGELOG
 
 .. include:: ../../global.txt
 
+Release 2026-08
+---------------
+
+- New section:
+
+  - :ref:`Ordinary fixed-point types <Adv_Ada_Ordinary_Fixed_Point_Types>`
+
+
 Release 2026-04
 ---------------
 
